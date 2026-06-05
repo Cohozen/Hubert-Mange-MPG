@@ -1,0 +1,296 @@
+// MPG Enhanced — schéma de données.
+// SQLite en local (provider "sqlite"). Pour passer à Postgres : remplacer provider par
+// "postgresql" et DATABASE_URL. Les montants sont stockés en CENTIMES (Int) pour rester
+// portables et éviter les soucis de virgule flottante.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Un humain du groupe. Stable dans le temps, relié à son compte MPG.
+model Manager {
+  id          String   @id @default(cuid())
+  mpgUserId   String?  @unique // identifiant utilisateur côté MPG (rempli au login/sync)
+  email       String?  @unique
+  displayName String
+  username    String? // pseudo MPG (ex. "Coco#4B9KV")
+  avatarUrl   String?
+  roles       String   @default("") // CSV de rôles assignés : "ADMIN", "TREASURER" (SUPERADMIN via config)
+  // Coordonnées de paiement (visibles par le membre + banquier/superadmin uniquement).
+  phone         String? // numéro Wero (optionnel)
+  weroUrl       String? // lien de partage Wero perso (https://share.weropay.eu/...) → QR
+  ibanEncrypted String? // IBAN chiffré au repos (AES-256-GCM)
+  ibanHolder    String? // nom du titulaire (pour le QR SEPA)
+  createdAt   DateTime @default(now())
+
+  participations Participation[]
+  contributions  Contribution[]
+  payouts        Payout[]
+  cupMatchesHome CupMatch[]       @relation("HomeManager")
+  cupMatchesAway CupMatch[]       @relation("AwayManager")
+  cupMatchesWon  CupMatch[]       @relation("WinnerManager")
+  awards         DivisionAward[]
+  tournamentsWon Tournament[]     @relation("TournamentWinner")
+  homeMatches    Match[]          @relation("HomeMatch")
+  awayMatches    Match[]          @relation("AwayMatch")
+}
+
+/// Saison réelle (ex. "2025-2026"). Contient les saisons jeu MPG + 1 coupe.
+/// Adossée au championnat Ligue 1 réel (championshipSeason renvoyé par MPG).
+model RealSeason {
+  id                 String   @id @default(cuid())
+  name               String   @unique // ex. "2025-2026"
+  year               Int // année de début, ex. 2025
+  championshipSeason Int?     @unique // année Ligue 1 côté MPG (ex. 2025)
+  createdAt          DateTime @default(now())
+
+  gameSeasons GameSeason[]
+  cups        Cup[]
+  prizePool   PrizePool?
+  tournaments Tournament[]
+}
+
+/// Une des 3 saisons "jeu" d'une saison réelle.
+model GameSeason {
+  id                String   @id @default(cuid())
+  realSeasonId      String
+  realSeason        RealSeason @relation(fields: [realSeasonId], references: [id], onDelete: Cascade)
+  index             Int // position dans la saison réelle (= numéro de saison MPG)
+  name              String // ex. "Saison 3"
+  mpgLeagueId       String? // ex. "mpg_league_TJ4ZP8MT"
+  mpgSeason         Int? // numéro de saison côté MPG (1, 2, 3...)
+  mpgChampionshipId String? // championshipId côté MPG (ex. "1")
+  status            String   @default("active") // active | finished
+  startDate         DateTime?
+  endDate           DateTime?
+
+  divisions Division[]
+  payouts   Payout[]
+
+  @@unique([mpgLeagueId, mpgSeason])
+}
+
+/// Une division (D1..D6) au sein d'une saison jeu. Le nombre peut varier par saison.
+model Division {
+  id            String     @id @default(cuid())
+  gameSeasonId  String
+  gameSeason    GameSeason @relation(fields: [gameSeasonId], references: [id], onDelete: Cascade)
+  level         Int // 1 = D1 (élite) ... n
+  name          String // ex. "Division 1"
+  mpgDivisionId String? // id côté MPG si récupéré par le sync
+
+  participations Participation[]
+  awards         DivisionAward[]
+  matches        Match[]
+
+  @@unique([gameSeasonId, level])
+}
+
+/// La "ligne" d'un manager dans une division pour une saison jeu.
+/// Table pivot qui absorbe montées/descentes et la croissance du groupe.
+model Participation {
+  id         String   @id @default(cuid())
+  managerId  String
+  manager    Manager  @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  divisionId String
+  division   Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  finalRank  Int? // classement final dans la division (1 = vainqueur)
+  points     Int?
+  played     Int?
+  won        Int?
+  drawn      Int?
+  lost       Int?
+  goalsFor   Int?
+  goalsAgainst Int?
+  mpgTeamId  String?
+  teamName   String? // nom de l'équipe MPG du manager dans cette division
+  teamAbbr   String? // abréviation (ex. "JBO")
+
+  @@unique([managerId, divisionId])
+}
+
+/// Récompense de fin de saison d'une division (ex. "Rotaldo d'Or" = meilleur joueur).
+/// Issu de /division-season-stats côté MPG. Extensible (kind) pour d'autres prix.
+model DivisionAward {
+  id            String   @id @default(cuid())
+  divisionId    String
+  division      Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  kind          String // BEST_PLAYER (Rotaldo d'Or), SCAPEGOAT (bouc émissaire), ...
+  managerId     String? // manager concerné (propriétaire / victime)
+  manager       Manager? @relation(fields: [managerId], references: [id], onDelete: SetNull)
+  playerName    String?
+  playerClub    String?
+  averageRating Float?
+  goals         Int?
+  value         Int? // valeur générique (ex. nb de malus subis pour SCAPEGOAT)
+
+  @@unique([divisionId, kind])
+}
+
+/// Match de division (confrontation directe entre 2 managers) — base du head-to-head.
+model Match {
+  id            String   @id @default(cuid())
+  mpgMatchId    String   @unique
+  divisionId    String
+  division      Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  gameWeek      Int
+  homeManagerId String?
+  homeManager   Manager? @relation("HomeMatch", fields: [homeManagerId], references: [id], onDelete: SetNull)
+  awayManagerId String?
+  awayManager   Manager? @relation("AwayMatch", fields: [awayManagerId], references: [id], onDelete: SetNull)
+  homeScore     Int
+  awayScore     Int
+}
+
+/// Coupe MPG (tournoi). "Ligue des Crampons" = LDC, "Heureux papa's League" = UEFA.
+/// Le vainqueur vient de finishedState.winner. Année extraite du nom (défaut 2025).
+model Tournament {
+  id              String      @id @default(cuid())
+  mpgTournamentId String      @unique
+  name            String
+  competition     String // LDC | UEFA | OTHER
+  year            Int
+  realSeasonId    String?
+  realSeason      RealSeason? @relation(fields: [realSeasonId], references: [id], onDelete: SetNull)
+  winnerManagerId String?
+  winnerManager   Manager?    @relation("TournamentWinner", fields: [winnerManagerId], references: [id], onDelete: SetNull)
+  winnerName      String?
+  status          String?
+  createdAt       DateTime    @default(now())
+
+  payouts Payout[]
+}
+
+/// Coupe (style Ligue des Champions) + repêchage Coupe UEFA, rattachée à une saison réelle.
+model Cup {
+  id           String     @id @default(cuid())
+  realSeasonId String
+  realSeason   RealSeason @relation(fields: [realSeasonId], references: [id], onDelete: Cascade)
+  name         String
+
+  rounds CupRound[]
+}
+
+/// Un tour de coupe (8es, 1/4...) pour une compétition donnée (LDC ou UEFA).
+model CupRound {
+  id          String   @id @default(cuid())
+  cupId       String
+  cup         Cup      @relation(fields: [cupId], references: [id], onDelete: Cascade)
+  competition String // LDC | UEFA
+  name        String // ex. "8es de finale"
+  order       Int
+
+  matches CupMatch[]
+}
+
+model CupMatch {
+  id              String   @id @default(cuid())
+  cupRoundId      String
+  cupRound        CupRound @relation(fields: [cupRoundId], references: [id], onDelete: Cascade)
+  homeManagerId   String?
+  homeManager     Manager? @relation("HomeManager", fields: [homeManagerId], references: [id])
+  awayManagerId   String?
+  awayManager     Manager? @relation("AwayManager", fields: [awayManagerId], references: [id])
+  homeScore       Int?
+  awayScore       Int?
+  winnerManagerId String?
+  winnerManager   Manager? @relation("WinnerManager", fields: [winnerManagerId], references: [id])
+}
+
+/// Cagnotte d'une SAISON RÉELLE (mise annuelle unique, identique pour tous).
+/// Les reversements (3 fins de saison jeu + coupe) sont multiples au sein de l'année.
+model PrizePool {
+  id           String     @id @default(cuid())
+  realSeasonId String     @unique
+  realSeason   RealSeason @relation(fields: [realSeasonId], references: [id], onDelete: Cascade)
+  buyInAmount  Int        @default(0) // mise unique par joueur, en centimes
+  currency     String     @default("EUR")
+  closed       Boolean    @default(false) // clôturée par le banquier → lecture seule
+
+  contributions Contribution[]
+  payouts       Payout[]
+  rules         PayoutRule[]
+}
+
+/// Grille de gains fixes d'une cagnotte (définie en amont). Montant par division (vainqueur)
+/// ou par coupe. Sert à générer automatiquement les reversements.
+model PayoutRule {
+  id            String    @id @default(cuid())
+  prizePoolId   String
+  prizePool     PrizePool @relation(fields: [prizePoolId], references: [id], onDelete: Cascade)
+  scope         String // DIVISION | CUP
+  divisionLevel Int? // niveau de division (1 = D1) pour scope DIVISION
+  amount        Int // centimes
+  label         String // ex. "Vainqueur D1", "Vainqueur Coupe"
+
+  @@unique([prizePoolId, scope, divisionLevel])
+}
+
+/// Ligues MPG que l'appli synchronise. On ne synchronise QUE les ligues suivies (active),
+/// pour ignorer les autres ligues que l'utilisateur pourrait rejoindre.
+model TrackedLeague {
+  id          String   @id @default(cuid())
+  mpgLeagueId String   @unique
+  shortId     String?
+  name        String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+/// Tournois (coupes) MPG que l'appli synchronise. On ne synchronise QUE les tournois suivis.
+model TrackedTournament {
+  id              String   @id @default(cuid())
+  mpgTournamentId String   @unique
+  name            String
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+}
+
+/// Trace d'une exécution de sync (manuelle ou automatique) pour observabilité.
+model SyncRun {
+  id         String    @id @default(cuid())
+  trigger    String // manual | auto
+  status     String // running | success | error
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  summary    String? // JSON du SyncResult
+  error      String?
+}
+
+/// Mise d'un manager dans la cagnotte d'une saison réelle + suivi du paiement.
+model Contribution {
+  id          String    @id @default(cuid())
+  prizePoolId String
+  prizePool   PrizePool @relation(fields: [prizePoolId], references: [id], onDelete: Cascade)
+  managerId   String
+  manager     Manager   @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  amount      Int // centimes (généralement = buyInAmount de la cagnotte)
+  paid        Boolean   @default(false)
+  paidAt      DateTime?
+
+  @@unique([prizePoolId, managerId])
+}
+
+/// Gain reversé à un manager + suivi du versement. Rattaché à une saison jeu si applicable.
+model Payout {
+  id           String      @id @default(cuid())
+  prizePoolId  String
+  prizePool    PrizePool   @relation(fields: [prizePoolId], references: [id], onDelete: Cascade)
+  managerId    String
+  manager      Manager     @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  gameSeasonId  String? // saison jeu concernée (null = coupe / autre)
+  gameSeason    GameSeason? @relation(fields: [gameSeasonId], references: [id], onDelete: SetNull)
+  tournamentId  String? // coupe concernée (pour les reversements de coupe générés)
+  tournament    Tournament? @relation(fields: [tournamentId], references: [id], onDelete: SetNull)
+  divisionLevel Int? // niveau de division (pour les reversements générés)
+  amount        Int // centimes
+  reason        String // ex. "Vainqueur D1", "Vainqueur Coupe"
+  auto          Boolean     @default(false) // généré automatiquement depuis la grille
+  paid          Boolean     @default(false)
+  paidAt        DateTime?
+}
