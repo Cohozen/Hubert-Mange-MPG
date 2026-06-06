@@ -1,0 +1,33 @@
+# Dépendances
+node_modules/
+
+# Builds
+dist/
+build/
+
+# Variables d'environnement & secrets (on garde les .example)
+.env
+.env.*
+!.env.example
+
+# Base de données locale (SQLite)
+*.db
+*.db-journal
+prisma/dev.db*
+
+# Données de découverte MPG (perso : peut contenir le token / données)
+backend/discovery/
+
+# Logs
+*.log
+npm-debug.log*
+
+# macOS
+.DS_Store
+
+# Éditeurs
+.vscode/
+.idea/
+
+# Claude Code — préférences locales (spécifiques à la machine)
+.claude/settings.local.json
