@@ -4,7 +4,6 @@ import { z } from "zod";
 import { prisma } from "../../db/client.js";
 import { requireAuth, requireCagnotteEditor } from "../../http/middleware.js";
 import { decrypt, encrypt, isEncryptionConfigured } from "../../lib/crypto.js";
-import { buildSepaQr } from "../../lib/sepaQr.js";
 
 /**
  * Profil & coordonnées de paiement.
@@ -123,22 +122,4 @@ profileRouter.get("/:managerId/wero-qr", requireCagnotteEditor, async (req, res)
     color: { light: "#FFE94D", dark: "#0a0a0a" }, // jaune Wero
   });
   res.json({ dataUrl, url: m.weroUrl });
-});
-
-profileRouter.get("/:managerId/sepa-qr", requireCagnotteEditor, async (req, res) => {
-  const m = await prisma.manager.findUnique({ where: { id: req.params.managerId } });
-  const iban = m ? safeDecrypt(m.ibanEncrypted) : null;
-  if (!m || !iban) {
-    res.status(404).json({ error: "IBAN indisponible pour ce membre" });
-    return;
-  }
-  const amountCents = req.query.amount ? Number(req.query.amount) : undefined;
-  const remittance = typeof req.query.reason === "string" ? req.query.reason : undefined;
-  const qr = await buildSepaQr({
-    holderName: m.ibanHolder || m.displayName,
-    iban,
-    amountCents,
-    remittance,
-  });
-  res.json(qr);
 });

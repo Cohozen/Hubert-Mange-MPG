@@ -16,7 +16,7 @@ export function issueSession(res: Response, payload: SessionPayload): void {
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: config.isProd,
+    secure: config.cookieSecure,
     maxAge: MAX_AGE_DAYS * 24 * 60 * 60 * 1000,
   });
 }

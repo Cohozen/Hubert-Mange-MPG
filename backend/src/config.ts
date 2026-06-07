@@ -16,6 +16,8 @@ export const config = {
   mpgAdminEmail: process.env.MPG_ADMIN_EMAIL ?? "",
   mpgAdminPassword: process.env.MPG_ADMIN_PASSWORD ?? "",
   isProd: process.env.NODE_ENV === "production",
+  // Cookie de session en Secure (HTTPS). Mettre COOKIE_SECURE=true en prod.
+  cookieSecure: process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
   // Auto-sync : activé par défaut. Lundi 08:30 Europe/Paris (résultats publiés vers 8h).
   autoSync: process.env.AUTO_SYNC !== "false",
   syncCron: process.env.SYNC_CRON ?? "30 8 * * 1",
