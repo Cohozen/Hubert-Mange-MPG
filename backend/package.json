@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "db:to-postgres": "node scripts/use-postgres.mjs",
     "build:prod": "npm run db:to-postgres && prisma generate && tsc",
-    "start:prod": "prisma db push --accept-data-loss && node dist/index.js",
+    "start:prod": "npm run db:to-postgres && prisma generate && prisma db push --accept-data-loss && node dist/index.js",
     "sync": "tsx src/sync/run.ts",
     "connector:test": "tsx src/connector/test.ts",
     "discover": "tsx src/connector/discover.ts",
