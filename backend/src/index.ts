@@ -73,6 +73,6 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 });
 
 app.listen(config.port, () => {
-  console.log(`API MPG Enhanced sur http://localhost:${config.port}`);
+  console.log(`API Hubert Mange MPG sur http://localhost:${config.port}`);
   startScheduler();
 });

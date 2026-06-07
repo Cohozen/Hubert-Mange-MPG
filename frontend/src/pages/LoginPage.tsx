@@ -33,7 +33,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
       <div className="card w-full max-w-sm bg-base-100 shadow-xl">
         <form onSubmit={onSubmit} className="card-body gap-3">
-          <h1 className="text-2xl font-bold text-primary">MPG Enhanced</h1>
+          <h1 className="text-2xl font-bold text-primary">Hubert Mange MPG</h1>
           <p className="text-sm opacity-70">Connecte-toi avec ton compte Mon Petit Gazon.</p>
 
           <label className="form-control">

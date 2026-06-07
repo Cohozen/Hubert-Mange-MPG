@@ -70,7 +70,7 @@ export default function App() {
       <header className="navbar bg-base-100 border-b border-base-300 px-4 sticky top-0 z-30">
         <div className="flex-1">
           <Link to="/" className="text-lg font-bold text-primary">
-            MPG Enhanced
+            Hubert Mange MPG
           </Link>
         </div>
         {/* Onglets desktop */}

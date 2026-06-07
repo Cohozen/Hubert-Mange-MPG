@@ -1,4 +1,4 @@
-# MPG Enhanced
+# Hubert Mange MPG
 
 Appli web pour résumer l'organisation d'une grande ligue Mon Petit Gazon entre amis
 (6 divisions, 3 saisons jeu par saison réelle, coupe, cagnotte commune).
