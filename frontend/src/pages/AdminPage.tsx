@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 import { api } from "../api/client";
 import { ManagerLabel } from "../components/Manager";
+import { isSuperadmin, useAuth } from "../auth/useAuth";
 
 interface SyncRun {
   trigger: string;
@@ -23,6 +25,7 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const qc = useQueryClient();
+  const { data: me } = useAuth();
 
   const last = useQuery<SyncRun | null>({
     queryKey: ["sync-last"],
@@ -92,7 +95,7 @@ export default function AdminPage() {
 
       <TournamentsSection />
 
-      <RolesSection />
+      {isSuperadmin(me) && <RolesSection />}
     </div>
   );
 }
@@ -113,9 +116,22 @@ interface TrackedLeague {
   active: boolean;
 }
 
+// Ligne fusionnée : une ligue suivie (globale, visible par tous les admins) et/ou disponible dans
+// le dashboard MPG de l'admin connecté. La checkbox = « synchronisée » (suivie ET active).
+interface LeagueRow {
+  mpgLeagueId: string;
+  name: string;
+  trackedId?: string; // présent si suivie
+  active: boolean; // pertinent si suivie
+  inMyDashboard: boolean; // présente dans mes ligues MPG (mon token)
+  shortId?: string;
+  totalUsers?: number;
+  totalDivisions?: number;
+  season?: number;
+}
+
 function LeaguesSection() {
   const qc = useQueryClient();
-  const [load, setLoad] = useState(false);
   const tracked = useQuery<TrackedLeague[]>({
     queryKey: ["tracked-leagues"],
     queryFn: () => api<TrackedLeague[]>("/api/admin/leagues"),
@@ -123,69 +139,136 @@ function LeaguesSection() {
   const available = useQuery<AvailableLeague[]>({
     queryKey: ["available-leagues"],
     queryFn: () => api<AvailableLeague[]>("/api/admin/leagues/available"),
-    enabled: load,
   });
 
-  async function toggle(l: AvailableLeague) {
-    if (l.tracked) {
-      const t = tracked.data?.find((x) => x.mpgLeagueId === l.mpgLeagueId);
-      if (t) await api(`/api/admin/leagues/${t.id}`, { method: "DELETE" });
-    } else {
-      await api("/api/admin/leagues", {
-        method: "POST",
-        body: JSON.stringify({ mpgLeagueId: l.mpgLeagueId, name: l.name, shortId: l.shortId }),
+  const rows = useMemo<LeagueRow[]>(() => {
+    const map = new Map<string, LeagueRow>();
+    for (const t of tracked.data ?? []) {
+      map.set(t.mpgLeagueId, {
+        mpgLeagueId: t.mpgLeagueId,
+        name: t.name,
+        trackedId: t.id,
+        active: t.active,
+        inMyDashboard: false,
       });
     }
+    for (const a of available.data ?? []) {
+      const ex = map.get(a.mpgLeagueId);
+      if (ex) {
+        ex.inMyDashboard = true;
+        ex.shortId = a.shortId;
+        ex.totalUsers = a.totalUsers;
+        ex.totalDivisions = a.totalDivisions;
+        ex.season = a.season;
+      } else {
+        map.set(a.mpgLeagueId, {
+          mpgLeagueId: a.mpgLeagueId,
+          name: a.name,
+          active: false,
+          inMyDashboard: true,
+          shortId: a.shortId,
+          totalUsers: a.totalUsers,
+          totalDivisions: a.totalDivisions,
+          season: a.season,
+        });
+      }
+    }
+    // Suivies d'abord, puis disponibles à ajouter ; alpha dans chaque groupe.
+    return [...map.values()].sort((x, y) => {
+      const gx = x.trackedId ? 0 : 1;
+      const gy = y.trackedId ? 0 : 1;
+      return gx - gy || x.name.localeCompare(y.name);
+    });
+  }, [tracked.data, available.data]);
+
+  function invalidate() {
     qc.invalidateQueries({ queryKey: ["tracked-leagues"] });
     qc.invalidateQueries({ queryKey: ["available-leagues"] });
+  }
+
+  // Checkbox : crée le suivi si absent, sinon bascule active (gèle/réactive le sync).
+  async function toggle(row: LeagueRow) {
+    if (!row.trackedId) {
+      await api("/api/admin/leagues", {
+        method: "POST",
+        body: JSON.stringify({ mpgLeagueId: row.mpgLeagueId, name: row.name, shortId: row.shortId }),
+      });
+    } else {
+      await api(`/api/admin/leagues/${row.trackedId}`, {
+        method: "PUT",
+        body: JSON.stringify({ active: !row.active }),
+      });
+    }
+    invalidate();
+  }
+
+  async function remove(row: LeagueRow) {
+    if (!row.trackedId) return;
+    if (!confirm(`Supprimer « ${row.name} » et toutes ses données synchronisées ?`)) return;
+    await api(`/api/admin/leagues/${row.trackedId}`, { method: "DELETE" });
+    invalidate();
   }
 
   return (
     <section className="bg-base-100 rounded-box shadow p-6">
       <h2 className="text-lg font-bold text-base-content mb-1">Ligues suivies</h2>
       <p className="text-sm opacity-60 mb-3">
-        Seules les ligues suivies sont synchronisées. Les autres ligues MPG que tu rejoins
-        sont ignorées.
+        Coche une ligue pour la synchroniser. Décocher met le sync en pause (les données déjà
+        synchronisées restent dans le classement). « Supprimer » efface la ligue et ses données.
       </p>
 
-      <div className="text-sm opacity-70 mb-3">
-        Suivies :{" "}
-        {tracked.data?.length
-          ? tracked.data.map((t) => t.name).join(", ")
-          : "aucune"}
-      </div>
+      {available.isError && (
+        <p className="text-sm text-warning mb-2">
+          Tes ligues MPG n'ont pas pu être lues ({(available.error as Error).message}). Tu vois
+          quand même les ligues déjà suivies ci-dessous.
+        </p>
+      )}
 
-      {!load ? (
-        <button onClick={() => setLoad(true)} className="btn btn-sm">
-          Charger mes ligues MPG
-        </button>
-      ) : available.isLoading ? (
-        <p className="text-sm opacity-50">Lecture de MPG…</p>
-      ) : available.error ? (
-        <p className="text-sm text-error">{(available.error as Error).message}</p>
-      ) : (
-        <div className="divide-y">
-          {available.data?.map((l) => (
-            <div key={l.mpgLeagueId} className="flex items-center justify-between py-2">
-              <div className="text-sm">
-                <div className="font-medium text-base-content">{l.name}</div>
-                <div className="opacity-50 text-xs">
-                  {l.totalUsers} joueurs · {l.totalDivisions} divisions · saison {l.season}
-                </div>
-              </div>
+      <div className="divide-y">
+        {rows.map((l) => (
+          <div key={l.mpgLeagueId} className="flex items-center justify-between gap-2 py-2">
+            <label className="flex items-center gap-3 min-w-0 cursor-pointer">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-sm checkbox-success shrink-0"
+                checked={!!l.trackedId && l.active}
+                onChange={() => toggle(l)}
+              />
+              <span className="text-sm min-w-0">
+                <span className="font-medium text-base-content flex items-center gap-2">
+                  <span className="truncate">{l.name}</span>
+                  {l.trackedId && !l.active && (
+                    <span className="badge badge-ghost badge-sm shrink-0">en pause</span>
+                  )}
+                </span>
+                <span className="opacity-50 text-xs block">
+                  {l.totalUsers != null
+                    ? `${l.totalUsers} joueurs · ${l.totalDivisions} divisions · saison ${l.season}`
+                    : l.trackedId && !l.inMyDashboard
+                      ? "hors de ton compte MPG"
+                      : ""}
+                </span>
+              </span>
+            </label>
+            {l.trackedId && (
               <button
-                onClick={() => toggle(l)}
-                className={`text-xs rounded-full px-3 py-1 border ${
-                  l.tracked
-                    ? "bg-emerald-600 text-white border-emerald-600"
-                    : "bg-base-100 opacity-60 border-base-300 hover:border-base-content/40"
-                }`}
+                onClick={() => remove(l)}
+                title="Supprimer la ligue et ses données"
+                className="text-xs rounded-full p-2 border border-base-300 text-error hover:border-error"
               >
-                {l.tracked ? "✓ suivie" : "suivre"}
+                <Trash2 size={14} />
               </button>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
+        ))}
+        {rows.length === 0 && (
+          <p className="text-sm opacity-50 py-2">
+            {available.isLoading ? "Lecture de MPG…" : "Aucune ligue."}
+          </p>
+        )}
+      </div>
+      {available.isLoading && rows.length > 0 && (
+        <p className="text-xs opacity-40 mt-2">Lecture de tes ligues MPG…</p>
       )}
     </section>
   );
@@ -204,9 +287,17 @@ interface TrackedTournament {
   active: boolean;
 }
 
+interface TournamentRow {
+  mpgTournamentId: string;
+  name: string;
+  trackedId?: string;
+  active: boolean;
+  inMyDashboard: boolean;
+  winner?: string | null;
+}
+
 function TournamentsSection() {
   const qc = useQueryClient();
-  const [load, setLoad] = useState(false);
   const tracked = useQuery<TrackedTournament[]>({
     queryKey: ["tracked-tournaments"],
     queryFn: () => api<TrackedTournament[]>("/api/admin/tournaments"),
@@ -214,63 +305,128 @@ function TournamentsSection() {
   const available = useQuery<AvailableTournament[]>({
     queryKey: ["available-tournaments"],
     queryFn: () => api<AvailableTournament[]>("/api/admin/tournaments/available"),
-    enabled: load,
   });
 
-  async function toggle(t: AvailableTournament) {
-    if (t.tracked) {
-      const x = tracked.data?.find((y) => y.mpgTournamentId === t.mpgTournamentId);
-      if (x) await api(`/api/admin/tournaments/${x.id}`, { method: "DELETE" });
-    } else {
-      await api("/api/admin/tournaments", {
-        method: "POST",
-        body: JSON.stringify({ mpgTournamentId: t.mpgTournamentId, name: t.name }),
+  const rows = useMemo<TournamentRow[]>(() => {
+    const map = new Map<string, TournamentRow>();
+    for (const t of tracked.data ?? []) {
+      map.set(t.mpgTournamentId, {
+        mpgTournamentId: t.mpgTournamentId,
+        name: t.name,
+        trackedId: t.id,
+        active: t.active,
+        inMyDashboard: false,
       });
     }
+    for (const a of available.data ?? []) {
+      const ex = map.get(a.mpgTournamentId);
+      if (ex) {
+        ex.inMyDashboard = true;
+        ex.winner = a.winner;
+      } else {
+        map.set(a.mpgTournamentId, {
+          mpgTournamentId: a.mpgTournamentId,
+          name: a.name,
+          active: false,
+          inMyDashboard: true,
+          winner: a.winner,
+        });
+      }
+    }
+    return [...map.values()].sort((x, y) => {
+      const gx = x.trackedId ? 0 : 1;
+      const gy = y.trackedId ? 0 : 1;
+      return gx - gy || x.name.localeCompare(y.name);
+    });
+  }, [tracked.data, available.data]);
+
+  function invalidate() {
     qc.invalidateQueries({ queryKey: ["tracked-tournaments"] });
     qc.invalidateQueries({ queryKey: ["available-tournaments"] });
+  }
+
+  async function toggle(row: TournamentRow) {
+    if (!row.trackedId) {
+      await api("/api/admin/tournaments", {
+        method: "POST",
+        body: JSON.stringify({ mpgTournamentId: row.mpgTournamentId, name: row.name }),
+      });
+    } else {
+      await api(`/api/admin/tournaments/${row.trackedId}`, {
+        method: "PUT",
+        body: JSON.stringify({ active: !row.active }),
+      });
+    }
+    invalidate();
+  }
+
+  async function remove(row: TournamentRow) {
+    if (!row.trackedId) return;
+    if (!confirm(`Supprimer « ${row.name} » et ses données synchronisées ?`)) return;
+    await api(`/api/admin/tournaments/${row.trackedId}`, { method: "DELETE" });
+    invalidate();
   }
 
   return (
     <section className="bg-base-100 rounded-box shadow p-6">
       <h2 className="text-lg font-bold text-base-content mb-1">Tournois suivis (coupes)</h2>
       <p className="text-sm opacity-60 mb-3">
-        Seuls les tournois suivis sont synchronisés. Les autres coupes que tu rejoins sont ignorées.
+        Coche un tournoi pour le synchroniser. Décocher met le sync en pause. « Supprimer » efface
+        le tournoi et ses données.
       </p>
 
-      <div className="text-sm opacity-70 mb-3">
-        Suivis : {tracked.data?.length ? tracked.data.map((t) => t.name).join(", ") : "aucun"}
-      </div>
+      {available.isError && (
+        <p className="text-sm text-warning mb-2">
+          Tes tournois MPG n'ont pas pu être lus ({(available.error as Error).message}). Tu vois
+          quand même les tournois déjà suivis ci-dessous.
+        </p>
+      )}
 
-      {!load ? (
-        <button onClick={() => setLoad(true)} className="btn btn-sm">
-          Charger mes tournois MPG
-        </button>
-      ) : available.isLoading ? (
-        <p className="text-sm opacity-50">Lecture de MPG…</p>
-      ) : available.error ? (
-        <p className="text-sm text-error">{(available.error as Error).message}</p>
-      ) : (
-        <div className="divide-y">
-          {available.data?.map((t) => (
-            <div key={t.mpgTournamentId} className="flex items-center justify-between py-2">
-              <div className="text-sm">
-                <div className="font-medium text-base-content">{t.name}</div>
-                {t.winner && <div className="opacity-50 text-xs">🏆 {t.winner}</div>}
-              </div>
+      <div className="divide-y">
+        {rows.map((t) => (
+          <div key={t.mpgTournamentId} className="flex items-center justify-between gap-2 py-2">
+            <label className="flex items-center gap-3 min-w-0 cursor-pointer">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-sm checkbox-success shrink-0"
+                checked={!!t.trackedId && t.active}
+                onChange={() => toggle(t)}
+              />
+              <span className="text-sm min-w-0">
+                <span className="font-medium text-base-content flex items-center gap-2">
+                  <span className="truncate">{t.name}</span>
+                  {t.trackedId && !t.active && (
+                    <span className="badge badge-ghost badge-sm shrink-0">en pause</span>
+                  )}
+                </span>
+                <span className="opacity-50 text-xs block">
+                  {t.winner
+                    ? `🏆 ${t.winner}`
+                    : t.trackedId && !t.inMyDashboard
+                      ? "hors de ton compte MPG"
+                      : ""}
+                </span>
+              </span>
+            </label>
+            {t.trackedId && (
               <button
-                onClick={() => toggle(t)}
-                className={`text-xs rounded-full px-3 py-1 border ${
-                  t.tracked
-                    ? "bg-emerald-600 text-white border-emerald-600"
-                    : "bg-base-100 opacity-60 border-base-300 hover:border-base-content/40"
-                }`}
+                onClick={() => remove(t)}
+                title="Supprimer le tournoi et ses données"
+                className="text-xs rounded-full p-2 border border-base-300 text-error hover:border-error"
               >
-                {t.tracked ? "✓ suivi" : "suivre"}
+                <Trash2 size={14} />
               </button>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
+        ))}
+        {rows.length === 0 && (
+          <p className="text-sm opacity-50 py-2">
+            {available.isLoading ? "Lecture de MPG…" : "Aucun tournoi."}
+          </p>
+        )}
+      </div>
+      {available.isLoading && rows.length > 0 && (
+        <p className="text-xs opacity-40 mt-2">Lecture de tes tournois MPG…</p>
       )}
     </section>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Navigate, Route, Routes, Link } from "react-router-dom";
 import { Wallet, Trophy, BarChart3, User, Settings, LogOut, Sun, Moon } from "lucide-react";
-import { isSuperadmin, useAuth, useLogout } from "./auth/useAuth";
+import { isLeagueAdmin, useAuth, useLogout } from "./auth/useAuth";
 import { Avatar } from "./components/Manager";
 import LoginPage from "./pages/LoginPage";
 import CagnottePage from "./pages/CagnottePage";
@@ -61,7 +61,7 @@ export default function App() {
     { to: "/stats", label: "Stats", icon: BarChart3 },
     { to: "/cagnotte", label: "Cagnotte", icon: Wallet },
     { to: "/profil", label: "Profil", icon: User, desktopHidden: true },
-    ...(isSuperadmin(me) ? [{ to: "/admin", label: "Admin", icon: Settings }] : []),
+    ...(isLeagueAdmin(me) ? [{ to: "/admin", label: "Admin", icon: Settings }] : []),
   ];
 
   return (
@@ -108,7 +108,7 @@ export default function App() {
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/cagnotte" element={<CagnottePage />} />
           <Route path="/profil" element={<ProfilePage />} />
-          <Route path="/admin" element={isSuperadmin(me) ? <AdminPage /> : <Navigate to="/" />} />
+          <Route path="/admin" element={isLeagueAdmin(me) ? <AdminPage /> : <Navigate to="/" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>

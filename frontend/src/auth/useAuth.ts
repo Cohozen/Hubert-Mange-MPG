@@ -17,6 +17,11 @@ export function canEditCagnotte(me: Me | null | undefined): boolean {
   return !!me?.roles.some((r) => ["SUPERADMIN", "ADMIN", "TREASURER"].includes(r));
 }
 
+// Superadmin et admin de league : gestion des ligues/tournois suivis + sync (page Admin).
+export function isLeagueAdmin(me: Me | null | undefined): boolean {
+  return !!me?.roles.some((r) => ["SUPERADMIN", "ADMIN"].includes(r));
+}
+
 // Récupère l'utilisateur courant (null si non connecté).
 export function useAuth() {
   return useQuery<Me | null>({
