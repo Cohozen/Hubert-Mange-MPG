@@ -60,7 +60,7 @@ export default function PalmaresPage() {
           <div className="flex flex-wrap gap-2 mb-4">
             {cups.data.ranking.map((m) => (
               <span key={m.managerId} className="badge badge-lg gap-1">
-                {m.manager} · {"⭐".repeat(m.ldc)}{"🥈".repeat(m.uefa)}
+                {m.manager} · {"⭐".repeat(m.ldc)}{"🎖️".repeat(m.uefa)}
               </span>
             ))}
           </div>
@@ -73,7 +73,7 @@ export default function PalmaresPage() {
           />
           <CupColumn
             title="Heureux papa's League (UEFA)"
-            icon="🥈"
+            icon="🎖️"
             rows={cups.data?.list.filter((c) => c.competition === "UEFA")}
           />
         </div>
