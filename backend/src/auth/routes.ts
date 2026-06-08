@@ -5,6 +5,7 @@ import { MpgConnector } from "../connector/index.js";
 import { config } from "../config.js";
 import { clearSession, issueSession } from "./session.js";
 import { requireAuth } from "../http/middleware.js";
+import { encrypt, isEncryptionConfigured } from "../lib/crypto.js";
 
 export const authRouter = Router();
 
@@ -30,8 +31,10 @@ authRouter.post("/login", async (req, res) => {
   let username: string | undefined;
   let avatarUrl: string | undefined;
   let userLeagueIds: string[] = [];
+  let mpgToken: string | undefined;
   try {
     const mpg = await MpgConnector.login(email, password);
+    mpgToken = mpg.token;
     // Endpoint réel confirmé : GET /user → { id, firstName, username, avatarUrl, email }.
     const u = await mpg.apiGet<any>("/user");
     mpgUserId = u?.id;
@@ -70,16 +73,28 @@ authRouter.post("/login", async (req, res) => {
     return;
   }
 
+  // Token MPG chiffré (capturé au login) : sert au sync manuel + à la découverte admin.
+  // On ne casse jamais le login si le chiffrement n'est pas configuré ou échoue.
+  let tokenFields: { mpgTokenEncrypted: string; mpgTokenUpdatedAt: Date } | undefined;
+  if (mpgToken && isEncryptionConfigured()) {
+    try {
+      tokenFields = { mpgTokenEncrypted: encrypt(mpgToken), mpgTokenUpdatedAt: new Date() };
+    } catch {
+      // chiffrement indisponible : on continue sans stocker le token.
+    }
+  }
+
   // Upsert du manager. On relie par mpgUserId si dispo, sinon par email.
   const manager = await prisma.manager.upsert({
     where: mpgUserId ? { mpgUserId } : { email },
-    update: { email, displayName: displayName ?? email, username, avatarUrl },
+    update: { email, displayName: displayName ?? email, username, avatarUrl, ...tokenFields },
     create: {
       mpgUserId,
       email,
       displayName: displayName ?? email,
       username,
       avatarUrl,
+      ...tokenFields,
     },
   });
 

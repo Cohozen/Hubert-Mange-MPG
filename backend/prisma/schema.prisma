@@ -26,6 +26,10 @@ model Manager {
   weroUrl       String? // lien de partage Wero perso (https://share.weropay.eu/...) → QR
   ibanEncrypted String? // IBAN chiffré au repos (AES-256-GCM)
   ibanHolder    String? // nom du titulaire (pour le QR SEPA)
+  // Token API MPG du membre, capturé au login et chiffré au repos (AES-256-GCM).
+  // Sert au sync manuel + à la découverte admin (à la place des identifiants .env).
+  mpgTokenEncrypted String? // token api.mpg.football chiffré
+  mpgTokenUpdatedAt DateTime? // date de dernière capture du token
   createdAt   DateTime @default(now())
 
   participations Participation[]

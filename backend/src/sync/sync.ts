@@ -40,8 +40,7 @@ function yearFromName(name: string): number {
 }
 
 export async function runSync(
-  email: string,
-  password: string,
+  mpg: MpgConnector,
   opts?: { leagueId?: string }
 ): Promise<SyncResult> {
   const notes: string[] = [];
@@ -54,8 +53,6 @@ export async function runSync(
     matches: 0,
   };
   const managerIds = new Set<string>();
-
-  const mpg = await MpgConnector.login(email, password);
 
   // Soit une ligue explicite (resync ponctuel d'une ligue masquée), soit les ligues SUIVIES
   // (TrackedLeague active) — on ne synchronise pas les autres ligues de l'utilisateur.

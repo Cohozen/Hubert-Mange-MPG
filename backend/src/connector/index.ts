@@ -20,6 +20,15 @@ export class MpgConnector {
     return new MpgConnector(creds);
   }
 
+  /**
+   * Construit un connecteur à partir d'un token API déjà obtenu (capturé au login d'un membre
+   * et stocké chiffré). Seul `apiGet` est alors utilisable — `getData` (cookie __session) ne
+   * l'est pas, ce qui suffit pour le sync et la découverte des ligues/tournois.
+   */
+  static fromToken(token: string): MpgConnector {
+    return new MpgConnector({ session: "", token, dashboard: null });
+  }
+
   get session(): string {
     return this.creds.session;
   }

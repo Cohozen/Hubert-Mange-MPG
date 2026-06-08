@@ -13,6 +13,8 @@ export const config = {
   sessionSecret: required("SESSION_SECRET", "dev-insecure-secret"),
   encryptionKey: process.env.ENCRYPTION_KEY ?? "",
   frontendOrigin: process.env.FRONTEND_ORIGIN ?? "http://localhost:5173",
+  // Identifiants admin MPG : requis uniquement pour l'auto-sync (cron) et le CLI `npm run sync`.
+  // Le sync manuel + la découverte admin passent par le token du superadmin connecté.
   mpgAdminEmail: process.env.MPG_ADMIN_EMAIL ?? "",
   mpgAdminPassword: process.env.MPG_ADMIN_PASSWORD ?? "",
   isProd: process.env.NODE_ENV === "production",

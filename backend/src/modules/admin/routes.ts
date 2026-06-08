@@ -3,8 +3,7 @@ import { z } from "zod";
 import { prisma } from "../../db/client.js";
 import { requireSuperadmin, requireAuth } from "../../http/middleware.js";
 import { ASSIGNABLE_ROLES, serializeRoles } from "../../auth/roles.js";
-import { config } from "../../config.js";
-import { MpgConnector } from "../../connector/index.js";
+import { connectorForManager } from "../../sync/service.js";
 
 /**
  * Routes d'administration de la structure de la ligue. Servent au backfill manuel des
@@ -102,13 +101,15 @@ adminRouter.get("/leagues", requireSuperadmin, async (_req, res) => {
 });
 
 // Ligues disponibles côté MPG (dashboard) + indicateur "suivie".
-adminRouter.get("/leagues/available", requireSuperadmin, async (_req, res) => {
-  if (!config.mpgAdminEmail || !config.mpgAdminPassword) {
-    res.status(400).json({ error: "Identifiants admin MPG non configurés (.env)" });
+adminRouter.get("/leagues/available", requireSuperadmin, async (req, res) => {
+  let mpg;
+  try {
+    mpg = await connectorForManager(req.auth!.managerId);
+  } catch (err: any) {
+    res.status(401).json({ error: err?.message });
     return;
   }
   try {
-    const mpg = await MpgConnector.login(config.mpgAdminEmail, config.mpgAdminPassword);
     const dashboard = await mpg.apiGet<any>("/dashboard");
     const tracked = new Set(
       (await prisma.trackedLeague.findMany()).map((t) => t.mpgLeagueId)
@@ -175,13 +176,15 @@ adminRouter.get("/tournaments", requireSuperadmin, async (_req, res) => {
 });
 
 // Tournois disponibles côté MPG (dashboard) + indicateur "suivi".
-adminRouter.get("/tournaments/available", requireSuperadmin, async (_req, res) => {
-  if (!config.mpgAdminEmail || !config.mpgAdminPassword) {
-    res.status(400).json({ error: "Identifiants admin MPG non configurés (.env)" });
+adminRouter.get("/tournaments/available", requireSuperadmin, async (req, res) => {
+  let mpg;
+  try {
+    mpg = await connectorForManager(req.auth!.managerId);
+  } catch (err: any) {
+    res.status(401).json({ error: err?.message });
     return;
   }
   try {
-    const mpg = await MpgConnector.login(config.mpgAdminEmail, config.mpgAdminPassword);
     const dashboard = await mpg.apiGet<any>("/dashboard");
     const tracked = new Set(
       (await prisma.trackedTournament.findMany()).map((t) => t.mpgTournamentId)
