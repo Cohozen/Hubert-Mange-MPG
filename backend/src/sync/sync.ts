@@ -70,7 +70,16 @@ export async function runSync(
   }
 
   for (const tile of leagueTiles) {
-    const league = await mpg.apiGet<any>(`/league/${tile.leagueId}`);
+    // Le token courant (admin connecté pour un sync manuel) ne voit pas forcément toutes les
+    // ligues suivies : certaines ont pu être ajoutées par un autre admin. On ignore alors la
+    // ligue avec une note, au lieu de planter tout le sync.
+    let league: any;
+    try {
+      league = await mpg.apiGet<any>(`/league/${tile.leagueId}`);
+    } catch {
+      notes.push(`Ligue ${tile.leagueId} : non accessible avec ce compte, ignorée.`);
+      continue;
+    }
     const shortId: string = league.shortId;
     const currentSeason: number = league.season ?? 1;
     const totalDivisions: number = Object.keys(league.divisions ?? {}).length || 1;

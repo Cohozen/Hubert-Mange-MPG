@@ -2,7 +2,7 @@ import express from "express";
 import "express-async-errors"; // permet de catcher les erreurs async des routes
 import cookieParser from "cookie-parser";
 import { config } from "./config.js";
-import { attachSession, requireSuperadmin } from "./http/middleware.js";
+import { attachSession, requireLeagueAdmin } from "./http/middleware.js";
 import { authRouter } from "./auth/routes.js";
 import { cagnotteRouter } from "./modules/cagnotte/routes.js";
 import { palmaresRouter } from "./modules/palmares/routes.js";
@@ -40,8 +40,8 @@ app.use("/api/palmares", palmaresRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/profile", profileRouter);
 
-// Déclenchement manuel du sync (admin) — via le token MPG du superadmin connecté.
-app.post("/api/sync", requireSuperadmin, async (req, res) => {
+// Déclenchement manuel du sync (admin) — via le token MPG de l'admin connecté.
+app.post("/api/sync", requireLeagueAdmin, async (req, res) => {
   const leagueId = typeof req.body?.leagueId === "string" ? req.body.leagueId : undefined;
   let mpg;
   try {
@@ -59,13 +59,13 @@ app.post("/api/sync", requireSuperadmin, async (req, res) => {
 });
 
 // Dernière exécution de sync (admin) — pour afficher l'état dans l'UI.
-app.get("/api/sync/last", requireSuperadmin, async (_req, res) => {
+app.get("/api/sync/last", requireLeagueAdmin, async (_req, res) => {
   const run = await prisma.syncRun.findFirst({ orderBy: { startedAt: "desc" } });
   res.json(run ? { ...run, summary: run.summary ? JSON.parse(run.summary) : null } : null);
 });
 
 // Historique des syncs (admin).
-app.get("/api/sync/history", requireSuperadmin, async (_req, res) => {
+app.get("/api/sync/history", requireLeagueAdmin, async (_req, res) => {
   const runs = await prisma.syncRun.findMany({ orderBy: { startedAt: "desc" }, take: 20 });
   res.json(
     runs.map((r) => ({ ...r, summary: r.summary ? JSON.parse(r.summary) : null }))

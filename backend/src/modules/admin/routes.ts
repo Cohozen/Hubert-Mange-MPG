@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../db/client.js";
-import { requireSuperadmin, requireAuth } from "../../http/middleware.js";
+import { requireSuperadmin, requireAuth, requireLeagueAdmin } from "../../http/middleware.js";
 import { ASSIGNABLE_ROLES, serializeRoles } from "../../auth/roles.js";
 import { connectorForManager } from "../../sync/service.js";
 
@@ -95,13 +95,13 @@ adminRouter.post("/managers/merge", requireSuperadmin, async (req, res) => {
 });
 
 // ---- Ligues suivies (sélection des ligues à synchroniser) ----
-adminRouter.get("/leagues", requireSuperadmin, async (_req, res) => {
+adminRouter.get("/leagues", requireLeagueAdmin, async (_req, res) => {
   const leagues = await prisma.trackedLeague.findMany({ orderBy: { createdAt: "asc" } });
   res.json(leagues);
 });
 
 // Ligues disponibles côté MPG (dashboard) + indicateur "suivie".
-adminRouter.get("/leagues/available", requireSuperadmin, async (req, res) => {
+adminRouter.get("/leagues/available", requireLeagueAdmin, async (req, res) => {
   let mpg;
   try {
     mpg = await connectorForManager(req.auth!.managerId);
@@ -131,7 +131,7 @@ adminRouter.get("/leagues/available", requireSuperadmin, async (req, res) => {
   }
 });
 
-adminRouter.post("/leagues", requireSuperadmin, async (req, res) => {
+adminRouter.post("/leagues", requireLeagueAdmin, async (req, res) => {
   const schema = z.object({
     mpgLeagueId: z.string().min(1),
     name: z.string().min(1),
@@ -150,7 +150,7 @@ adminRouter.post("/leagues", requireSuperadmin, async (req, res) => {
   res.status(201).json(league);
 });
 
-adminRouter.put("/leagues/:id", requireSuperadmin, async (req, res) => {
+adminRouter.put("/leagues/:id", requireLeagueAdmin, async (req, res) => {
   const schema = z.object({ active: z.boolean() });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) {
@@ -164,19 +164,31 @@ adminRouter.put("/leagues/:id", requireSuperadmin, async (req, res) => {
   res.json(league);
 });
 
-adminRouter.delete("/leagues/:id", requireSuperadmin, async (req, res) => {
-  await prisma.trackedLeague.delete({ where: { id: req.params.id } });
+// Supprime la ligue suivie ET ses données synchronisées. La cascade Prisma
+// (GameSeason → Division → Participation/Match/DivisionAward) efface le détail ; les Payout
+// liés gardent leur ligne (gameSeasonId mis à NULL). RealSeason/PrizePool/Contribution (cagnotte)
+// sont partagés et conservés.
+adminRouter.delete("/leagues/:id", requireLeagueAdmin, async (req, res) => {
+  const league = await prisma.trackedLeague.findUnique({ where: { id: req.params.id } });
+  if (!league) {
+    res.status(404).json({ error: "Ligue introuvable" });
+    return;
+  }
+  await prisma.$transaction([
+    prisma.gameSeason.deleteMany({ where: { mpgLeagueId: league.mpgLeagueId } }),
+    prisma.trackedLeague.delete({ where: { id: league.id } }),
+  ]);
   res.json({ ok: true });
 });
 
 // ---- Tournois suivis (sélection des coupes à synchroniser) ----
-adminRouter.get("/tournaments", requireSuperadmin, async (_req, res) => {
+adminRouter.get("/tournaments", requireLeagueAdmin, async (_req, res) => {
   const tournaments = await prisma.trackedTournament.findMany({ orderBy: { createdAt: "asc" } });
   res.json(tournaments);
 });
 
 // Tournois disponibles côté MPG (dashboard) + indicateur "suivi".
-adminRouter.get("/tournaments/available", requireSuperadmin, async (req, res) => {
+adminRouter.get("/tournaments/available", requireLeagueAdmin, async (req, res) => {
   let mpg;
   try {
     mpg = await connectorForManager(req.auth!.managerId);
@@ -203,7 +215,7 @@ adminRouter.get("/tournaments/available", requireSuperadmin, async (req, res) =>
   }
 });
 
-adminRouter.post("/tournaments", requireSuperadmin, async (req, res) => {
+adminRouter.post("/tournaments", requireLeagueAdmin, async (req, res) => {
   const schema = z.object({ mpgTournamentId: z.string().min(1), name: z.string().min(1) });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) {
@@ -218,7 +230,7 @@ adminRouter.post("/tournaments", requireSuperadmin, async (req, res) => {
   res.status(201).json(t);
 });
 
-adminRouter.put("/tournaments/:id", requireSuperadmin, async (req, res) => {
+adminRouter.put("/tournaments/:id", requireLeagueAdmin, async (req, res) => {
   const schema = z.object({ active: z.boolean() });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) {
@@ -232,8 +244,18 @@ adminRouter.put("/tournaments/:id", requireSuperadmin, async (req, res) => {
   res.json(t);
 });
 
-adminRouter.delete("/tournaments/:id", requireSuperadmin, async (req, res) => {
-  await prisma.trackedTournament.delete({ where: { id: req.params.id } });
+// Supprime le tournoi suivi ET ses données synchronisées (la ligne Tournament de même
+// mpgTournamentId). Les Payout liés gardent leur ligne (tournamentId mis à NULL).
+adminRouter.delete("/tournaments/:id", requireLeagueAdmin, async (req, res) => {
+  const tracked = await prisma.trackedTournament.findUnique({ where: { id: req.params.id } });
+  if (!tracked) {
+    res.status(404).json({ error: "Tournoi introuvable" });
+    return;
+  }
+  await prisma.$transaction([
+    prisma.tournament.deleteMany({ where: { mpgTournamentId: tracked.mpgTournamentId } }),
+    prisma.trackedTournament.delete({ where: { id: tracked.id } }),
+  ]);
   res.json({ ok: true });
 });
 

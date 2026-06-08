@@ -1,7 +1,8 @@
 /**
  * Rôles applicatifs.
  *  - SUPERADMIN : toi (le dev). Tout. Attribué via config (userId MPG) ou rôle stocké.
- *  - ADMIN      : créateur de league. Peut éditer la cagnotte (pas la structure/sync).
+ *  - ADMIN      : admin de league. Peut éditer la cagnotte, gérer les ligues/tournois suivis
+ *                 et déclencher le sync (pas la structure ni l'attribution des rôles).
  *  - TREASURER  : banquier. Peut éditer la cagnotte.
  * MEMBER = aucun rôle (lecture seule).
  */
@@ -36,4 +37,9 @@ export function canEditCagnotte(roles: string[]): boolean {
   return roles.some((r) =>
     [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.TREASURER].includes(r as Role)
   );
+}
+
+/** Superadmin et admin de league peuvent gérer les ligues/tournois suivis et lancer le sync. */
+export function canManageLeagues(roles: string[]): boolean {
+  return roles.includes(ROLES.SUPERADMIN) || roles.includes(ROLES.ADMIN);
 }

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { config } from "../config.js";
 import { prisma } from "../db/client.js";
 import { readSession, SESSION_COOKIE } from "../auth/session.js";
-import { canEditCagnotte, isSuperadmin, parseRoles, ROLES } from "../auth/roles.js";
+import { canEditCagnotte, canManageLeagues, isSuperadmin, parseRoles, ROLES } from "../auth/roles.js";
 
 export interface AuthContext {
   managerId: string;
@@ -67,6 +67,14 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
 export function requireSuperadmin(req: Request, res: Response, next: NextFunction): void {
   if (!req.auth || !isSuperadmin(req.auth.roles)) {
     res.status(403).json({ error: "Accès superadmin requis" });
+    return;
+  }
+  next();
+}
+
+export function requireLeagueAdmin(req: Request, res: Response, next: NextFunction): void {
+  if (!req.auth || !canManageLeagues(req.auth.roles)) {
+    res.status(403).json({ error: "Droits admin de league requis" });
     return;
   }
   next();
