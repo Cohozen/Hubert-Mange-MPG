@@ -24,14 +24,25 @@ synchronisation des données depuis l'API MPG.
   contact avec MPG. Si MPG/Ligue1 change son OAuth, on corrige UNIQUEMENT là. Le reste de l'appli
   ne dépend que de l'interface `MpgConnector` (`getData` cookie / `apiGet` token).
 - **Authentification du sync :**
-  - Sync manuel (`POST /api/sync`) + découverte admin (`/leagues|tournaments/available`) →
-    token MPG du **superadmin connecté** (capturé au login, chiffré sur `Manager`).
+  - Sync manuel (`POST /api/sync`) + découverte/gestion ligues-tournois (`/leagues|tournaments...`) →
+    token MPG de **l'admin connecté** (capturé au login, chiffré sur `Manager`). Ouvert au rôle
+    **ADMIN** (pas seulement superadmin) via `requireLeagueAdmin`/`canManageLeagues`.
   - Cron auto-sync + CLI `npm run sync` → identifiants admin `.env` (`MPG_ADMIN_EMAIL/PASSWORD`).
   - Token expiré → échec explicite « reconnecte-toi » (pas de fallback silencieux).
+  - **Multi-admin** : les `TrackedLeague`/`TrackedTournament` sont globales (visibles par tous les
+    admins). Le sync manuel est **résilient** : une ligue suivie non visible par le token de l'admin
+    connecté est ignorée avec une note, sans planter (`try/catch` autour de `apiGet('/league/{id}')`).
 - **`ENCRYPTION_KEY` (AES-256-GCM)** chiffre les IBAN ET le token MPG. Obligatoire en prod, à ne
   jamais perdre ni committer.
 - **Rôles** : `SUPERADMIN` vient de `SUPERADMIN_MPG_USER_IDS` (config, recalculé par requête) ;
-  `ADMIN`/`TREASURER` sont stockés sur `Manager`.
+  `ADMIN`/`TREASURER` sont stockés sur `Manager`. **ADMIN** gère ligues/tournois suivis + sync +
+  cagnotte. **SUPERADMIN seul** : backfill de structure, attribution des rôles, fusion de managers,
+  et la **suppression** d'une ligue/tournoi suivi.
+- **Désactiver ≠ supprimer une ligue/tournoi** : stats/palmarès agrègent **toutes** les données
+  synchronisées (pas de filtre `active`). Décocher une ligue = `active:false` → *gèle* le sync, les
+  données **restent** au classement. La **supprimer** (`DELETE`, superadmin) efface ses `GameSeason`
+  (cascade Division/Participation/Match/Award) ; les `Payout` survivent (`onDelete: SetNull`),
+  cagnotte (`PrizePool`/`Contribution`) et `RealSeason` partagées préservées.
 
 ## Commandes
 

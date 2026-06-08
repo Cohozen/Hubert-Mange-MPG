@@ -37,7 +37,7 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
 
 - `npm run connector:test` — se connecte à MPG (identifiants `.env`) et imprime le dashboard.
   Sert à **découvrir la structure des données** (leagues/divisions/IDs) avant de finaliser le sync.
-- `npm run sync` — lance le sync admin (à compléter, voir `src/sync/sync.ts`).
+- `npm run sync` — lance le sync admin (identifiants `.env`), voir `src/sync/sync.ts`.
 - `npm run db:studio` — explorer la base avec Prisma Studio.
 - `npx tsx src/db/seed.ts` — données de démonstration.
 - `npx tsx src/db/verify.ts` — vérif end-to-end des endpoints (forge une session admin).
@@ -46,9 +46,9 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
 
 - ✅ Connecteur MPG (flow OAuth), auth applicative "Sign in with MPG", sessions JWT.
 - ✅ Modèle de données complet (Manager / RealSeason / GameSeason / Division / Participation /
-  Cup / PrizePool / Contribution / Payout).
+  Match / Tournament / DivisionAward / PrizePool / Contribution / Payout / TrackedLeague·Tournament).
 - ✅ Cagnotte : API lecture + édition admin, page de consultation.
-- ✅ Palmarès : vainqueurs par saison + classement all-time.
+- ✅ Palmarès : coupes + vainqueurs par saison (filtres) + classement all-time + stats fun + H2H perso.
 - ✅ Admin : déclenchement du sync.
 - ✅ **Sync fonctionnel** : `npm run sync` rapatrie les vraies données MPG (ligues,
   saisons, divisions, managers, classements/participations) — historique des saisons
@@ -61,14 +61,39 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
   reversements (saisons jeu + coupe), **verrou des années passées** (seule l'année courante
   est éditable). UI banquier dans la page Cagnotte.
 - ✅ **Profil & paiement** : tél + IBAN (chiffré au repos), visibles par le membre + banquier.
-  **QR SEPA** (EPC/GiroCode) affiché au banquier pour pré-remplir le virement. `ENCRYPTION_KEY` requis.
-- ✅ **Ligues suivies** : on ne synchronise que les ligues sélectionnées (page Admin →
-  « Ligues suivies »). Sync ponctuel d'une ligue par `POST /api/sync { leagueId }`.
+  **QR Wero** (lien `share.weropay.eu` perso de chaque membre) affiché au banquier pour le virement.
+  `ENCRYPTION_KEY` requis.
+- ✅ **Ligues & tournois suivis** : on ne synchronise que les ligues/tournois sélectionnés (page
+  Admin). Liste à cocher **toujours affichée**, partagée par tous les admins (chacun ajoute les
+  siens depuis son compte). Décocher = **mettre le sync en pause** (les données restent au
+  classement) ; **Supprimer** (superadmin) efface la ligue et ses données. Sync ponctuel d'une
+  ligue par `POST /api/sync { leagueId }`.
 - ✅ **Rôles** : SUPERADMIN / ADMIN / TREASURER / MEMBER, attribués depuis la page Admin.
+  ADMIN gère les ligues/tournois + sync + cagnotte ; suppression et attribution des rôles =
+  superadmin seul.
 - ✅ **Gains automatisés** : grille de **montants fixes** par division + coupe ; bouton
   « Générer les reversements » qui crée les gains des vainqueurs depuis les classements
   (idempotent, préserve le statut « versé »).
+- ✅ **Classement all-time « façon JO »** : tableau des médailles par division — on compte les
+  titres (1re place) et on classe sur les titres de D1 d'abord, puis D2, etc. (les podiums ont leur
+  propre classement dans les stats fun).
 - ✅ **Dark mode** (toggle dans le header) + UI responsive mobile-first (DaisyUI, nav bas mobile,
-  classements en cartes sur petit écran, classement all-time pondéré par division + montées/descentes).
-- 🚧 Features v2/v3 : résultats par journée, badges, stats MVP (« Rotaldo d'Or ») — données
-  déjà captées par le crawler (`npm run discover`).
+  classements en cartes sur petit écran, montées/descentes/yo-yo).
+
+## Idées de features (v2/v3)
+
+Pistes pour rendre l'appli plus fun et plus « club » :
+
+- 🏆 **Pages profil publiques par joueur** avec **salle des trophées** : titres de division, coupes,
+  Rotaldo d'Or, séries, montées/descentes, et bilan H2H (l'endpoint `/api/palmares/h2h/:managerId`
+  existe déjà et renvoie bête noire / victime préférée / plus large victoire-défaite).
+- 👕 **Maillot floqué à étoiles** : une étoile par titre de D1 (façon étoiles de champion sur le
+  maillot), couleurs/abréviation d'équipe du manager — décliné en avatar/embleme partout.
+- 🔥 **Rivalités** : page de confrontation entre deux joueurs au choix (réutilise les matchs H2H).
+- 🗓️ **Frise chronologique d'un joueur** : sa trajectoire saison par saison (division, rang, titres).
+- 🥇 **« Ballon d'Or » annuel** : un classement de la saison combinant titres + coupe + Rotaldo.
+- 📈 **Résultats par journée** : déjà captés (matchs en base), à exposer en mini-classements animés.
+- 🏅 **Badges / hauts faits** : série de titres, yo-yo, invincibilité, comeback… débloqués automatiquement.
+- 📣 **Récap partageable** (image/story) du palmarès ou de la fin de saison pour le groupe.
+- 🔔 **Notifications** du lundi matin (résultats publiés, « tu as gagné la cagnotte »).
+- 📺 **Mode présentation / soirée de remise des prix** (plein écran) pour la fin de saison.
