@@ -35,10 +35,9 @@ interface AllTimeRow {
   username: string | null;
   avatarUrl: string | null;
   seasonsPlayed: number;
-  score: number;
-  divisionTitles: number;
-  eliteTitles: number;
-  podiums: number;
+  titles: number[]; // index 0 = titres D1, 1 = D2, ...
+  totalTitles: number;
+  rank: number;
 }
 interface RankRow {
   managerId: string;
@@ -65,12 +64,14 @@ interface Movement {
   count: number;
 }
 
-const medal = (i: number) => ["🥇", "🥈", "🥉"][i] ?? `${i + 1}.`;
+// Médaille pour le top 3 (uniquement si le manager a au moins un titre), sinon le rang.
+const rankLabel = (rank: number, hasTitles: boolean) =>
+  hasTitles && rank <= 3 ? ["🥇", "🥈", "🥉"][rank - 1] : `${rank}.`;
 
 export default function StatsPage() {
   const allTime = useQuery({
     queryKey: ["all-time"],
-    queryFn: () => api<{ ranking: AllTimeRow[] }>("/api/palmares/all-time"),
+    queryFn: () => api<{ ranking: AllTimeRow[]; maxLevel: number }>("/api/palmares/all-time"),
   });
   const fun = useQuery({
     queryKey: ["fun-stats"],
@@ -96,27 +97,38 @@ export default function StatsPage() {
       <section>
         <h2 className="text-xl font-bold mb-1">Classement all-time</h2>
         <p className="text-xs opacity-60 mb-3">
-          Score pondéré : gagner une division supérieure rapporte plus (1er = 3× le poids de la division, 2e = 1×).
+          Façon Jeux Olympiques : on compte les titres (1re place) par division. On départage
+          d'abord sur les titres de D1, puis de D2, et ainsi de suite.
         </p>
         {allTime.data?.ranking.length ? (
           <>
             <div className="sm:hidden space-y-2">
-              {allTime.data.ranking.map((r, i) => (
+              {allTime.data.ranking.map((r) => (
                 <div key={r.managerId} className="card bg-base-100 shadow">
                   <div className="card-body p-3 flex-row items-center gap-3">
-                    <div className="text-lg w-8 text-center">{medal(i)}</div>
+                    <div className="text-lg w-8 text-center">{rankLabel(r.rank, r.totalTitles > 0)}</div>
                     <div className="flex-1 min-w-0">
                       <ManagerLabel name={r.manager} username={r.username} avatarUrl={r.avatarUrl} size={26} />
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {r.eliteTitles > 0 && <span className="badge badge-sm badge-primary">🏆 {r.eliteTitles}</span>}
-                        <span className="badge badge-sm badge-ghost">{r.divisionTitles} titres</span>
-                        <span className="badge badge-sm badge-ghost">{r.podiums} podiums</span>
+                        {r.titles.map((c, lvl) =>
+                          c > 0 ? (
+                            <span
+                              key={lvl}
+                              className={`badge badge-sm ${lvl === 0 ? "badge-primary" : "badge-ghost"}`}
+                            >
+                              D{lvl + 1} ×{c}
+                            </span>
+                          ) : null
+                        )}
+                        {r.totalTitles === 0 && (
+                          <span className="badge badge-sm badge-ghost opacity-60">aucun titre</span>
+                        )}
                         <span className="badge badge-sm badge-ghost">{r.seasonsPlayed} saisons</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-primary">{r.score}</div>
-                      <div className="text-[10px] opacity-60">pts</div>
+                      <div className="text-lg font-bold text-primary">{r.totalTitles}</div>
+                      <div className="text-[10px] opacity-60">titres</div>
                     </div>
                   </div>
                 </div>
@@ -128,24 +140,28 @@ export default function StatsPage() {
                   <tr>
                     <th>#</th>
                     <th>Manager</th>
-                    <th className="text-center">Score</th>
-                    <th className="text-center">🏆 Élite</th>
-                    <th className="text-center">Titres</th>
-                    <th className="text-center">Podiums</th>
+                    {Array.from({ length: allTime.data.maxLevel }, (_, lvl) => (
+                      <th key={lvl} className="text-center">
+                        {lvl === 0 ? "🥇 D1" : `D${lvl + 1}`}
+                      </th>
+                    ))}
+                    <th className="text-center">Total</th>
                     <th className="text-center">Saisons</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {allTime.data.ranking.map((r, i) => (
+                  {allTime.data.ranking.map((r) => (
                     <tr key={r.managerId}>
-                      <td>{medal(i)}</td>
+                      <td>{rankLabel(r.rank, r.totalTitles > 0)}</td>
                       <td>
                         <ManagerLabel name={r.manager} username={r.username} avatarUrl={r.avatarUrl} size={26} />
                       </td>
-                      <td className="text-center font-bold text-primary">{r.score}</td>
-                      <td className="text-center">{r.eliteTitles}</td>
-                      <td className="text-center">{r.divisionTitles}</td>
-                      <td className="text-center">{r.podiums}</td>
+                      {r.titles.map((c, lvl) => (
+                        <td key={lvl} className={`text-center ${c > 0 ? "font-semibold" : "opacity-30"}`}>
+                          {c || "—"}
+                        </td>
+                      ))}
+                      <td className="text-center font-bold text-primary">{r.totalTitles}</td>
                       <td className="text-center">{r.seasonsPlayed}</td>
                     </tr>
                   ))}

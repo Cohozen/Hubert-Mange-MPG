@@ -3,25 +3,12 @@ import { prisma } from "../../db/client.js";
 import { requireAuth } from "../../http/middleware.js";
 
 /**
- * Module palmarès / historique (lecture). Calcule vainqueurs, classement all-time pondéré
- * par la division, et classements "fun" (montées / descentes).
+ * Module palmarès / historique (lecture). Calcule vainqueurs, classement all-time « façon JO »
+ * (tableau des médailles par division), et classements "fun" (montées / descentes).
  */
 export const palmaresRouter = Router();
 
 palmaresRouter.use(requireAuth);
-
-/**
- * Score de prestige : gagner une division supérieure vaut plus.
- * Poids d'une division = (nb de divisions de la saison) - niveau + 1.
- * Ex. en 6 divisions : gagner la D1 = poids 6, la D6 = poids 1.
- *  - 1er  → 3 × poids
- *  - 2e   → 1 × poids
- */
-function rankPoints(rank: number | null, weight: number): number {
-  if (rank === 1) return 3 * weight;
-  if (rank === 2) return 1 * weight;
-  return 0;
-}
 
 // Vainqueurs par saison jeu (1er de chaque division) + vainqueurs de coupe.
 palmaresRouter.get("/winners", async (_req, res) => {
@@ -60,34 +47,24 @@ palmaresRouter.get("/winners", async (_req, res) => {
   res.json({ divisionWinners });
 });
 
-// Classement all-time pondéré par la division.
+// Classement all-time « façon Jeux Olympiques » : on compte les titres (1re place) par niveau de
+// division. On classe d'abord sur le nombre de titres de D1, puis D2, etc. (ordre lexicographique).
+// Pas de notion de podium ici (un classement dédié existe dans /fun-stats).
 palmaresRouter.get("/all-time", async (_req, res) => {
-  // Nb de divisions par saison jeu (pour le poids).
-  const divisions = await prisma.division.groupBy({
-    by: ["gameSeasonId"],
-    _count: { _all: true },
-  });
-  const divCount = new Map(divisions.map((d) => [d.gameSeasonId, d._count._all]));
-
   const managers = await prisma.manager.findMany({
     include: { participations: { include: { division: true } } },
   });
 
-  const ranking = managers
+  let maxLevel = 1;
+  const rows = managers
     .map((m) => {
-      let score = 0;
-      let divisionTitles = 0;
-      let eliteTitles = 0;
-      let podiums = 0;
+      const titlesByLevel = new Map<number, number>();
       for (const p of m.participations) {
-        const total = divCount.get(p.division.gameSeasonId) ?? p.division.level;
-        const weight = Math.max(1, total - p.division.level + 1);
-        score += rankPoints(p.finalRank, weight);
         if (p.finalRank === 1) {
-          divisionTitles++;
-          if (p.division.level === 1) eliteTitles++;
+          const lvl = p.division.level;
+          titlesByLevel.set(lvl, (titlesByLevel.get(lvl) ?? 0) + 1);
+          if (lvl > maxLevel) maxLevel = lvl;
         }
-        if (p.finalRank != null && p.finalRank <= 3) podiums++;
       }
       return {
         managerId: m.id,
@@ -95,16 +72,42 @@ palmaresRouter.get("/all-time", async (_req, res) => {
         username: m.username,
         avatarUrl: m.avatarUrl,
         seasonsPlayed: m.participations.length,
-        score,
-        divisionTitles,
-        eliteTitles,
-        podiums,
+        titlesByLevel,
       };
     })
-    .filter((r) => r.seasonsPlayed > 0)
-    .sort((a, b) => b.score - a.score || b.eliteTitles - a.eliteTitles);
+    .filter((r) => r.seasonsPlayed > 0);
 
-  res.json({ ranking });
+  // Vecteur des titres par niveau (index 0 = D1) + total, longueur normalisée à maxLevel.
+  const withTitles = rows.map((r) => {
+    const titles = Array.from({ length: maxLevel }, (_, i) => r.titlesByLevel.get(i + 1) ?? 0);
+    return {
+      managerId: r.managerId,
+      manager: r.manager,
+      username: r.username,
+      avatarUrl: r.avatarUrl,
+      seasonsPlayed: r.seasonsPlayed,
+      titles,
+      totalTitles: titles.reduce((a, b) => a + b, 0),
+    };
+  });
+
+  // Tri médailles : plus de titres D1, puis D2, ... ; à vecteur égal, moins de saisons puis le nom.
+  const sameTitles = (a: { titles: number[] }, b: { titles: number[] }) =>
+    a.titles.every((v, i) => v === b.titles[i]);
+  withTitles.sort((a, b) => {
+    for (let i = 0; i < maxLevel; i++) {
+      if (b.titles[i] !== a.titles[i]) return b.titles[i] - a.titles[i];
+    }
+    return a.seasonsPlayed - b.seasonsPlayed || a.manager.localeCompare(b.manager);
+  });
+
+  // Rang avec ex æquo : un vecteur de titres identique partage le même rang.
+  const ranking = withTitles.map((r, i) => ({ ...r, rank: i + 1 }));
+  for (let i = 1; i < ranking.length; i++) {
+    if (sameTitles(ranking[i], ranking[i - 1])) ranking[i].rank = ranking[i - 1].rank;
+  }
+
+  res.json({ ranking, maxLevel });
 });
 
 // Classements "fun" : montées et descentes entre saisons jeu consécutives (même ligue).
