@@ -67,12 +67,12 @@ export default function PalmaresPage() {
         ) : null}
         <div className="grid sm:grid-cols-2 gap-4">
           <CupColumn
-            title="Ligue des Crampons (LDC)"
+            title="Ligue des Crampons"
             icon="⭐"
             rows={cups.data?.list.filter((c) => c.competition === "LDC")}
           />
           <CupColumn
-            title="Heureux papa's League (UEFA)"
+            title="Heureux papa's League"
             icon="🎖️"
             rows={cups.data?.list.filter((c) => c.competition === "UEFA")}
           />

@@ -499,7 +499,7 @@ function RulesEditor({ poolId, onChange }: { poolId: string; onChange: () => voi
           <input value={ldc} onChange={(e) => setLdc(e.target.value)} className="input input-bordered input-sm w-full mt-1" />
         </label>
         <label className="text-sm">
-          <span className="opacity-70">🥈 Heureux papa's League</span>
+          <span className="opacity-70">🎖️ Heureux papa's League</span>
           <input value={uefa} onChange={(e) => setUefa(e.target.value)} className="input input-bordered input-sm w-full mt-1" />
         </label>
       </div>
