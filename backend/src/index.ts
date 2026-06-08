@@ -9,7 +9,7 @@ import { palmaresRouter } from "./modules/palmares/routes.js";
 import { adminRouter } from "./modules/admin/routes.js";
 import { profileRouter } from "./modules/profile/routes.js";
 import { prisma } from "./db/client.js";
-import { executeSync } from "./sync/service.js";
+import { executeSync, connectorForManager } from "./sync/service.js";
 import { startScheduler } from "./sync/scheduler.js";
 
 const app = express();
@@ -40,11 +40,18 @@ app.use("/api/palmares", palmaresRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/profile", profileRouter);
 
-// Déclenchement manuel du sync (admin).
+// Déclenchement manuel du sync (admin) — via le token MPG du superadmin connecté.
 app.post("/api/sync", requireSuperadmin, async (req, res) => {
+  const leagueId = typeof req.body?.leagueId === "string" ? req.body.leagueId : undefined;
+  let mpg;
   try {
-    const leagueId = typeof req.body?.leagueId === "string" ? req.body.leagueId : undefined;
-    const run = await executeSync("manual", { leagueId });
+    mpg = await connectorForManager(req.auth!.managerId);
+  } catch (err: any) {
+    res.status(401).json({ error: err?.message });
+    return;
+  }
+  try {
+    const run = await executeSync("manual", { leagueId, mpg });
     res.json({ ...run, summary: run.summary ? JSON.parse(run.summary) : null });
   } catch (err: any) {
     res.status(502).json({ error: "Sync MPG échoué", detail: err?.message });
