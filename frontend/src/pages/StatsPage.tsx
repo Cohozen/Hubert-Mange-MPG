@@ -18,6 +18,9 @@ interface OppRow {
 interface BigMatch {
   score: string;
   opponent: string;
+  opponentId: string;
+  username: string | null;
+  avatarUrl: string | null;
   context: string;
 }
 interface H2H {
@@ -309,9 +312,9 @@ function BigMatchCard({ title, m }: { title: string; m: BigMatch | null }) {
       <div className="card-body p-4">
         <h3 className="font-semibold mb-1">{title}</h3>
         {m ? (
-          <div>
+          <div className="space-y-1">
             <div className="text-2xl font-bold">{m.score}</div>
-            <div className="text-sm">vs {m.opponent}</div>
+            <ManagerLabel name={m.opponent} username={m.username} avatarUrl={m.avatarUrl} size={24} />
             <div className="text-xs opacity-60">{m.context}</div>
           </div>
         ) : (

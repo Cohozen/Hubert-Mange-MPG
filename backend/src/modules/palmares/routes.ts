@@ -350,11 +350,17 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
     else overall.d++;
 
     const ctx = `${m.division.name} · ${m.division.gameSeason.realSeason.name}`;
+    const oppInfo = {
+      opponent: oppMgr.displayName,
+      opponentId: oppId,
+      username: oppMgr.username,
+      avatarUrl: oppMgr.avatarUrl,
+    };
     if (won && (!biggestWin || mine - theirs > biggestWin.diff)) {
-      biggestWin = { diff: mine - theirs, score: `${mine}-${theirs}`, opponent: oppMgr.displayName, context: ctx };
+      biggestWin = { diff: mine - theirs, score: `${mine}-${theirs}`, context: ctx, ...oppInfo };
     }
     if (lost && (!biggestLoss || theirs - mine > biggestLoss.diff)) {
-      biggestLoss = { diff: theirs - mine, score: `${mine}-${theirs}`, opponent: oppMgr.displayName, context: ctx };
+      biggestLoss = { diff: theirs - mine, score: `${mine}-${theirs}`, context: ctx, ...oppInfo };
     }
   }
 
