@@ -91,9 +91,9 @@ export default function AdminPage() {
         )}
       </section>
 
-      <LeaguesSection />
+      <LeaguesSection canDelete={isSuperadmin(me)} />
 
-      <TournamentsSection />
+      <TournamentsSection canDelete={isSuperadmin(me)} />
 
       {isSuperadmin(me) && <RolesSection />}
     </div>
@@ -130,7 +130,7 @@ interface LeagueRow {
   season?: number;
 }
 
-function LeaguesSection() {
+function LeaguesSection({ canDelete }: { canDelete: boolean }) {
   const qc = useQueryClient();
   const tracked = useQuery<TrackedLeague[]>({
     queryKey: ["tracked-leagues"],
@@ -250,7 +250,7 @@ function LeaguesSection() {
                 </span>
               </span>
             </label>
-            {l.trackedId && (
+            {l.trackedId && canDelete && (
               <button
                 onClick={() => remove(l)}
                 title="Supprimer la ligue et ses données"
@@ -296,7 +296,7 @@ interface TournamentRow {
   winner?: string | null;
 }
 
-function TournamentsSection() {
+function TournamentsSection({ canDelete }: { canDelete: boolean }) {
   const qc = useQueryClient();
   const tracked = useQuery<TrackedTournament[]>({
     queryKey: ["tracked-tournaments"],
@@ -408,7 +408,7 @@ function TournamentsSection() {
                 </span>
               </span>
             </label>
-            {t.trackedId && (
+            {t.trackedId && canDelete && (
               <button
                 onClick={() => remove(t)}
                 title="Supprimer le tournoi et ses données"

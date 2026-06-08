@@ -168,7 +168,7 @@ adminRouter.put("/leagues/:id", requireLeagueAdmin, async (req, res) => {
 // (GameSeason → Division → Participation/Match/DivisionAward) efface le détail ; les Payout
 // liés gardent leur ligne (gameSeasonId mis à NULL). RealSeason/PrizePool/Contribution (cagnotte)
 // sont partagés et conservés.
-adminRouter.delete("/leagues/:id", requireLeagueAdmin, async (req, res) => {
+adminRouter.delete("/leagues/:id", requireSuperadmin, async (req, res) => {
   const league = await prisma.trackedLeague.findUnique({ where: { id: req.params.id } });
   if (!league) {
     res.status(404).json({ error: "Ligue introuvable" });
@@ -246,7 +246,7 @@ adminRouter.put("/tournaments/:id", requireLeagueAdmin, async (req, res) => {
 
 // Supprime le tournoi suivi ET ses données synchronisées (la ligne Tournament de même
 // mpgTournamentId). Les Payout liés gardent leur ligne (tournamentId mis à NULL).
-adminRouter.delete("/tournaments/:id", requireLeagueAdmin, async (req, res) => {
+adminRouter.delete("/tournaments/:id", requireSuperadmin, async (req, res) => {
   const tracked = await prisma.trackedTournament.findUnique({ where: { id: req.params.id } });
   if (!tracked) {
     res.status(404).json({ error: "Tournoi introuvable" });
