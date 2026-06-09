@@ -222,6 +222,12 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
     where: { finalRank: { lte: 3 } },
     _count: { _all: true },
   });
+  // Jean-Claude Duss : le plus de fois 2e (« du mal à conclure »).
+  const secondAgg = await prisma.participation.groupBy({
+    by: ["managerId"],
+    where: { finalRank: 2 },
+    _count: { _all: true },
+  });
   const awards = await prisma.divisionAward.findMany({
     where: { kind: { in: ["SCAPEGOAT", "BEST_PLAYER", "RAISING_STAR"] } },
   });
@@ -242,6 +248,9 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
     include: { participations: { include: { division: { include: { gameSeason: true } } } } },
   });
   const streak = new Map<string, number>();
+  // Saisons en D1 (level 1) : total cumulé et plus longue série consécutive (même ligue).
+  const d1Count = new Map<string, number>();
+  const d1Streak = new Map<string, number>();
   for (const m of mgrsForStreak) {
     const sorted = m.participations
       .filter((p) => p.division.gameSeason.mpgSeason != null)
@@ -253,15 +262,27 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
       });
     let best = 0;
     let cur = 0;
+    let bestD1 = 0;
+    let curD1 = 0;
+    let totalD1 = 0;
     let prevLeague: string | null = null;
     for (const p of sorted) {
       const lg = p.division.gameSeason.mpgLeagueId ?? "";
-      if (lg !== prevLeague) cur = 0;
+      if (lg !== prevLeague) {
+        cur = 0;
+        curD1 = 0;
+      }
       cur = p.finalRank === 1 ? cur + 1 : 0;
       if (cur > best) best = cur;
+      const isD1 = p.division.level === 1;
+      if (isD1) totalD1 += 1;
+      curD1 = isD1 ? curD1 + 1 : 0;
+      if (curD1 > bestD1) bestD1 = curD1;
       prevLeague = lg;
     }
     if (best >= 2) streak.set(m.id, best);
+    if (totalD1 >= 1) d1Count.set(m.id, totalD1);
+    if (bestD1 >= 2) d1Streak.set(m.id, bestD1);
   }
 
   const rank = (entries: [string, number][], min = 1) =>
@@ -279,6 +300,9 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
     rotaldo: rank([...rotaldo]),
     raisingStar: rank([...raisingStar]),
     titleStreak: rank([...streak], 2),
+    jeanClaudeDuss: rank(secondAgg.map((a) => [a.managerId, a._count._all])),
+    d1Seasons: rank([...d1Count]),
+    d1Streak: rank([...d1Streak], 2),
     podiums: rank(podiumAgg.map((a) => [a.managerId, a._count._all])),
     worstDefense: rank(agg.map((a) => [a.managerId, a._sum.goalsAgainst ?? 0])),
     bestAttack: rank(agg.map((a) => [a.managerId, a._sum.goalsFor ?? 0])),

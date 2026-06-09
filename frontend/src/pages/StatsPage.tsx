@@ -54,6 +54,9 @@ interface FunStats {
   rotaldo: RankRow[];
   raisingStar: RankRow[];
   titleStreak: RankRow[];
+  jeanClaudeDuss: RankRow[];
+  d1Seasons: RankRow[];
+  d1Streak: RankRow[];
   podiums: RankRow[];
   worstDefense: RankRow[];
   bestAttack: RankRow[];
@@ -190,6 +193,9 @@ export default function StatsPage() {
           <RankCard title="🌟 La révélation" subtitle="a possédé la plus grosse hausse de cote" rows={fun.data?.raisingStar} unit="×" accent="text-primary" />
           <RankCard title="🏆 Roi des podiums" subtitle="le plus de podiums (top 3)" rows={fun.data?.podiums} unit="" accent="text-warning" />
           <RankCard title="🔥 Série de titres" subtitle="titres consécutifs" rows={fun.data?.titleStreak} unit="" accent="text-primary" />
+          <RankCard title="🍸 Le Jean-Claude Duss" subtitle="le plus de 2es places (du mal à conclure)" rows={fun.data?.jeanClaudeDuss} unit="×" accent="text-secondary" />
+          <RankCard title="🏛️ Pilier de l'élite" subtitle="le plus de saisons en D1" rows={fun.data?.d1Seasons} unit="" accent="text-primary" />
+          <RankCard title="🔒 Indéboulonnable" subtitle="saisons consécutives en D1" rows={fun.data?.d1Streak} unit="" accent="text-primary" />
           <RankCard title="📈 Montées" subtitle="le plus de promotions" rows={moveRows(movements.data?.promotions)} unit="" accent="text-success" />
           <RankCard title="📉 Descentes" subtitle="le plus de relégations" rows={moveRows(movements.data?.relegations)} unit="" accent="text-error" />
           <RankCard title="🎢 Yo-yo" subtitle="le plus de montées + descentes" rows={moveRows(movements.data?.yoyo)} unit="" accent="text-secondary" />
