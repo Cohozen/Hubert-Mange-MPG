@@ -316,7 +316,7 @@ cagnotteRouter.put("/:id/rules", requireCagnotteEditor, async (req, res) => {
   const schema = z.object({
     rules: z.array(
       z.object({
-        scope: z.enum(["DIVISION", "LDC", "UEFA"]),
+        scope: z.enum(["DIVISION", "LDC", "UEFA", "CONFERENCE"]),
         divisionLevel: z.number().int().positive().nullable().optional(),
         amount: z.number().int().nonnegative(),
         label: z.string().min(1),
@@ -404,12 +404,12 @@ cagnotteRouter.post("/:id/generate-payouts", requireCagnotteEditor, async (req, 
     }
   }
 
-  // Reversements de coupe : LDC + UEFA de la saison réelle (coupes terminées = winner connu).
+  // Reversements de coupe : LDC + UEFA + Conference de la saison réelle (coupes terminées = winner connu).
   const tournaments = await prisma.tournament.findMany({
     where: { realSeasonId: pool.realSeasonId },
   });
   for (const t of tournaments) {
-    const rule = cupRule(t.competition); // règle LDC ou UEFA
+    const rule = cupRule(t.competition); // règle LDC, UEFA ou CONFERENCE
     if (!rule || !t.winnerManagerId) continue;
     const reason = `${rule.label} ${t.year}`;
     const existing = await prisma.payout.findFirst({

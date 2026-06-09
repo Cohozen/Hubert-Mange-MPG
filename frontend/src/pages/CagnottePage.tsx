@@ -427,6 +427,7 @@ function RulesEditor({ poolId, onChange }: { poolId: string; onChange: () => voi
   const [amounts, setAmounts] = useState<Record<number, string>>({});
   const [ldc, setLdc] = useState("");
   const [uefa, setUefa] = useState("");
+  const [conference, setConference] = useState("");
   const [busy, setBusy] = useState(false);
   const [genMsg, setGenMsg] = useState<string | null>(null);
 
@@ -437,6 +438,7 @@ function RulesEditor({ poolId, onChange }: { poolId: string; onChange: () => voi
       if (r.scope === "DIVISION" && r.divisionLevel) m[r.divisionLevel] = String(r.amount / 100);
       if (r.scope === "LDC") setLdc(String(r.amount / 100));
       if (r.scope === "UEFA") setUefa(String(r.amount / 100));
+      if (r.scope === "CONFERENCE") setConference(String(r.amount / 100));
     }
     setAmounts(m);
   }, [data]);
@@ -452,6 +454,7 @@ function RulesEditor({ poolId, onChange }: { poolId: string; onChange: () => voi
       }));
       if (ldc) rules.push({ scope: "LDC", amount: eurosToCents(ldc), label: "Vainqueur Ligue des Crampons" });
       if (uefa) rules.push({ scope: "UEFA", amount: eurosToCents(uefa), label: "Vainqueur Heureux papa's League" });
+      if (conference) rules.push({ scope: "CONFERENCE", amount: eurosToCents(conference), label: "Vainqueur Heureux papa's League Conference" });
       await api(`/api/cagnotte/${poolId}/rules`, { method: "PUT", body: JSON.stringify({ rules }) });
       qc.invalidateQueries({ queryKey: ["rules", poolId] });
     } finally {
@@ -501,6 +504,10 @@ function RulesEditor({ poolId, onChange }: { poolId: string; onChange: () => voi
         <label className="text-sm">
           <span className="opacity-70">🎖️ Heureux papa's League</span>
           <input value={uefa} onChange={(e) => setUefa(e.target.value)} className="input input-bordered input-sm w-full mt-1" />
+        </label>
+        <label className="text-sm">
+          <span className="opacity-70">🏵️ Heureux papa's League Conference</span>
+          <input value={conference} onChange={(e) => setConference(e.target.value)} className="input input-bordered input-sm w-full mt-1" />
         </label>
       </div>
       <div className="flex flex-wrap gap-2 items-center">
