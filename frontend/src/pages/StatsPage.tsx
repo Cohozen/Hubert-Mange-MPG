@@ -49,6 +49,14 @@ interface RankRow {
   avatarUrl: string | null;
   value: number;
 }
+interface CupCount {
+  managerId: string;
+  manager: string;
+  ldc: number;
+  uefa: number;
+  conference: number;
+  total: number;
+}
 interface FunStats {
   scapeGoat: RankRow[];
   rotaldo: RankRow[];
@@ -83,6 +91,10 @@ export default function StatsPage() {
     queryKey: ["fun-stats"],
     queryFn: () => api<FunStats>("/api/palmares/fun-stats"),
   });
+  const cups = useQuery({
+    queryKey: ["tournaments"],
+    queryFn: () => api<{ ranking: CupCount[] }>("/api/palmares/tournaments"),
+  });
   const movements = useQuery({
     queryKey: ["movements"],
     queryFn: () =>
@@ -98,13 +110,17 @@ export default function StatsPage() {
       value: x.count,
     }));
 
+  // Coupes par manager (affichage indicatif, hors calcul du classement).
+  const cupsByManager = new Map((cups.data?.ranking ?? []).map((c) => [c.managerId, c]));
+
   return (
     <div className="space-y-8">
       <section>
         <h2 className="text-xl font-bold mb-1">Classement all-time</h2>
         <p className="text-xs opacity-60 mb-3">
           Façon Jeux Olympiques : on compte les titres (1re place) par division. On départage
-          d'abord sur les titres de D1, puis de D2, et ainsi de suite.
+          d'abord sur les titres de D1, puis de D2, et ainsi de suite. Les coupes
+          (⭐ Crampons · 🎖️ Europa · 🏵️ Conference) sont affichées à titre indicatif, hors calcul.
         </p>
         {allTime.data?.ranking.length ? (
           <>
@@ -129,6 +145,18 @@ export default function StatsPage() {
                         {r.totalTitles === 0 && (
                           <span className="badge badge-sm badge-ghost opacity-60">aucun titre</span>
                         )}
+                        {(() => {
+                          const c = cupsByManager.get(r.managerId);
+                          return c ? (
+                            <>
+                              {c.ldc > 0 && <span className="badge badge-sm badge-ghost">⭐ ×{c.ldc}</span>}
+                              {c.uefa > 0 && <span className="badge badge-sm badge-ghost">🎖️ ×{c.uefa}</span>}
+                              {c.conference > 0 && (
+                                <span className="badge badge-sm badge-ghost">🏵️ ×{c.conference}</span>
+                              )}
+                            </>
+                          ) : null;
+                        })()}
                         <span className="badge badge-sm badge-ghost">{r.seasonsPlayed} saisons</span>
                       </div>
                     </div>
@@ -152,6 +180,9 @@ export default function StatsPage() {
                       </th>
                     ))}
                     <th className="text-center">Total</th>
+                    <th className="text-center" title="Ligue des Crampons">⭐</th>
+                    <th className="text-center" title="Europa (Heureux papa's)">🎖️</th>
+                    <th className="text-center" title="Conference">🏵️</th>
                     <th className="text-center">Saisons</th>
                   </tr>
                 </thead>
@@ -168,6 +199,21 @@ export default function StatsPage() {
                         </td>
                       ))}
                       <td className="text-center font-bold text-primary">{r.totalTitles}</td>
+                      {(() => {
+                        const c = cupsByManager.get(r.managerId);
+                        const cell = (n: number) => (
+                          <td className={`text-center ${n > 0 ? "font-semibold" : "opacity-30"}`}>
+                            {n || "—"}
+                          </td>
+                        );
+                        return (
+                          <>
+                            {cell(c?.ldc ?? 0)}
+                            {cell(c?.uefa ?? 0)}
+                            {cell(c?.conference ?? 0)}
+                          </>
+                        );
+                      })()}
                       <td className="text-center">{r.seasonsPlayed}</td>
                     </tr>
                   ))}
@@ -348,7 +394,9 @@ function RankCard({
     <div className="card bg-base-100 shadow">
       <div className="card-body p-4">
         <h3 className="font-semibold">{title}</h3>
-        <p className="text-xs opacity-60 -mt-1 mb-1">{subtitle}</p>
+        <p className="text-xs opacity-60 -mt-1 mb-1">
+          {subtitle.charAt(0).toUpperCase() + subtitle.slice(1)}
+        </p>
         {rows?.length ? (
           <ul className="space-y-1.5">
             {rows.slice(0, 6).map((r, i) => (
