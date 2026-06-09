@@ -67,10 +67,10 @@ export default function App() {
     return (
         <div className="min-h-screen bg-base-200">
             {/* Barre du haut */}
-            <header className="navbar bg-base-100 border-b border-base-300 px-4 sticky top-0 z-30">
+            <header className="navbar bg-base-100 shadow-sm px-4 sticky top-0 z-30">
                 <div className="flex-1">
                     <Link to="/" className="text-lg font-bold text-primary">
-                        Hubert Mange MPG
+                        Ligue Hubert Mange
                     </Link>
                 </div>
                 {/* Onglets desktop */}
@@ -83,7 +83,7 @@ export default function App() {
                                 to={it.to}
                                 end={it.end}
                                 className={({ isActive }) =>
-                                    `btn btn-sm btn-ghost gap-2 ${isActive ? "btn-active text-primary" : ""}`
+                                    `btn btn-sm btn-ghost gap-2 ${isActive ? "btn-outline btn-primary" : ""}`
                                 }
                             >
                                 <it.icon size={16} />
@@ -116,20 +116,16 @@ export default function App() {
             </main>
 
             {/* Nav mobile (barre du bas) */}
-            <nav className="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-base-100 border-t border-base-300 flex justify-around">
+            <nav className="sm:hidden dock">
                 {items.map((it) => (
                     <NavLink
                         key={it.to}
                         to={it.to}
                         end={it.end}
-                        className={({ isActive }) =>
-                            `flex flex-col items-center gap-0.5 py-2 flex-1 text-xs ${
-                                isActive ? "text-primary" : "opacity-60"
-                            }`
-                        }
+                        className={({ isActive }) => `${isActive ? "dock-active" : ""}`}
                     >
                         <it.icon size={20} />
-                        {it.label}
+                        <span className="dock-label">{it.label}</span>
                     </NavLink>
                 ))}
             </nav>
