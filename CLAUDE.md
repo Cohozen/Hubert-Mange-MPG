@@ -18,6 +18,11 @@ synchronisation des données depuis l'API MPG.
 - **Base de données : `prisma db push`, PAS de migrations.** Ne jamais lancer `prisma migrate dev`
   (il détecte une dérive et propose de reset la base). Pour appliquer un changement de schéma :
   `cd backend && npx prisma db push`.
+- **Cloner la prod en local : `npm run clone:prod`** (script `scripts/clone-prod.mjs`). Lit la prod
+  Postgres via `PROD_DATABASE_URL` (jamais committée) et **purge puis remplace** la base SQLite
+  locale (insertion dans l'ordre des FK). Garde-fou : refuse de tourner si `DATABASE_URL` local ne
+  pointe pas sur `file:` (anti-écrasement de la prod). Pour la lecture seule de la prod, on a aussi
+  le serveur MCP Supabase.
 - **Montants en centimes (`Int`)** partout (cagnotte, contributions, payouts) — éviter les
   flottants. Convertir uniquement à l'affichage.
 - **`backend/src/connector/` = flow OAuth MPG non officiel et fragile.** C'est le SEUL point de
@@ -49,6 +54,7 @@ synchronisation des données depuis l'API MPG.
 Backend (`cd backend`) :
 - `npm run dev` — API en watch · `npm run build` — tsc · `npm start` — dist
 - `npm run db:push` — applique le schéma · `npm run db:studio` — Prisma Studio
+- `npm run clone:prod` — copie la prod (Postgres) → base SQLite locale (lit `PROD_DATABASE_URL`)
 - `npm run sync` — sync CLI (utilise `.env`) · `npm run connector:test` / `npm run discover` —
   outils de debug du connecteur MPG
 

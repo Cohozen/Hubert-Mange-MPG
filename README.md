@@ -39,6 +39,11 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
   Sert à **découvrir la structure des données** (leagues/divisions/IDs) avant de finaliser le sync.
 - `npm run sync` — lance le sync admin (identifiants `.env`), voir `src/sync/sync.ts`.
 - `npm run db:studio` — explorer la base avec Prisma Studio.
+- `npm run clone:prod` — copie les données de la **prod** (Postgres/Supabase) vers la base
+  **SQLite locale** (purge puis réinsertion dans l'ordre des clés étrangères). Pratique pour
+  bidouiller en local sur de vraies données. Prérequis : `PROD_DATABASE_URL` dans `.env`
+  (connection string Supabase, cf. `DEPLOY.md`). ⚠️ Les champs chiffrés (IBAN, token MPG) ne
+  se déchiffrent que si ta `ENCRYPTION_KEY` locale est identique à celle de prod.
 - `npx tsx src/db/seed.ts` — données de démonstration.
 - `npx tsx src/db/verify.ts` — vérif end-to-end des endpoints (forge une session admin).
 

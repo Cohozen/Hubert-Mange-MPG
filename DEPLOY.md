@@ -47,4 +47,5 @@ Repo unique (monorepo) : Vercel pointe sur `frontend/`, Railway sur `backend/`.
 
 ## Notes
 - Le schéma Prisma reste en `sqlite` dans le repo (dev local) ; le build Railway le bascule en `postgresql` (`scripts/use-postgres.mjs`) puis `prisma db push` crée les tables.
+- **Travailler en local sur les vraies données** : `cd backend && npm run clone:prod` copie la prod Supabase → SQLite local. Renseigner `PROD_DATABASE_URL` dans `backend/.env` (même connection string qu'à l'étape 1).
 - Branche de prod : `main`.
