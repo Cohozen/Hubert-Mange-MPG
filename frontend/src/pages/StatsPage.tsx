@@ -46,7 +46,7 @@ export default function StatsPage() {
                 <h2 className="text-xl font-bold mb-1">Classement all-time</h2>
                 <p className="text-xs opacity-60 mb-3">
                     Façon Jeux Olympiques : on compte les titres (1re place) par division. On départage d'abord sur les
-                    titres de D1, puis de D2, et ainsi de suite. Les coupes (⭐ Crampons · 🎖️ Europa · 🏵️ Conference) sont
+                    titres de D1, puis de D2, et ainsi de suite. Les coupes (⭐ Crampons · 🎖️ Europa · 🍐 Conference) sont
                     affichées à titre indicatif, hors calcul.
                 </p>
                 {allTime.data?.ranking.length ? (
@@ -97,7 +97,7 @@ export default function StatsPage() {
                                                             )}
                                                             {c.conference > 0 && (
                                                                 <span className="badge badge-sm badge-ghost">
-                                                                    🏵️ ×{c.conference}
+                                                                    🍐 ×{c.conference}
                                                                 </span>
                                                             )}
                                                         </>
@@ -135,7 +135,7 @@ export default function StatsPage() {
                                             🎖️
                                         </th>
                                         <th className="text-center" title="Conference">
-                                            🏵️
+                                            🍐
                                         </th>
                                         <th className="text-center">Saisons</th>
                                     </tr>

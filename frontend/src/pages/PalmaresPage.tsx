@@ -36,7 +36,7 @@ export default function PalmaresPage() {
                             <span key={m.managerId} className="badge badge-lg gap-1">
                                 {m.manager} · {"⭐".repeat(m.ldc)}
                                 {"🎖️".repeat(m.uefa)}
-                                {"🏵️".repeat(m.conference)}
+                                {"🍐".repeat(m.conference)}
                             </span>
                         ))}
                     </div>
@@ -54,7 +54,7 @@ export default function PalmaresPage() {
                     />
                     <CupColumn
                         title="Heureux papa's League Conference"
-                        icon="🏵️"
+                        icon="🍐"
                         rows={cups.data?.list.filter((c) => c.competition === "CONFERENCE")}
                     />
                 </div>

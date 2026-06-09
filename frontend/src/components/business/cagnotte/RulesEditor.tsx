@@ -119,7 +119,7 @@ export function RulesEditor({ poolId, onChange }: { poolId: string; onChange: ()
                     />
                 </label>
                 <label className="text-sm">
-                    <span className="opacity-70">🏵️ Heureux papa's League Conference</span>
+                    <span className="opacity-70">🍐 Heureux papa's League Conference</span>
                     <input
                         value={conference}
                         onChange={(e) => setConference(e.target.value)}
