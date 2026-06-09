@@ -401,14 +401,18 @@ palmaresRouter.get("/tournaments", async (_req, res) => {
   }));
 
   // All-time : nombre de coupes par manager (toutes compétitions).
-  const counts = new Map<string, { manager: string; ldc: number; uefa: number; total: number }>();
+  const counts = new Map<
+    string,
+    { manager: string; ldc: number; uefa: number; conference: number; total: number }
+  >();
   for (const t of tournaments) {
     if (!t.winnerManagerId || !t.winnerManager) continue;
     const e =
       counts.get(t.winnerManagerId) ??
-      { manager: t.winnerManager.displayName, ldc: 0, uefa: 0, total: 0 };
+      { manager: t.winnerManager.displayName, ldc: 0, uefa: 0, conference: 0, total: 0 };
     if (t.competition === "LDC") e.ldc++;
     else if (t.competition === "UEFA") e.uefa++;
+    else if (t.competition === "CONFERENCE") e.conference++;
     e.total++;
     counts.set(t.winnerManagerId, e);
   }

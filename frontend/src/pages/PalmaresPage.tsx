@@ -30,6 +30,7 @@ interface CupCount {
   manager: string;
   ldc: number;
   uefa: number;
+  conference: number;
   total: number;
 }
 
@@ -60,12 +61,12 @@ export default function PalmaresPage() {
           <div className="flex flex-wrap gap-2 mb-4">
             {cups.data.ranking.map((m) => (
               <span key={m.managerId} className="badge badge-lg gap-1">
-                {m.manager} · {"⭐".repeat(m.ldc)}{"🎖️".repeat(m.uefa)}
+                {m.manager} · {"⭐".repeat(m.ldc)}{"🎖️".repeat(m.uefa)}{"🏵️".repeat(m.conference)}
               </span>
             ))}
           </div>
         ) : null}
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-3 gap-4">
           <CupColumn
             title="Ligue des Crampons"
             icon="⭐"
@@ -75,6 +76,11 @@ export default function PalmaresPage() {
             title="Heureux papa's League"
             icon="🎖️"
             rows={cups.data?.list.filter((c) => c.competition === "UEFA")}
+          />
+          <CupColumn
+            title="Heureux papa's League Conference"
+            icon="🏵️"
+            rows={cups.data?.list.filter((c) => c.competition === "CONFERENCE")}
           />
         </div>
       </section>
