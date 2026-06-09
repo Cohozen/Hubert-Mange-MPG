@@ -61,7 +61,8 @@ synchronisation des données depuis l'API MPG.
   (Europa, « Heureux papa's League »), `CONFERENCE` (« …League Conference »), sinon `OTHER`.
   Classification par **nom** dans `competitionFromName` (`sync.ts`, exporté) : tester **`conference`
   AVANT `papa`/`heureu`** (un nom Conference contient aussi « papa »). Le scope cagnotte
-  (`PayoutRule`) suit les mêmes codes (`DIVISION|LDC|UEFA|CONFERENCE`).
+  (`PayoutRule`) suit les mêmes codes (`DIVISION|LDC|UEFA|CONFERENCE`). **Icônes d'affichage**
+  (à garder cohérentes dans tout le front) : ⭐ `LDC` · 🎖️ `UEFA` (Europa) · 🍐 `CONFERENCE`.
 - **Override manuel du type** : la détection par nom échoue si le type n'est identifiable qu'au logo
   (ex. coupe Conference nommée « Heureux Papa's League 🍐 » → classée UEFA par défaut). On peut forcer
   le type via `TrackedTournament.competitionOverride` (nullable ; `null` = détection auto). Le sync
@@ -75,8 +76,20 @@ synchronisation des données depuis l'API MPG.
   inchangée : **coupe année N ↔ `RealSeason` N-1**. Pour corriger des données déjà en prod
   (reclasser/recalculer) : **relancer un sync** (upsert idempotent sur `mpgTournamentId`), pas de
   script dédié.
+- **Classement all-time (`/api/palmares/all-time`)** : ordonné **façon JO** sur les seuls titres de
+  **division** (départage sur D1, puis D2…). Les **coupes comptent dans le total de titres affiché**
+  (côté front, helper `totalWithCups` dans `StatsPage`) **mais jamais dans l'ordre** (`rank` reste
+  basé sur les divisions). La liste des **vainqueurs par saison** (`/winners`) est triée du plus
+  récent au plus ancien : année desc, puis saison MPG desc, puis division asc.
+- **Formatage : Biome** (config racine `biome.json`, version épinglée). Lancer `npm run format`
+  (écrit) ou `npm run format:check` (vérifie) **depuis la racine** — couvre front + back. Style :
+  4 espaces, double quotes, point-virgules, largeur 120. **CSS exclu** (`styles.css` = syntaxe
+  Tailwind v4 / daisyUI non comprise par le parseur) ; **linter désactivé** pour l'instant.
 
 ## Commandes
+
+Racine du repo :
+- `npm run format` — formate tout (front + back) avec Biome · `npm run format:check` — vérifie sans écrire
 
 Backend (`cd backend`) :
 - `npm run dev` — API en watch · `npm run build` — tsc · `npm start` — dist
