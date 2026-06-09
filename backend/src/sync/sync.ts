@@ -25,18 +25,30 @@ export interface SyncResult {
   notes: string[];
 }
 
-/** Détermine la compétition d'après le nom du tournoi. */
+/**
+ * Détermine la compétition d'après le nom du tournoi. 3 niveaux comme en vrai :
+ * LDC (Ligue des Crampons), UEFA (Europa, "Heureux papa's League"), CONFERENCE.
+ * Ordre important : un nom Conference contient aussi "papa"/"heureu".
+ */
 function competitionFromName(name: string): string {
   const n = name.toLowerCase();
   if (n.includes("crampons")) return "LDC";
+  if (n.includes("conference") || n.includes("conférence")) return "CONFERENCE";
   if (n.includes("heureu") || n.includes("papa")) return "UEFA";
   return "OTHER";
 }
 
-/** Année du nom (ex. "... 2026"). Défaut 2025 si absente. */
-function yearFromName(name: string): number {
-  const m = name.match(/(20\d{2})/);
-  return m ? Number(m[1]) : 2025;
+/**
+ * Année de la coupe = année de création MPG (`createdAt`), car elle n'est pas toujours dans le nom.
+ * Replis : année du nom (ex. "... 2026"), puis année courante.
+ */
+function tournamentYear(t: any, fallbackName: string): number {
+  if (t?.createdAt) {
+    const y = new Date(t.createdAt).getFullYear();
+    if (y) return y;
+  }
+  const m = String(fallbackName).match(/(20\d{2})/);
+  return m ? Number(m[1]) : new Date().getFullYear();
 }
 
 export async function runSync(
@@ -333,7 +345,7 @@ export async function runSync(
         const owner = winner?.userId
           ? await prisma.manager.findUnique({ where: { mpgUserId: winner.userId } })
           : null;
-        const year = yearFromName(t.name ?? tt.name);
+        const year = tournamentYear(t, t.name ?? tt.name);
         // Coupe "année N" ↔ saison réelle (N-1) (convention MPG : année = fin de saison).
         const realSeason = await prisma.realSeason.findFirst({ where: { year: year - 1 } });
         const data = {
