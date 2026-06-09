@@ -17,7 +17,11 @@ palmaresRouter.get("/winners", async (_req, res) => {
       gameSeason: { include: { realSeason: true } },
       participations: { where: { finalRank: 1 }, include: { manager: true } },
     },
-    orderBy: [{ gameSeason: { realSeason: { year: "desc" } } }, { level: "asc" }],
+    orderBy: [
+      { gameSeason: { realSeason: { year: "desc" } } },
+      { gameSeason: { mpgSeason: "asc" } }, // saison MPG 1 → 2 → 3 dans l'année
+      { level: "asc" },
+    ],
   });
 
   const divisionWinners = divisions
