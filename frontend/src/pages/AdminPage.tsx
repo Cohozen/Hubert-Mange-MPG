@@ -5,17 +5,17 @@ import { TournamentsSection } from "@/components/business/admin/TournamentsSecti
 import { RolesSection } from "@/components/business/admin/RolesSection";
 
 export default function AdminPage() {
-  const { data: me } = useAuth();
+    const { data: me } = useAuth();
 
-  return (
-    <div className="max-w-5xl columns-1 lg:columns-2 gap-6 [&>*]:mb-6 [&>*]:break-inside-avoid">
-      <SyncSection />
+    return (
+        <div className="max-w-5xl columns-1 lg:columns-2 gap-6 [&>*]:mb-6 [&>*]:break-inside-avoid">
+            <SyncSection />
 
-      <LeaguesSection canDelete={isSuperadmin(me)} />
+            <LeaguesSection canDelete={isSuperadmin(me)} />
 
-      <TournamentsSection canDelete={isSuperadmin(me)} />
+            <TournamentsSection canDelete={isSuperadmin(me)} />
 
-      {isSuperadmin(me) && <RolesSection />}
-    </div>
-  );
+            {isSuperadmin(me) && <RolesSection />}
+        </div>
+    );
 }

@@ -26,94 +26,87 @@ import { MpgConnector } from "./index.js";
 const OUT_DIR = new URL("../../discovery/parsed/", import.meta.url).pathname;
 
 async function main() {
-  if (!config.mpgAdminEmail || !config.mpgAdminPassword) {
-    throw new Error("Renseigne MPG_ADMIN_EMAIL et MPG_ADMIN_PASSWORD dans backend/.env.");
-  }
-  await mkdir(OUT_DIR, { recursive: true });
-
-  console.log("→ Authentification MPG...");
-  const mpg = await MpgConnector.login(config.mpgAdminEmail, config.mpgAdminPassword);
-  console.log("✓ Authentifié. Token présent:", Boolean(mpg.token));
-
-  const dump = async (name: string, data: unknown) => {
-    await writeFile(`${OUT_DIR}${name}.json`, JSON.stringify(data, null, 2), "utf8");
-    console.log(`  ✓ ${name}.json`);
-  };
-
-  const tryGet = async (name: string, path: string): Promise<any | null> => {
-    try {
-      const data = await mpg.apiGet(path);
-      await dump(name, data);
-      return data;
-    } catch (err: any) {
-      console.log(`  ✗ ${path} → ${err?.response?.status ?? err?.message}`);
-      return null;
+    if (!config.mpgAdminEmail || !config.mpgAdminPassword) {
+        throw new Error("Renseigne MPG_ADMIN_EMAIL et MPG_ADMIN_PASSWORD dans backend/.env.");
     }
-  };
+    await mkdir(OUT_DIR, { recursive: true });
 
-  // Niveau 0 : compte + ligues.
-  await tryGet("user", "/user");
-  const dashboard = await tryGet("dashboard", "/dashboard");
-  await tryGet("championships-active", "/championships/active");
-  await tryGet("badge-config", "/badge/config");
+    console.log("→ Authentification MPG...");
+    const mpg = await MpgConnector.login(config.mpgAdminEmail, config.mpgAdminPassword);
+    console.log("✓ Authentifié. Token présent:", Boolean(mpg.token));
 
-  // Extraction générique des IDs de ligue depuis le JSON du dashboard.
-  const dashStr = JSON.stringify(dashboard ?? {});
-  const leagueIds = [...new Set(dashStr.match(/mpg_league_[A-Za-z0-9]+/g) ?? [])];
-  console.log(`\n→ Ligues détectées : ${leagueIds.length ? leagueIds.join(", ") : "aucune"}`);
+    const dump = async (name: string, data: unknown) => {
+        await writeFile(`${OUT_DIR}${name}.json`, JSON.stringify(data, null, 2), "utf8");
+        console.log(`  ✓ ${name}.json`);
+    };
 
-  for (const leagueId of leagueIds) {
-    const league = await tryGet(`league_${leagueId}`, `/league/${leagueId}`);
-    const leagueStr = JSON.stringify(league ?? {});
+    const tryGet = async (name: string, path: string): Promise<any | null> => {
+        try {
+            const data = await mpg.apiGet(path);
+            await dump(name, data);
+            return data;
+        } catch (err: any) {
+            console.log(`  ✗ ${path} → ${err?.response?.status ?? err?.message}`);
+            return null;
+        }
+    };
 
-    // Saisons présentes (pour winners).
-    const seasons = [
-      ...new Set((leagueStr.match(/"season"\s*:\s*(\d+)/g) ?? []).map((s) => s.match(/\d+/)![0])),
-    ];
-    for (const season of seasons.length ? seasons : ["1"]) {
-      await tryGet(
-        `winners_${leagueId}_s${season}`,
-        `/league/${leagueId}/winners?season=${season}`,
-      );
+    // Niveau 0 : compte + ligues.
+    await tryGet("user", "/user");
+    const dashboard = await tryGet("dashboard", "/dashboard");
+    await tryGet("championships-active", "/championships/active");
+    await tryGet("badge-config", "/badge/config");
+
+    // Extraction générique des IDs de ligue depuis le JSON du dashboard.
+    const dashStr = JSON.stringify(dashboard ?? {});
+    const leagueIds = [...new Set(dashStr.match(/mpg_league_[A-Za-z0-9]+/g) ?? [])];
+    console.log(`\n→ Ligues détectées : ${leagueIds.length ? leagueIds.join(", ") : "aucune"}`);
+
+    for (const leagueId of leagueIds) {
+        const league = await tryGet(`league_${leagueId}`, `/league/${leagueId}`);
+        const leagueStr = JSON.stringify(league ?? {});
+
+        // Saisons présentes (pour winners).
+        const seasons = [...new Set((leagueStr.match(/"season"\s*:\s*(\d+)/g) ?? []).map((s) => s.match(/\d+/)![0]))];
+        for (const season of seasons.length ? seasons : ["1"]) {
+            await tryGet(`winners_${leagueId}_s${season}`, `/league/${leagueId}/winners?season=${season}`);
+        }
+
+        // Divisions : mpg_division_{league}_{saison}_{division}
+        const divisionIds = [...new Set(leagueStr.match(/mpg_division_[A-Za-z0-9_]+/g) ?? [])];
+        console.log(`  Divisions de ${leagueId} : ${divisionIds.length}`);
+        for (const divId of divisionIds) {
+            await tryGet(`division_${divId}`, `/division/${divId}`);
+            await tryGet(`standings_${divId}`, `/division/${divId}/ranking/standings`);
+            await tryGet(`teams_${divId}`, `/teams/division/${divId}`);
+            await tryGet(`users_${divId}`, `/division/${divId}/users`);
+            await tryGet(`seasonBadges_${divId}`, `/division/${divId}/ranking/seasonBadges`);
+            await tryGet(`seasonStats_${divId}`, `/division-season-stats/${divId}`);
+            // Résultats par journée : on sonde quelques journées pour capter la structure.
+            for (const gw of [1, 5, 10]) {
+                await tryGet(`matches_${divId}_gw${gw}`, `/division/${divId}/game-week/${gw}/matches`);
+            }
+        }
     }
 
-    // Divisions : mpg_division_{league}_{saison}_{division}
-    const divisionIds = [...new Set(leagueStr.match(/mpg_division_[A-Za-z0-9_]+/g) ?? [])];
-    console.log(`  Divisions de ${leagueId} : ${divisionIds.length}`);
-    for (const divId of divisionIds) {
-      await tryGet(`division_${divId}`, `/division/${divId}`);
-      await tryGet(`standings_${divId}`, `/division/${divId}/ranking/standings`);
-      await tryGet(`teams_${divId}`, `/teams/division/${divId}`);
-      await tryGet(`users_${divId}`, `/division/${divId}/users`);
-      await tryGet(`seasonBadges_${divId}`, `/division/${divId}/ranking/seasonBadges`);
-      await tryGet(`seasonStats_${divId}`, `/division-season-stats/${divId}`);
-      // Résultats par journée : on sonde quelques journées pour capter la structure.
-      for (const gw of [1, 5, 10]) {
-        await tryGet(`matches_${divId}_gw${gw}`, `/division/${divId}/game-week/${gw}/matches`);
-      }
+    // Tournois (coupes). On sonde plusieurs endpoints candidats par tournoi.
+    const tournamentIds = [...new Set(dashStr.match(/mpg_tournament_[A-Za-z0-9]+/g) ?? [])];
+    console.log(`\n→ Tournois détectés : ${tournamentIds.length ? tournamentIds.join(", ") : "aucun"}`);
+    for (const tId of tournamentIds) {
+        await tryGet(`tournament_${tId}`, `/tournament/${tId}`);
+        await tryGet(`tournament_${tId}_ranking`, `/tournament/${tId}/ranking`);
+        await tryGet(`tournament_${tId}_standings`, `/tournament/${tId}/ranking/standings`);
+        await tryGet(`tournament_${tId}_calendar`, `/tournament/${tId}/calendar`);
+        await tryGet(`tournament_${tId}_teams`, `/teams/tournament/${tId}`);
+        await tryGet(`tournament_${tId}_winners`, `/tournament/${tId}/winners`);
+        await tryGet(`tournament_${tId}_phases`, `/tournament/${tId}/phases`);
+        await tryGet(`tournament_${tId}_brackets`, `/tournament/${tId}/brackets`);
     }
-  }
 
-  // Tournois (coupes). On sonde plusieurs endpoints candidats par tournoi.
-  const tournamentIds = [...new Set(dashStr.match(/mpg_tournament_[A-Za-z0-9]+/g) ?? [])];
-  console.log(
-    `\n→ Tournois détectés : ${tournamentIds.length ? tournamentIds.join(", ") : "aucun"}`,
-  );
-  for (const tId of tournamentIds) {
-    await tryGet(`tournament_${tId}`, `/tournament/${tId}`);
-    await tryGet(`tournament_${tId}_ranking`, `/tournament/${tId}/ranking`);
-    await tryGet(`tournament_${tId}_standings`, `/tournament/${tId}/ranking/standings`);
-    await tryGet(`tournament_${tId}_calendar`, `/tournament/${tId}/calendar`);
-    await tryGet(`tournament_${tId}_teams`, `/teams/tournament/${tId}`);
-    await tryGet(`tournament_${tId}_winners`, `/tournament/${tId}/winners`);
-    await tryGet(`tournament_${tId}_phases`, `/tournament/${tId}/phases`);
-    await tryGet(`tournament_${tId}_brackets`, `/tournament/${tId}/brackets`);
-  }
-
-  console.log("\nTerminé. Inspecte backend/discovery/parsed/ (ou demande-moi de le lire).");
+    console.log("\nTerminé. Inspecte backend/discovery/parsed/ (ou demande-moi de le lire).");
 }
 
 main().catch((err) => {
-  console.error("✗ Erreur:", err?.message ?? err);
-  process.exit(1);
+    console.error("✗ Erreur:", err?.message ?? err);
+    process.exit(1);
 });

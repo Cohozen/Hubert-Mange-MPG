@@ -7,9 +7,9 @@
  * MEMBER = aucun rôle (lecture seule).
  */
 export const ROLES = {
-  SUPERADMIN: "SUPERADMIN",
-  ADMIN: "ADMIN",
-  TREASURER: "TREASURER",
+    SUPERADMIN: "SUPERADMIN",
+    ADMIN: "ADMIN",
+    TREASURER: "TREASURER",
 } as const;
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];
@@ -18,26 +18,26 @@ export type Role = (typeof ROLES)[keyof typeof ROLES];
 export const ASSIGNABLE_ROLES: Role[] = [ROLES.ADMIN, ROLES.TREASURER];
 
 export function parseRoles(csv: string | null | undefined): string[] {
-  return (csv ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+    return (csv ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
 }
 
 export function serializeRoles(roles: string[]): string {
-  return [...new Set(roles)].filter((r) => r).join(",");
+    return [...new Set(roles)].filter((r) => r).join(",");
 }
 
 export function isSuperadmin(roles: string[]): boolean {
-  return roles.includes(ROLES.SUPERADMIN);
+    return roles.includes(ROLES.SUPERADMIN);
 }
 
 /** Superadmin, admin de league et banquier peuvent éditer la cagnotte. */
 export function canEditCagnotte(roles: string[]): boolean {
-  return roles.some((r) => [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.TREASURER].includes(r as Role));
+    return roles.some((r) => [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.TREASURER].includes(r as Role));
 }
 
 /** Superadmin et admin de league peuvent gérer les ligues/tournois suivis et lancer le sync. */
 export function canManageLeagues(roles: string[]): boolean {
-  return roles.includes(ROLES.SUPERADMIN) || roles.includes(ROLES.ADMIN);
+    return roles.includes(ROLES.SUPERADMIN) || roles.includes(ROLES.ADMIN);
 }
