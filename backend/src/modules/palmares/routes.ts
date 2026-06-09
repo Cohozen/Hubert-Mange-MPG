@@ -19,7 +19,7 @@ palmaresRouter.get("/winners", async (_req, res) => {
         },
         orderBy: [
             { gameSeason: { realSeason: { year: "desc" } } },
-            { gameSeason: { mpgSeason: "asc" } }, // saison MPG 1 → 2 → 3 dans l'année
+            { gameSeason: { mpgSeason: "desc" } }, // saison MPG la plus récente d'abord (3 → 2 → 1)
             { level: "asc" },
         ],
     });
