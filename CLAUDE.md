@@ -48,6 +48,16 @@ synchronisation des données depuis l'API MPG.
   données **restent** au classement. La **supprimer** (`DELETE`, superadmin) efface ses `GameSeason`
   (cascade Division/Participation/Match/Award) ; les `Payout` survivent (`onDelete: SetNull`),
   cagnotte (`PrizePool`/`Contribution`) et `RealSeason` partagées préservées.
+- **Coupes : 3 niveaux** comme en vrai — `competition` = `LDC` (Ligue des Crampons), `UEFA`
+  (Europa, « Heureux papa's League »), `CONFERENCE` (« …League Conference »), sinon `OTHER`.
+  Classification par **nom** dans `competitionFromName` (`sync.ts`) : tester **`conference` AVANT
+  `papa`/`heureu`** (un nom Conference contient aussi « papa »). Le scope cagnotte (`PayoutRule`)
+  suit les mêmes codes (`DIVISION|LDC|UEFA|CONFERENCE`).
+- **Année d'une coupe = `createdAt` MPG** (`/tournament/{id}`), pas le nom (l'année n'y est pas
+  toujours) — `tournamentYear()` dans `sync.ts`, replis nom puis année courante. Convention
+  inchangée : **coupe année N ↔ `RealSeason` N-1**. Pour corriger des données déjà en prod
+  (reclasser/recalculer) : **relancer un sync** (upsert idempotent sur `mpgTournamentId`), pas de
+  script dédié.
 
 ## Commandes
 

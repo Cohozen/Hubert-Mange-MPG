@@ -53,7 +53,8 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
 - ✅ Modèle de données complet (Manager / RealSeason / GameSeason / Division / Participation /
   Match / Tournament / DivisionAward / PrizePool / Contribution / Payout / TrackedLeague·Tournament).
 - ✅ Cagnotte : API lecture + édition admin, page de consultation.
-- ✅ Palmarès : coupes + vainqueurs par saison (filtres) + classement all-time + stats fun + H2H perso.
+- ✅ Palmarès : coupes (3 niveaux : Ligue des Crampons ⭐ / Heureux papa's League 🎖️ / Conference 🏵️)
+  + vainqueurs par saison (filtres) + classement all-time + stats fun + H2H perso.
 - ✅ Admin : déclenchement du sync.
 - ✅ **Sync fonctionnel** : `npm run sync` rapatrie les vraies données MPG (ligues,
   saisons, divisions, managers, classements/participations) — historique des saisons
@@ -76,7 +77,8 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
 - ✅ **Rôles** : SUPERADMIN / ADMIN / TREASURER / MEMBER, attribués depuis la page Admin.
   ADMIN gère les ligues/tournois + sync + cagnotte ; suppression et attribution des rôles =
   superadmin seul.
-- ✅ **Gains automatisés** : grille de **montants fixes** par division + coupe ; bouton
+- ✅ **Gains automatisés** : grille de **montants fixes** par division + chaque coupe (LDC / Europa /
+  Conference) ; bouton
   « Générer les reversements » qui crée les gains des vainqueurs depuis les classements
   (idempotent, préserve le statut « versé »).
 - ✅ **Classement all-time « façon JO »** : tableau des médailles par division — on compte les
