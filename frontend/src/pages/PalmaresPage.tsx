@@ -1,38 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
-import { api } from "../api/client";
-import { ManagerLabel } from "../components/Manager";
-
-interface DivisionWinner {
-  season: string;
-  realSeason: string;
-  division: string;
-  level: number;
-  winner: string | null;
-  username: string | null;
-  avatarUrl: string | null;
-  team: string | null;
-  mpgUrl: string | null;
-}
-interface CupRow {
-  id: string;
-  name: string;
-  competition: string;
-  year: number;
-  winner: string | null;
-  username: string | null;
-  avatarUrl: string | null;
-  mpgUrl: string | null;
-}
-interface CupCount {
-  managerId: string;
-  manager: string;
-  ldc: number;
-  uefa: number;
-  conference: number;
-  total: number;
-}
+import { api } from "@/api/client";
+import { ManagerLabel } from "@/components/ui/ManagerLabel";
+import { Empty } from "@/components/ui/Empty";
+import { CupColumn } from "@/components/business/palmares/CupColumn";
+import { CupCount, CupRow, DivisionWinner } from "@/components/business/palmares/types";
 
 export default function PalmaresPage() {
   const winners = useQuery({
@@ -190,48 +163,6 @@ export default function PalmaresPage() {
           <Empty />
         )}
       </section>
-    </div>
-  );
-}
-
-function CupColumn({ title, icon, rows }: { title: string; icon: string; rows?: CupRow[] }) {
-  return (
-    <div className="card bg-base-100 shadow">
-      <div className="card-body p-4">
-        <h3 className="font-semibold mb-1">{title}</h3>
-        {rows?.length ? (
-          <ul className="space-y-2">
-            {rows.map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-2 text-sm">
-                <span className="opacity-60 w-10 shrink-0">{c.year}</span>
-                <span className="flex-1 min-w-0 flex items-center gap-1">
-                  <span className="shrink-0">{icon}</span>
-                  <ManagerLabel name={c.winner} username={c.username} avatarUrl={c.avatarUrl} size={22} />
-                </span>
-                <a
-                  href={c.mpgUrl ?? "#"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="link link-primary shrink-0"
-                  aria-label="Voir sur MPG"
-                >
-                  <ExternalLink size={14} />
-                </a>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm opacity-60">Pas encore de données.</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Empty() {
-  return (
-    <div className="card bg-base-100 shadow">
-      <div className="card-body text-sm opacity-60">Pas encore de données.</div>
     </div>
   );
 }

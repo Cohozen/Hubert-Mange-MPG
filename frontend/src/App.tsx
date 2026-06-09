@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { NavLink, Navigate, Route, Routes, Link } from "react-router-dom";
 import { Wallet, Trophy, BarChart3, User, Settings, LogOut, Sun, Moon } from "lucide-react";
-import { isLeagueAdmin, useAuth, useLogout } from "./auth/useAuth";
-import { Avatar } from "./components/Manager";
-import LoginPage from "./pages/LoginPage";
-import CagnottePage from "./pages/CagnottePage";
-import PalmaresPage from "./pages/PalmaresPage";
-import StatsPage from "./pages/StatsPage";
-import AdminPage from "./pages/AdminPage";
-import ProfilePage from "./pages/ProfilePage";
+import { isLeagueAdmin, useAuth, useLogout } from "@/auth/useAuth";
+import { Avatar } from "@/components/ui/Avatar";
+import LoginPage from "@/pages/LoginPage";
+import CagnottePage from "@/pages/CagnottePage";
+import PalmaresPage from "@/pages/PalmaresPage";
+import StatsPage from "@/pages/StatsPage";
+import AdminPage from "@/pages/AdminPage";
+import ProfilePage from "@/pages/ProfilePage";
 
 interface NavItem {
   to: string;

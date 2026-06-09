@@ -7,6 +7,15 @@ synchronisation des données depuis l'API MPG.
 
 - `backend/` — API Express + TypeScript, Prisma. SQLite en local, Postgres (Supabase) en prod.
 - `frontend/` — Vite + React 18, React Router, TanStack Query, Tailwind + DaisyUI.
+  - **Un seul composant par fichier, un seul fichier par composant.** Pas de sous-composant
+    défini dans une page.
+  - Composants **métier** → `src/components/business/<domaine>/` (ex. `cagnotte/`, `stats/`,
+    `palmares/`, `admin/`) ; UI **générique réutilisable** (Avatar, ManagerLabel, Field, Empty…)
+    → `src/components/ui/`. Les types partagés d'un domaine vont dans son `types.ts`.
+  - Les `src/pages/*.tsx` ne font que **data-fetching + composition** (elles assemblent les
+    composants métier, ne les définissent pas).
+  - Imports via l'**alias `@/`** (`@/api/client`, `@/components/...`), configuré dans
+    `tsconfig.json` (`paths`) et `vite.config.ts` (`resolve.alias`). Pas de chemins relatifs.
 
 ## Déploiement
 

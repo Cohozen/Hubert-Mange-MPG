@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "../api/client";
+import { api } from "@/api/client";
+import { Field } from "@/components/ui/Field";
 
 interface Profile {
   displayName: string;
@@ -140,14 +141,5 @@ export default function ProfilePage() {
         </button>
       </form>
     </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="text-sm font-medium text-base-content">{label}</span>
-      <div className="mt-1">{children}</div>
-    </label>
   );
 }

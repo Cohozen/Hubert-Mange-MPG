@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { api } from "../api/client";
+import { api } from "@/api/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
