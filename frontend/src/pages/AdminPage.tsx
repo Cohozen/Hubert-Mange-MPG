@@ -285,6 +285,7 @@ interface TrackedTournament {
   mpgTournamentId: string;
   name: string;
   active: boolean;
+  competitionOverride: string | null;
 }
 
 interface TournamentRow {
@@ -294,7 +295,17 @@ interface TournamentRow {
   active: boolean;
   inMyDashboard: boolean;
   winner?: string | null;
+  competitionOverride: string | null;
 }
+
+// Options du type de coupe forcé ("" = détection auto par nom).
+const COMPETITION_OPTIONS: { value: string; label: string }[] = [
+  { value: "", label: "Auto (par nom)" },
+  { value: "LDC", label: "Ligue des Crampons" },
+  { value: "UEFA", label: "Europa (Heureux papa's)" },
+  { value: "CONFERENCE", label: "Conference" },
+  { value: "OTHER", label: "Autre" },
+];
 
 function TournamentsSection({ canDelete }: { canDelete: boolean }) {
   const qc = useQueryClient();
@@ -316,6 +327,7 @@ function TournamentsSection({ canDelete }: { canDelete: boolean }) {
         trackedId: t.id,
         active: t.active,
         inMyDashboard: false,
+        competitionOverride: t.competitionOverride,
       });
     }
     for (const a of available.data ?? []) {
@@ -330,6 +342,7 @@ function TournamentsSection({ canDelete }: { canDelete: boolean }) {
           active: false,
           inMyDashboard: true,
           winner: a.winner,
+          competitionOverride: null,
         });
       }
     }
@@ -360,6 +373,15 @@ function TournamentsSection({ canDelete }: { canDelete: boolean }) {
     invalidate();
   }
 
+  async function setCompetition(row: TournamentRow, value: string) {
+    if (!row.trackedId) return;
+    await api(`/api/admin/tournaments/${row.trackedId}`, {
+      method: "PUT",
+      body: JSON.stringify({ competitionOverride: value || null }),
+    });
+    invalidate();
+  }
+
   async function remove(row: TournamentRow) {
     if (!row.trackedId) return;
     if (!confirm(`Supprimer « ${row.name} » et ses données synchronisées ?`)) return;
@@ -371,8 +393,9 @@ function TournamentsSection({ canDelete }: { canDelete: boolean }) {
     <section className="bg-base-100 rounded-box shadow p-6">
       <h2 className="text-lg font-bold text-base-content mb-1">Tournois suivis (coupes)</h2>
       <p className="text-sm opacity-60 mb-3">
-        Coche un tournoi pour le synchroniser. Décocher met le sync en pause. « Supprimer » efface
-        le tournoi et ses données.
+        Coche un tournoi pour le synchroniser. Décocher met le sync en pause. Le type de coupe est
+        déduit du nom ; force-le via le menu si la détection se trompe. « Supprimer » efface le
+        tournoi et ses données.
       </p>
 
       {available.isError && (
@@ -408,15 +431,31 @@ function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                 </span>
               </span>
             </label>
-            {t.trackedId && canDelete && (
-              <button
-                onClick={() => remove(t)}
-                title="Supprimer le tournoi et ses données"
-                className="text-xs rounded-full p-2 border border-base-300 text-error hover:border-error"
-              >
-                <Trash2 size={14} />
-              </button>
-            )}
+            <div className="flex items-center gap-2 shrink-0">
+              {t.trackedId && (
+                <select
+                  value={t.competitionOverride ?? ""}
+                  onChange={(e) => setCompetition(t, e.target.value)}
+                  title="Type de coupe (auto par défaut, déduit du nom)"
+                  className="select select-bordered select-xs sm:select-sm max-w-[10rem]"
+                >
+                  {COMPETITION_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {t.trackedId && canDelete && (
+                <button
+                  onClick={() => remove(t)}
+                  title="Supprimer le tournoi et ses données"
+                  className="text-xs rounded-full p-2 border border-base-300 text-error hover:border-error"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
           </div>
         ))}
         {rows.length === 0 && (

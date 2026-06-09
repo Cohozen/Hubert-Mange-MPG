@@ -4,6 +4,7 @@ import { prisma } from "../../db/client.js";
 import { requireSuperadmin, requireAuth, requireLeagueAdmin } from "../../http/middleware.js";
 import { ASSIGNABLE_ROLES, serializeRoles } from "../../auth/roles.js";
 import { connectorForManager } from "../../sync/service.js";
+import { competitionFromName } from "../../sync/sync.js";
 
 /**
  * Routes d'administration de la structure de la ligue. Servent au backfill manuel des
@@ -230,17 +231,33 @@ adminRouter.post("/tournaments", requireLeagueAdmin, async (req, res) => {
   res.status(201).json(t);
 });
 
+// Met à jour un tournoi suivi : pause/reprise (`active`) et/ou type de coupe forcé
+// (`competitionOverride`, null = détection auto par nom). Changer l'override met aussi à jour
+// immédiatement la coupe déjà synchronisée (effet visible sans relancer un sync).
+const COMPETITIONS = ["LDC", "UEFA", "CONFERENCE", "OTHER"] as const;
 adminRouter.put("/tournaments/:id", requireLeagueAdmin, async (req, res) => {
-  const schema = z.object({ active: z.boolean() });
+  const schema = z.object({
+    active: z.boolean().optional(),
+    competitionOverride: z.enum(COMPETITIONS).nullable().optional(),
+  });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "active (booléen) requis" });
+    res.status(400).json({ error: "active (booléen) et/ou competitionOverride (LDC|UEFA|CONFERENCE|OTHER|null)" });
     return;
   }
-  const t = await prisma.trackedTournament.update({
-    where: { id: req.params.id },
-    data: { active: parsed.data.active },
-  });
+  const data: { active?: boolean; competitionOverride?: string | null } = {};
+  if (parsed.data.active !== undefined) data.active = parsed.data.active;
+  if (parsed.data.competitionOverride !== undefined) data.competitionOverride = parsed.data.competitionOverride;
+
+  const t = await prisma.trackedTournament.update({ where: { id: req.params.id }, data });
+
+  // Reflète le type effectif sur la coupe déjà synchronisée.
+  if (parsed.data.competitionOverride !== undefined) {
+    await prisma.tournament.updateMany({
+      where: { mpgTournamentId: t.mpgTournamentId },
+      data: { competition: parsed.data.competitionOverride ?? competitionFromName(t.name) },
+    });
+  }
   res.json(t);
 });
 

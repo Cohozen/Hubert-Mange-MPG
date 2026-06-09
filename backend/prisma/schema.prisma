@@ -248,11 +248,13 @@ model TrackedLeague {
 
 /// Tournois (coupes) MPG que l'appli synchronise. On ne synchronise QUE les tournois suivis.
 model TrackedTournament {
-  id              String   @id @default(cuid())
-  mpgTournamentId String   @unique
-  name            String
-  active          Boolean  @default(true)
-  createdAt       DateTime @default(now())
+  id                  String   @id @default(cuid())
+  mpgTournamentId     String   @unique
+  name                String
+  active              Boolean  @default(true)
+  /// Force le type de coupe : LDC | UEFA | CONFERENCE | OTHER. null = détection auto par nom.
+  competitionOverride String?
+  createdAt           DateTime @default(now())
 }
 
 /// Trace d'une exécution de sync (manuelle ou automatique) pour observabilité.

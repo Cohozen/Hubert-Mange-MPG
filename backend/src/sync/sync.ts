@@ -30,7 +30,7 @@ export interface SyncResult {
  * LDC (Ligue des Crampons), UEFA (Europa, "Heureux papa's League"), CONFERENCE.
  * Ordre important : un nom Conference contient aussi "papa"/"heureu".
  */
-function competitionFromName(name: string): string {
+export function competitionFromName(name: string): string {
   const n = name.toLowerCase();
   if (n.includes("crampons")) return "LDC";
   if (n.includes("conference") || n.includes("conférence")) return "CONFERENCE";
@@ -350,7 +350,7 @@ export async function runSync(
         const realSeason = await prisma.realSeason.findFirst({ where: { year: year - 1 } });
         const data = {
           name: t.name ?? tt.name,
-          competition: competitionFromName(t.name ?? tt.name),
+          competition: tt.competitionOverride ?? competitionFromName(t.name ?? tt.name),
           year,
           realSeasonId: realSeason?.id ?? null,
           winnerManagerId: owner?.id ?? null,
