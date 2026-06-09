@@ -50,9 +50,17 @@ synchronisation des données depuis l'API MPG.
   cagnotte (`PrizePool`/`Contribution`) et `RealSeason` partagées préservées.
 - **Coupes : 3 niveaux** comme en vrai — `competition` = `LDC` (Ligue des Crampons), `UEFA`
   (Europa, « Heureux papa's League »), `CONFERENCE` (« …League Conference »), sinon `OTHER`.
-  Classification par **nom** dans `competitionFromName` (`sync.ts`) : tester **`conference` AVANT
-  `papa`/`heureu`** (un nom Conference contient aussi « papa »). Le scope cagnotte (`PayoutRule`)
-  suit les mêmes codes (`DIVISION|LDC|UEFA|CONFERENCE`).
+  Classification par **nom** dans `competitionFromName` (`sync.ts`, exporté) : tester **`conference`
+  AVANT `papa`/`heureu`** (un nom Conference contient aussi « papa »). Le scope cagnotte
+  (`PayoutRule`) suit les mêmes codes (`DIVISION|LDC|UEFA|CONFERENCE`).
+- **Override manuel du type** : la détection par nom échoue si le type n'est identifiable qu'au logo
+  (ex. coupe Conference nommée « Heureux Papa's League 🍐 » → classée UEFA par défaut). On peut forcer
+  le type via `TrackedTournament.competitionOverride` (nullable ; `null` = détection auto). Le sync
+  fait primer l'override (`tt.competitionOverride ?? competitionFromName(...)`). Le réglage se fait
+  dans l'admin (select par tournoi) → `PUT /api/admin/tournaments/:id` `{ competitionOverride }`
+  (rôle ADMIN) ; **la route met à jour immédiatement la ligne `Tournament` déjà synchronisée** (effet
+  visible sans relancer un sync). L'override est **par environnement** (donnée DB) : à reposer dans
+  l'admin prod après déploiement.
 - **Année d'une coupe = `createdAt` MPG** (`/tournament/{id}`), pas le nom (l'année n'y est pas
   toujours) — `tournamentYear()` dans `sync.ts`, replis nom puis année courante. Convention
   inchangée : **coupe année N ↔ `RealSeason` N-1**. Pour corriger des données déjà en prod
