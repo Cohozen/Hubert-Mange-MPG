@@ -25,8 +25,8 @@ async function main() {
           email: `${displayName.toLowerCase()}@example.com`,
           roles: i === 0 ? "SUPERADMIN,TREASURER" : "", // Alice = superadmin + banquier
         },
-      })
-    )
+      }),
+    ),
   );
 
   const realSeason = await prisma.realSeason.create({
@@ -51,8 +51,8 @@ async function main() {
           finalRank: i + 1,
           points: 50 - i * 5,
         },
-      })
-    )
+      }),
+    ),
   );
 
   // Cagnotte de la saison réelle : mise unique 20 €, 4/6 ont payé.
@@ -63,8 +63,8 @@ async function main() {
     managers.map((m, i) =>
       prisma.contribution.create({
         data: { prizePoolId: pool.id, managerId: m.id, amount: 2000, paid: i < 4 },
-      })
-    )
+      }),
+    ),
   );
   await prisma.payout.create({
     data: {

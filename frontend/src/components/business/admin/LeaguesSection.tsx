@@ -94,7 +94,11 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
     if (!row.trackedId) {
       await api("/api/admin/leagues", {
         method: "POST",
-        body: JSON.stringify({ mpgLeagueId: row.mpgLeagueId, name: row.name, shortId: row.shortId }),
+        body: JSON.stringify({
+          mpgLeagueId: row.mpgLeagueId,
+          name: row.name,
+          shortId: row.shortId,
+        }),
       });
     } else {
       await api(`/api/admin/leagues/${row.trackedId}`, {

@@ -23,7 +23,7 @@ export default function PalmaresPage() {
   const seasonOptions = [...new Set(allWinners.map((w) => w.realSeason))];
   const divisionOptions = [...new Set(allWinners.map((w) => w.division))].sort();
   const filteredWinners = allWinners.filter(
-    (w) => (!fSeason || w.realSeason === fSeason) && (!fDiv || w.division === fDiv)
+    (w) => (!fSeason || w.realSeason === fSeason) && (!fDiv || w.division === fDiv),
   );
 
   return (
@@ -34,7 +34,9 @@ export default function PalmaresPage() {
           <div className="flex flex-wrap gap-2 mb-4">
             {cups.data.ranking.map((m) => (
               <span key={m.managerId} className="badge badge-lg gap-1">
-                {m.manager} · {"⭐".repeat(m.ldc)}{"🎖️".repeat(m.uefa)}{"🏵️".repeat(m.conference)}
+                {m.manager} · {"⭐".repeat(m.ldc)}
+                {"🎖️".repeat(m.uefa)}
+                {"🏵️".repeat(m.conference)}
               </span>
             ))}
           </div>
@@ -70,7 +72,9 @@ export default function PalmaresPage() {
               >
                 <option value="">Toutes les saisons</option>
                 {seasonOptions.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
               <select
@@ -80,12 +84,17 @@ export default function PalmaresPage() {
               >
                 <option value="">Toutes les divisions</option>
                 {divisionOptions.map((d) => (
-                  <option key={d} value={d}>{d}</option>
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
                 ))}
               </select>
               {(fSeason || fDiv) && (
                 <button
-                  onClick={() => { setFSeason(""); setFDiv(""); }}
+                  onClick={() => {
+                    setFSeason("");
+                    setFDiv("");
+                  }}
                   className="btn btn-sm btn-square btn-ghost shrink-0"
                   aria-label="Réinitialiser"
                 >
@@ -99,7 +108,12 @@ export default function PalmaresPage() {
                 <div key={i} className="card bg-base-100 shadow">
                   <div className="card-body p-3">
                     <div className="flex justify-between items-center gap-2">
-                      <ManagerLabel name={w.winner} username={w.username} avatarUrl={w.avatarUrl} size={26} />
+                      <ManagerLabel
+                        name={w.winner}
+                        username={w.username}
+                        avatarUrl={w.avatarUrl}
+                        size={26}
+                      />
                       <span className="badge badge-sm shrink-0">{w.division}</span>
                     </div>
                     {w.team && <div className="text-sm opacity-80 italic">🏟️ {w.team}</div>}
@@ -138,7 +152,12 @@ export default function PalmaresPage() {
                       <td className="whitespace-nowrap">{w.season}</td>
                       <td>{w.division}</td>
                       <td>
-                        <ManagerLabel name={w.winner} username={w.username} avatarUrl={w.avatarUrl} size={26} />
+                        <ManagerLabel
+                          name={w.winner}
+                          username={w.username}
+                          avatarUrl={w.avatarUrl}
+                          size={26}
+                        />
                       </td>
                       <td className="italic opacity-80">{w.team ?? "—"}</td>
                       <td>

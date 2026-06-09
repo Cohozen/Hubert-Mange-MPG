@@ -53,7 +53,7 @@ function tournamentYear(t: any, fallbackName: string): number {
 
 export async function runSync(
   mpg: MpgConnector,
-  opts?: { leagueId?: string }
+  opts?: { leagueId?: string },
 ): Promise<SyncResult> {
   const notes: string[] = [];
   const counters = {
@@ -75,9 +75,7 @@ export async function runSync(
     const tracked = await prisma.trackedLeague.findMany({ where: { active: true } });
     leagueTiles = tracked.map((t) => ({ leagueId: t.mpgLeagueId }));
     if (leagueTiles.length === 0) {
-      notes.push(
-        "Aucune ligue suivie. Ajoute des ligues à synchroniser depuis la page Admin."
-      );
+      notes.push("Aucune ligue suivie. Ajoute des ligues à synchroniser depuis la page Admin.");
     }
   }
 
@@ -101,9 +99,7 @@ export async function runSync(
       // Vainqueurs : donne l'année Ligue 1 réelle (championshipSeason) + structure finale.
       let championshipSeason: number | undefined;
       try {
-        const winners = await mpg.apiGet<any>(
-          `/league/${tile.leagueId}/winners?season=${season}`
-        );
+        const winners = await mpg.apiGet<any>(`/league/${tile.leagueId}/winners?season=${season}`);
         championshipSeason = winners?.championshipSeason;
       } catch {
         // saison passée non exposée : on tentera quand même les standings.
@@ -224,16 +220,20 @@ export async function runSync(
           if (bp?.playerId) {
             const p = stats.playersData?.relatedPlayers?.[bp.playerId];
             const club = p?.clubId ? stats.playersData?.relatedClubs?.[p.clubId] : null;
-            const playerName = p
-              ? `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim() || null
-              : null;
+            const playerName = p ? `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim() || null : null;
             const playerClub = club?.name?.["fr-FR"] ?? club?.name?.["en-GB"] ?? null;
             const owner = bp.ownerId
               ? await prisma.manager.findUnique({ where: { mpgUserId: bp.ownerId } })
               : null;
             await prisma.divisionAward.upsert({
               where: { divisionId_kind: { divisionId: division.id, kind: "BEST_PLAYER" } },
-              update: { managerId: owner?.id ?? null, playerName, playerClub, averageRating: bp.averageRating, goals: bp.goals },
+              update: {
+                managerId: owner?.id ?? null,
+                playerName,
+                playerClub,
+                averageRating: bp.averageRating,
+                goals: bp.goals,
+              },
               create: {
                 divisionId: division.id,
                 kind: "BEST_PLAYER",
@@ -256,7 +256,7 @@ export async function runSync(
               : null;
             const totalMalus = Object.values(sg.bonusesSuffered ?? {}).reduce(
               (a: number, v: any) => a + (Number(v) || 0),
-              0
+              0,
             );
             await prisma.divisionAward.upsert({
               where: { divisionId_kind: { divisionId: division.id, kind: "SCAPEGOAT" } },
@@ -275,9 +275,7 @@ export async function runSync(
           const rstar = stats?.raisingStar;
           if (rstar?.teamId) {
             const uid = standings.teamsUsers?.[rstar.teamId]?.id;
-            const mgr = uid
-              ? await prisma.manager.findUnique({ where: { mpgUserId: uid } })
-              : null;
+            const mgr = uid ? await prisma.manager.findUnique({ where: { mpgUserId: uid } }) : null;
             const gain = (rstar.lastQuotation?.value ?? 0) - (rstar.firstQuotation?.value ?? 0);
             await prisma.divisionAward.upsert({
               where: { divisionId_kind: { divisionId: division.id, kind: "RAISING_STAR" } },

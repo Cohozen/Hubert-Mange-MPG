@@ -18,7 +18,10 @@ export function PoolView({
   const canEdit = editor && !pool.closed;
 
   async function setClosed(closed: boolean) {
-    await api(`/api/cagnotte/${pool.id}/closed`, { method: "PUT", body: JSON.stringify({ closed }) });
+    await api(`/api/cagnotte/${pool.id}/closed`, {
+      method: "PUT",
+      body: JSON.stringify({ closed }),
+    });
     onChange();
   }
 
@@ -28,7 +31,9 @@ export function PoolView({
         <div className="flex items-center justify-between gap-2 text-sm bg-warning/20 text-warning border border-warning/30 rounded-lg px-4 py-2">
           <span>🔒 Cagnotte clôturée — consultation seule.</span>
           {editor && (
-            <button onClick={() => setClosed(false)} className="btn btn-xs">Rouvrir</button>
+            <button onClick={() => setClosed(false)} className="btn btn-xs">
+              Rouvrir
+            </button>
           )}
         </div>
       )}

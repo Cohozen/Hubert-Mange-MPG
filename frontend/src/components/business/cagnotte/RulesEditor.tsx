@@ -41,10 +41,28 @@ export function RulesEditor({ poolId, onChange }: { poolId: string; onChange: ()
         amount: eurosToCents(amounts[l] || "0"),
         label: `Vainqueur D${l}`,
       }));
-      if (ldc) rules.push({ scope: "LDC", amount: eurosToCents(ldc), label: "Vainqueur Ligue des Crampons" });
-      if (uefa) rules.push({ scope: "UEFA", amount: eurosToCents(uefa), label: "Vainqueur Heureux papa's League" });
-      if (conference) rules.push({ scope: "CONFERENCE", amount: eurosToCents(conference), label: "Vainqueur Heureux papa's League Conference" });
-      await api(`/api/cagnotte/${poolId}/rules`, { method: "PUT", body: JSON.stringify({ rules }) });
+      if (ldc)
+        rules.push({
+          scope: "LDC",
+          amount: eurosToCents(ldc),
+          label: "Vainqueur Ligue des Crampons",
+        });
+      if (uefa)
+        rules.push({
+          scope: "UEFA",
+          amount: eurosToCents(uefa),
+          label: "Vainqueur Heureux papa's League",
+        });
+      if (conference)
+        rules.push({
+          scope: "CONFERENCE",
+          amount: eurosToCents(conference),
+          label: "Vainqueur Heureux papa's League Conference",
+        });
+      await api(`/api/cagnotte/${poolId}/rules`, {
+        method: "PUT",
+        body: JSON.stringify({ rules }),
+      });
       qc.invalidateQueries({ queryKey: ["rules", poolId] });
     } finally {
       setBusy(false);
@@ -56,7 +74,7 @@ export function RulesEditor({ poolId, onChange }: { poolId: string; onChange: ()
     try {
       const r = await api<{ created: number; updated: number }>(
         `/api/cagnotte/${poolId}/generate-payouts`,
-        { method: "POST" }
+        { method: "POST" },
       );
       setGenMsg(`${r.created} créé(s), ${r.updated} mis à jour.`);
       onChange();
@@ -72,8 +90,8 @@ export function RulesEditor({ poolId, onChange }: { poolId: string; onChange: ()
       <h3 className="font-semibold">Grille de gains (montants fixes)</h3>
       <p className="text-xs opacity-60">
         Montant en € du vainqueur de chaque division et de chaque coupe. « Générer » crée les
-        reversements des gagnants une fois les saisons et coupes terminées (sans toucher aux
-        gains déjà versés).
+        reversements des gagnants une fois les saisons et coupes terminées (sans toucher aux gains
+        déjà versés).
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {data?.divisionLevels.map((l) => (
@@ -88,20 +106,36 @@ export function RulesEditor({ poolId, onChange }: { poolId: string; onChange: ()
         ))}
         <label className="text-sm">
           <span className="opacity-70">⭐ Ligue des Crampons</span>
-          <input value={ldc} onChange={(e) => setLdc(e.target.value)} className="input input-bordered input-sm w-full mt-1" />
+          <input
+            value={ldc}
+            onChange={(e) => setLdc(e.target.value)}
+            className="input input-bordered input-sm w-full mt-1"
+          />
         </label>
         <label className="text-sm">
           <span className="opacity-70">🎖️ Heureux papa's League</span>
-          <input value={uefa} onChange={(e) => setUefa(e.target.value)} className="input input-bordered input-sm w-full mt-1" />
+          <input
+            value={uefa}
+            onChange={(e) => setUefa(e.target.value)}
+            className="input input-bordered input-sm w-full mt-1"
+          />
         </label>
         <label className="text-sm">
           <span className="opacity-70">🏵️ Heureux papa's League Conference</span>
-          <input value={conference} onChange={(e) => setConference(e.target.value)} className="input input-bordered input-sm w-full mt-1" />
+          <input
+            value={conference}
+            onChange={(e) => setConference(e.target.value)}
+            className="input input-bordered input-sm w-full mt-1"
+          />
         </label>
       </div>
       <div className="flex flex-wrap gap-2 items-center">
-        <button onClick={saveRules} disabled={busy} className="btn btn-sm">Enregistrer la grille</button>
-        <button onClick={generate} disabled={busy} className="btn btn-sm btn-primary">Générer les reversements</button>
+        <button onClick={saveRules} disabled={busy} className="btn btn-sm">
+          Enregistrer la grille
+        </button>
+        <button onClick={generate} disabled={busy} className="btn btn-sm btn-primary">
+          Générer les reversements
+        </button>
         {genMsg && <span className="text-sm opacity-70">{genMsg}</span>}
       </div>
     </div>

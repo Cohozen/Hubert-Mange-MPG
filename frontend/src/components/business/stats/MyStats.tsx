@@ -41,7 +41,11 @@ export function MyStats() {
           {/* Cartes fun perso */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <DuelCard title="🐉 Bête noire" subtitle="te bat le plus" opp={h.beteNoire} />
-            <DuelCard title="🎯 Victime préférée" subtitle="tu la bats le plus" opp={h.victimePreferee} />
+            <DuelCard
+              title="🎯 Victime préférée"
+              subtitle="tu la bats le plus"
+              opp={h.victimePreferee}
+            />
             <BigMatchCard title="💥 Plus large victoire" m={h.biggestWin} />
             <BigMatchCard title="🩹 Plus large défaite" m={h.biggestLoss} />
           </div>
@@ -57,7 +61,12 @@ export function MyStats() {
                 {h.opponents.map((o) => (
                   <li key={o.opponentId} className="flex items-center gap-2 p-3 text-sm">
                     <span className="flex-1 min-w-0">
-                      <ManagerLabel name={o.manager} username={o.username} avatarUrl={o.avatarUrl} size={24} />
+                      <ManagerLabel
+                        name={o.manager}
+                        username={o.username}
+                        avatarUrl={o.avatarUrl}
+                        size={24}
+                      />
                     </span>
                     <span className="shrink-0 tabular-nums">
                       <span className="text-success">{o.w}</span>

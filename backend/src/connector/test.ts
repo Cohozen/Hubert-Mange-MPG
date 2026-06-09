@@ -10,7 +10,7 @@ import { MpgConnector } from "./index.js";
 async function main() {
   if (!config.mpgAdminEmail || !config.mpgAdminPassword) {
     throw new Error(
-      "Renseigne MPG_ADMIN_EMAIL et MPG_ADMIN_PASSWORD dans backend/.env avant de lancer ce test."
+      "Renseigne MPG_ADMIN_EMAIL et MPG_ADMIN_PASSWORD dans backend/.env avant de lancer ce test.",
     );
   }
 
@@ -18,7 +18,10 @@ async function main() {
   const mpg = await MpgConnector.login(config.mpgAdminEmail, config.mpgAdminPassword);
 
   console.log("✓ Authentifié.");
-  console.log("  token (api.mpg.football) :", mpg.token ? `${mpg.token.slice(0, 12)}…` : "(absent)");
+  console.log(
+    "  token (api.mpg.football) :",
+    mpg.token ? `${mpg.token.slice(0, 12)}…` : "(absent)",
+  );
   console.log("\n=== dashboard?_data=root (clés) ===");
   console.log(Object.keys(mpg.dashboard ?? {}));
   console.log("\n=== dashboard (JSON, tronqué) ===");

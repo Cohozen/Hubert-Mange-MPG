@@ -5,9 +5,12 @@ export function PayQr({ managerId }: { managerId: string }) {
   const payment = useQuery({
     queryKey: ["payment", managerId],
     queryFn: () =>
-      api<{ iban: string | null; phone: string | null; weroUrl: string | null; ibanHolder: string | null }>(
-        `/api/profile/${managerId}/payment`
-      ),
+      api<{
+        iban: string | null;
+        phone: string | null;
+        weroUrl: string | null;
+        ibanHolder: string | null;
+      }>(`/api/profile/${managerId}/payment`),
   });
   const p = payment.data;
   const wero = useQuery({

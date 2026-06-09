@@ -67,11 +67,14 @@ async function main() {
     const leagueStr = JSON.stringify(league ?? {});
 
     // Saisons présentes (pour winners).
-    const seasons = [...new Set(
-      (leagueStr.match(/"season"\s*:\s*(\d+)/g) ?? []).map((s) => s.match(/\d+/)![0])
-    )];
+    const seasons = [
+      ...new Set((leagueStr.match(/"season"\s*:\s*(\d+)/g) ?? []).map((s) => s.match(/\d+/)![0])),
+    ];
     for (const season of seasons.length ? seasons : ["1"]) {
-      await tryGet(`winners_${leagueId}_s${season}`, `/league/${leagueId}/winners?season=${season}`);
+      await tryGet(
+        `winners_${leagueId}_s${season}`,
+        `/league/${leagueId}/winners?season=${season}`,
+      );
     }
 
     // Divisions : mpg_division_{league}_{saison}_{division}
@@ -93,7 +96,9 @@ async function main() {
 
   // Tournois (coupes). On sonde plusieurs endpoints candidats par tournoi.
   const tournamentIds = [...new Set(dashStr.match(/mpg_tournament_[A-Za-z0-9]+/g) ?? [])];
-  console.log(`\n→ Tournois détectés : ${tournamentIds.length ? tournamentIds.join(", ") : "aucun"}`);
+  console.log(
+    `\n→ Tournois détectés : ${tournamentIds.length ? tournamentIds.join(", ") : "aucun"}`,
+  );
   for (const tId of tournamentIds) {
     await tryGet(`tournament_${tId}`, `/tournament/${tId}`);
     await tryGet(`tournament_${tId}_ranking`, `/tournament/${tId}/ranking`);

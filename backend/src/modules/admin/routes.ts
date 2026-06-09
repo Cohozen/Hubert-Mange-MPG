@@ -19,7 +19,15 @@ adminRouter.use(requireAuth);
 adminRouter.get("/managers", async (_req, res) => {
   const managers = await prisma.manager.findMany({
     orderBy: { displayName: "asc" },
-    select: { id: true, displayName: true, username: true, avatarUrl: true, email: true, roles: true, mpgUserId: true },
+    select: {
+      id: true,
+      displayName: true,
+      username: true,
+      avatarUrl: true,
+      email: true,
+      roles: true,
+      mpgUserId: true,
+    },
   });
   res.json(managers.map((m) => ({ ...m, roles: m.roles ? m.roles.split(",") : [] })));
 });
@@ -112,9 +120,7 @@ adminRouter.get("/leagues/available", requireLeagueAdmin, async (req, res) => {
   }
   try {
     const dashboard = await mpg.apiGet<any>("/dashboard");
-    const tracked = new Set(
-      (await prisma.trackedLeague.findMany()).map((t) => t.mpgLeagueId)
-    );
+    const tracked = new Set((await prisma.trackedLeague.findMany()).map((t) => t.mpgLeagueId));
     const tiles = (dashboard?.orderedTiles ?? [])
       .filter((t: any) => t.type === "league" && t.leagueId)
       .map((t: any) => ({
@@ -200,7 +206,7 @@ adminRouter.get("/tournaments/available", requireLeagueAdmin, async (req, res) =
   try {
     const dashboard = await mpg.apiGet<any>("/dashboard");
     const tracked = new Set(
-      (await prisma.trackedTournament.findMany()).map((t) => t.mpgTournamentId)
+      (await prisma.trackedTournament.findMany()).map((t) => t.mpgTournamentId),
     );
     const tiles = (dashboard?.orderedTiles ?? [])
       .filter((t: any) => t.type === "tournament" && t.tournamentId)
@@ -242,12 +248,17 @@ adminRouter.put("/tournaments/:id", requireLeagueAdmin, async (req, res) => {
   });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "active (booléen) et/ou competitionOverride (LDC|UEFA|CONFERENCE|OTHER|null)" });
+    res
+      .status(400)
+      .json({
+        error: "active (booléen) et/ou competitionOverride (LDC|UEFA|CONFERENCE|OTHER|null)",
+      });
     return;
   }
   const data: { active?: boolean; competitionOverride?: string | null } = {};
   if (parsed.data.active !== undefined) data.active = parsed.data.active;
-  if (parsed.data.competitionOverride !== undefined) data.competitionOverride = parsed.data.competitionOverride;
+  if (parsed.data.competitionOverride !== undefined)
+    data.competitionOverride = parsed.data.competitionOverride;
 
   const t = await prisma.trackedTournament.update({ where: { id: req.params.id }, data });
 

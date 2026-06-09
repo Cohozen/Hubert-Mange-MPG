@@ -9,9 +9,7 @@ import { config } from "../config.js";
 
 function getKey(): Buffer {
   if (!config.encryptionKey) {
-    throw new Error(
-      "ENCRYPTION_KEY manquante (.env) : impossible de (dé)chiffrer les IBAN."
-    );
+    throw new Error("ENCRYPTION_KEY manquante (.env) : impossible de (dé)chiffrer les IBAN.");
   }
   // Si c'est 32 octets en base64, on l'utilise tel quel ; sinon on dérive via SHA-256.
   try {

@@ -47,8 +47,8 @@ export function SyncSection() {
     <section className="bg-base-100 rounded-box shadow p-6 space-y-3">
       <h2 className="text-lg font-bold text-base-content">Synchronisation MPG</h2>
       <p className="text-sm opacity-60">
-        Synchro automatique chaque lundi matin (résultats publiés vers 8h). Tu peux aussi
-        la déclencher manuellement.
+        Synchro automatique chaque lundi matin (résultats publiés vers 8h). Tu peux aussi la
+        déclencher manuellement.
       </p>
       <button onClick={runSync} disabled={loading} className="btn btn-primary">
         {loading && <span className="loading loading-spinner loading-sm" />}
@@ -71,9 +71,7 @@ export function SyncSection() {
             <span className="font-medium text-base-content">
               Dernière synchro : {run.status} ({run.trigger})
             </span>
-            <span className="opacity-50">
-              {new Date(run.startedAt).toLocaleString("fr-FR")}
-            </span>
+            <span className="opacity-50">{new Date(run.startedAt).toLocaleString("fr-FR")}</span>
           </div>
           {run.summary && (
             <p className="opacity-60 mt-1">

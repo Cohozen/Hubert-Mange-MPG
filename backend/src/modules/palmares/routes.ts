@@ -124,7 +124,13 @@ palmaresRouter.get("/movements", async (_req, res) => {
     },
   });
 
-  type Mv = { managerId: string; manager: string; username: string | null; avatarUrl: string | null; count: number };
+  type Mv = {
+    managerId: string;
+    manager: string;
+    username: string | null;
+    avatarUrl: string | null;
+    count: number;
+  };
   const promotions: Mv[] = [];
   const relegations: Mv[] = [];
 
@@ -149,7 +155,12 @@ palmaresRouter.get("/movements", async (_req, res) => {
       if (cur.division.level < prev.division.level) up++;
       else if (cur.division.level > prev.division.level) down++;
     }
-    const base = { managerId: m.id, manager: m.displayName, username: m.username, avatarUrl: m.avatarUrl };
+    const base = {
+      managerId: m.id,
+      manager: m.displayName,
+      username: m.username,
+      avatarUrl: m.avatarUrl,
+    };
     if (up > 0) promotions.push({ ...base, count: up });
     if (down > 0) relegations.push({ ...base, count: down });
   }
@@ -242,9 +253,11 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
   const raisingStar = new Map<string, number>();
   for (const a of awards) {
     if (!a.managerId) continue;
-    if (a.kind === "SCAPEGOAT") scape.set(a.managerId, (scape.get(a.managerId) ?? 0) + (a.value ?? 0));
+    if (a.kind === "SCAPEGOAT")
+      scape.set(a.managerId, (scape.get(a.managerId) ?? 0) + (a.value ?? 0));
     if (a.kind === "BEST_PLAYER") rotaldo.set(a.managerId, (rotaldo.get(a.managerId) ?? 0) + 1);
-    if (a.kind === "RAISING_STAR") raisingStar.set(a.managerId, (raisingStar.get(a.managerId) ?? 0) + 1);
+    if (a.kind === "RAISING_STAR")
+      raisingStar.set(a.managerId, (raisingStar.get(a.managerId) ?? 0) + 1);
   }
 
   // Plus longue série de titres consécutifs (rang 1 sur saisons jeu consécutives, même ligue).
@@ -294,7 +307,13 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
       .filter(([id, v]) => infoOf.has(id) && v >= min)
       .map(([id, value]) => {
         const m = infoOf.get(id)!;
-        return { managerId: id, manager: m.displayName, username: m.username, avatarUrl: m.avatarUrl, value };
+        return {
+          managerId: id,
+          manager: m.displayName,
+          username: m.username,
+          avatarUrl: m.avatarUrl,
+          value,
+        };
       })
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
@@ -353,15 +372,18 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
     const won = mine > theirs;
     const lost = mine < theirs;
 
-    const e =
-      opp.get(oppId) ??
-      {
-        opponentId: oppId,
-        manager: oppMgr.displayName,
-        username: oppMgr.username,
-        avatarUrl: oppMgr.avatarUrl,
-        played: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0,
-      };
+    const e = opp.get(oppId) ?? {
+      opponentId: oppId,
+      manager: oppMgr.displayName,
+      username: oppMgr.username,
+      avatarUrl: oppMgr.avatarUrl,
+      played: 0,
+      w: 0,
+      d: 0,
+      l: 0,
+      gf: 0,
+      ga: 0,
+    };
     e.played++;
     e.gf += mine;
     e.ga += theirs;
@@ -394,8 +416,7 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
 
   const opponents = [...opp.values()].sort((a, b) => b.played - a.played);
   const eligible = opponents.filter((o) => o.played >= 2);
-  const beteNoire =
-    [...eligible].sort((a, b) => b.l - b.w - (a.l - a.w) || b.l - a.l)[0] ?? null;
+  const beteNoire = [...eligible].sort((a, b) => b.l - b.w - (a.l - a.w) || b.l - a.l)[0] ?? null;
   const victimePreferee =
     [...eligible].sort((a, b) => b.w - b.l - (a.w - a.l) || b.w - a.w)[0] ?? null;
 
@@ -403,7 +424,8 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
     overall,
     opponents,
     beteNoire: beteNoire && beteNoire.l > beteNoire.w ? beteNoire : null,
-    victimePreferee: victimePreferee && victimePreferee.w > victimePreferee.l ? victimePreferee : null,
+    victimePreferee:
+      victimePreferee && victimePreferee.w > victimePreferee.l ? victimePreferee : null,
     biggestWin,
     biggestLoss,
   });
@@ -435,9 +457,13 @@ palmaresRouter.get("/tournaments", async (_req, res) => {
   >();
   for (const t of tournaments) {
     if (!t.winnerManagerId || !t.winnerManager) continue;
-    const e =
-      counts.get(t.winnerManagerId) ??
-      { manager: t.winnerManager.displayName, ldc: 0, uefa: 0, conference: 0, total: 0 };
+    const e = counts.get(t.winnerManagerId) ?? {
+      manager: t.winnerManager.displayName,
+      ldc: 0,
+      uefa: 0,
+      conference: 0,
+      total: 0,
+    };
     if (t.competition === "LDC") e.ldc++;
     else if (t.competition === "UEFA") e.uefa++;
     else if (t.competition === "CONFERENCE") e.conference++;

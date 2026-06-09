@@ -41,14 +41,20 @@ export function BuyInEditor({ pool, onChange }: { pool: PoolDetail; onChange: ()
         />
       </label>
       <div className="flex gap-2">
-        <button onClick={saveMise} disabled={busy || saved} className="btn btn-sm flex-1 sm:flex-none">
+        <button
+          onClick={saveMise}
+          disabled={busy || saved}
+          className="btn btn-sm flex-1 sm:flex-none"
+        >
           Enregistrer la mise
         </button>
         <button
           onClick={initParticipants}
           disabled={busy || !canInit}
           className="btn btn-sm btn-primary flex-1 sm:flex-none"
-          title={canInit ? "Crée une ligne par membre actif de la saison" : "Enregistre d'abord la mise"}
+          title={
+            canInit ? "Crée une ligne par membre actif de la saison" : "Enregistre d'abord la mise"
+          }
         >
           Initialiser les participants
         </button>

@@ -18,7 +18,7 @@ if (!PROD_URL) {
     "❌ PROD_DATABASE_URL manquant.\n" +
       "   Récupère la chaîne de connexion sur Supabase → Connect → ORM/psql,\n" +
       "   puis : PROD_DATABASE_URL='postgresql://...' npm run clone:prod\n" +
-      "   (ou ajoute-la dans backend/.env)."
+      "   (ou ajoute-la dans backend/.env).",
   );
   process.exit(1);
 }
@@ -26,7 +26,7 @@ if (!PROD_URL) {
 // Garde-fou : refuser de tourner si la base "locale" pointe en réalité sur Postgres.
 if (!String(process.env.DATABASE_URL || "").startsWith("file:")) {
   console.error(
-    `❌ DATABASE_URL local doit pointer sur SQLite (file:...), trouvé : ${process.env.DATABASE_URL}`
+    `❌ DATABASE_URL local doit pointer sur SQLite (file:...), trouvé : ${process.env.DATABASE_URL}`,
   );
   process.exit(1);
 }

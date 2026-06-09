@@ -18,9 +18,7 @@ export function ManagerLabel({
       <Avatar url={avatarUrl} name={name} size={size} />
       <span className="truncate">
         {name ?? "—"}
-        {showPseudo && username && (
-          <span className="opacity-50 text-xs ml-1">{username}</span>
-        )}
+        {showPseudo && username && <span className="opacity-50 text-xs ml-1">{username}</span>}
       </span>
     </span>
   );

@@ -27,10 +27,7 @@ export interface MpgSession {
   dashboard: any;
 }
 
-export async function authenticateMPG(
-  email: string,
-  password: string
-): Promise<MpgSession> {
+export async function authenticateMPG(email: string, password: string): Promise<MpgSession> {
   const amplitudeId = crypto.randomUUID();
 
   // Étape 1 : init auth côté MPG → renvoie un redirect x-remix-redirect vers Ligue1.
@@ -41,7 +38,7 @@ export async function authenticateMPG(
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       maxRedirects: 0,
       validateStatus: accept,
-    }
+    },
   );
 
   const remixRedirect = auth.headers["x-remix-redirect"];
@@ -50,10 +47,7 @@ export async function authenticateMPG(
   }
 
   // Étape 2 : suivre le redirect vers l'OAuth Ligue1.
-  const redirectUrl = remixRedirect.replace(
-    "ext-amplitudeId=",
-    `ext-amplitudeId=${amplitudeId}`
-  );
+  const redirectUrl = remixRedirect.replace("ext-amplitudeId=", `ext-amplitudeId=${amplitudeId}`);
   const oauth: AxiosResponse = await axios.get(redirectUrl, {
     maxRedirects: 0,
     validateStatus: accept,
@@ -75,7 +69,7 @@ export async function authenticateMPG(
       headers: { "Content-Type": "application/x-www-form-urlencoded", Cookie: cookies },
       maxRedirects: 0,
       validateStatus: accept,
-    }
+    },
   );
 
   // Étape 4 : récupérer le code d'autorisation via l'URL "resume".
@@ -99,11 +93,11 @@ export async function authenticateMPG(
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       maxRedirects: 0,
       validateStatus: accept,
-    }
+    },
   );
 
   const sessionCookie = (callback.headers["set-cookie"] ?? []).find((c) =>
-    c.startsWith("__session=")
+    c.startsWith("__session="),
   );
   if (!sessionCookie) {
     throw new Error("MPG auth: cookie __session absent dans la réponse du callback");
@@ -111,10 +105,9 @@ export async function authenticateMPG(
   const session = sessionCookie.split(";")[0].split("=")[1];
 
   // Étape 6 : lire le dashboard pour récupérer le token d'API.
-  const dashboard: AxiosResponse = await axios.get(
-    "https://mpg.football/dashboard?_data=root",
-    { headers: { Cookie: `__session=${session}` } }
-  );
+  const dashboard: AxiosResponse = await axios.get("https://mpg.football/dashboard?_data=root", {
+    headers: { Cookie: `__session=${session}` },
+  });
 
   return {
     session,

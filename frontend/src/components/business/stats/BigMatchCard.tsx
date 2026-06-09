@@ -9,7 +9,12 @@ export function BigMatchCard({ title, m }: { title: string; m: BigMatch | null }
         {m ? (
           <div className="space-y-1">
             <div className="text-2xl font-bold">{m.score}</div>
-            <ManagerLabel name={m.opponent} username={m.username} avatarUrl={m.avatarUrl} size={24} />
+            <ManagerLabel
+              name={m.opponent}
+              username={m.username}
+              avatarUrl={m.avatarUrl}
+              size={24}
+            />
             <div className="text-xs opacity-60">{m.context}</div>
           </div>
         ) : (

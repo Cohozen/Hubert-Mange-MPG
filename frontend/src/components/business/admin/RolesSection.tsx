@@ -43,7 +43,12 @@ export function RolesSection() {
         {managers.data?.map((m) => (
           <div key={m.id} className="flex items-center justify-between gap-2 py-2">
             <span className="flex items-center gap-2 min-w-0 text-sm">
-              <ManagerLabel name={m.displayName} username={m.username} avatarUrl={m.avatarUrl} size={26} />
+              <ManagerLabel
+                name={m.displayName}
+                username={m.username}
+                avatarUrl={m.avatarUrl}
+                size={26}
+              />
               {m.roles.includes("SUPERADMIN") && (
                 <span className="text-xs text-primary font-medium shrink-0">superadmin</span>
               )}

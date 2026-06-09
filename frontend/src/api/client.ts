@@ -1,10 +1,7 @@
 // Client API minimal vers le backend. Le proxy Vite route /api et /auth vers :3001,
 // donc on reste same-origin et le cookie de session est envoyé automatiquement.
 
-export async function api<T = any>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
+export async function api<T = any>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(path, {
     credentials: "include",
     headers: { "Content-Type": "application/json", ...(options.headers ?? {}) },
@@ -19,9 +16,7 @@ export async function api<T = any>(
 
 /** Centimes → "12,50 €". */
 export function formatMoney(cents: number, currency = "EUR"): string {
-  return new Intl.NumberFormat("fr-FR", { style: "currency", currency }).format(
-    cents / 100
-  );
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency }).format(cents / 100);
 }
 
 /** Saisie en euros (ex. "12,50" ou "12.5") → centimes (1250). */

@@ -67,9 +67,7 @@ app.get("/api/sync/last", requireLeagueAdmin, async (_req, res) => {
 // Historique des syncs (admin).
 app.get("/api/sync/history", requireLeagueAdmin, async (_req, res) => {
   const runs = await prisma.syncRun.findMany({ orderBy: { startedAt: "desc" }, take: 20 });
-  res.json(
-    runs.map((r) => ({ ...r, summary: r.summary ? JSON.parse(r.summary) : null }))
-  );
+  res.json(runs.map((r) => ({ ...r, summary: r.summary ? JSON.parse(r.summary) : null })));
 });
 
 // Handler d'erreur global : renvoie 500 propre au lieu de crasher le process.

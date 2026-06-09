@@ -63,7 +63,7 @@ authRouter.post("/login", async (req, res) => {
       include: { participations: { include: { division: { include: { gameSeason: true } } } } },
     });
     inTracked = !!existing?.participations.some(
-      (p) => p.division.gameSeason.mpgLeagueId && trackedIds.has(p.division.gameSeason.mpgLeagueId)
+      (p) => p.division.gameSeason.mpgLeagueId && trackedIds.has(p.division.gameSeason.mpgLeagueId),
     );
   }
   if (!inTracked && !isConfigSuperadmin) {

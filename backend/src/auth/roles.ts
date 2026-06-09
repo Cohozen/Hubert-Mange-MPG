@@ -34,9 +34,7 @@ export function isSuperadmin(roles: string[]): boolean {
 
 /** Superadmin, admin de league et banquier peuvent éditer la cagnotte. */
 export function canEditCagnotte(roles: string[]): boolean {
-  return roles.some((r) =>
-    [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.TREASURER].includes(r as Role)
-  );
+  return roles.some((r) => [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.TREASURER].includes(r as Role));
 }
 
 /** Superadmin et admin de league peuvent gérer les ligues/tournois suivis et lancer le sync. */

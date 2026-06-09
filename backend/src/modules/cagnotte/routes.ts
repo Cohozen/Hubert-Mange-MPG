@@ -53,7 +53,7 @@ cagnotteRouter.get("/", async (_req, res) => {
       totalExpected: sumAll(p.contributions),
       totalCollected: sumPaid(p.contributions),
       totalPaidOut: sumPaid(p.payouts),
-    }))
+    })),
   );
 });
 
@@ -70,7 +70,7 @@ cagnotteRouter.get("/seasons", async (_req, res) => {
       year: s.year,
       poolId: s.prizePool?.id ?? null,
       closed: s.prizePool?.closed ?? false,
-    }))
+    })),
   );
 });
 
@@ -320,7 +320,7 @@ cagnotteRouter.put("/:id/rules", requireCagnotteEditor, async (req, res) => {
         divisionLevel: z.number().int().positive().nullable().optional(),
         amount: z.number().int().nonnegative(),
         label: z.string().min(1),
-      })
+      }),
     ),
   });
   const parsed = schema.safeParse(req.body);
@@ -353,7 +353,7 @@ cagnotteRouter.post("/:id/generate-payouts", requireCagnotteEditor, async (req, 
 
   const allRules = await prisma.payoutRule.findMany({ where: { prizePoolId: pool.id } });
   const ruleByLevel = new Map(
-    allRules.filter((r) => r.scope === "DIVISION").map((r) => [r.divisionLevel, r])
+    allRules.filter((r) => r.scope === "DIVISION").map((r) => [r.divisionLevel, r]),
   );
   const cupRule = (comp: string) => allRules.find((r) => r.scope === comp);
   if (allRules.length === 0) {

@@ -74,8 +74,8 @@ export default function ProfilePage() {
     <div className="max-w-3xl mx-auto">
       <h2 className="text-xl font-bold text-base-content mb-1">Mon profil</h2>
       <p className="text-sm opacity-60 mb-4">
-        Ces coordonnées servent au banquier pour te verser tes gains. Elles ne sont visibles
-        que par toi et le banquier. Ton IBAN est chiffré.
+        Ces coordonnées servent au banquier pour te verser tes gains. Elles ne sont visibles que par
+        toi et le banquier. Ton IBAN est chiffré.
       </p>
 
       <form onSubmit={onSubmit} className="bg-base-100 rounded-box shadow p-6 space-y-4">

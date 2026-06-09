@@ -75,19 +75,21 @@ export default function App() {
         </div>
         {/* Onglets desktop */}
         <nav className="hidden sm:flex items-center gap-1">
-          {items.filter((it) => !it.desktopHidden).map((it) => (
-            <NavLink
-              key={it.to}
-              to={it.to}
-              end={it.end}
-              className={({ isActive }) =>
-                `btn btn-sm btn-ghost gap-2 ${isActive ? "btn-active text-primary" : ""}`
-              }
-            >
-              <it.icon size={16} />
-              {it.label}
-            </NavLink>
-          ))}
+          {items
+            .filter((it) => !it.desktopHidden)
+            .map((it) => (
+              <NavLink
+                key={it.to}
+                to={it.to}
+                end={it.end}
+                className={({ isActive }) =>
+                  `btn btn-sm btn-ghost gap-2 ${isActive ? "btn-active text-primary" : ""}`
+                }
+              >
+                <it.icon size={16} />
+                {it.label}
+              </NavLink>
+            ))}
         </nav>
         <div className="flex items-center gap-1 ml-2">
           <Link to="/profil" className="hidden sm:flex items-center gap-2 mr-1 hover:opacity-80">
@@ -95,7 +97,11 @@ export default function App() {
             <span className="text-sm opacity-70">{me.displayName}</span>
           </Link>
           <ThemeToggle />
-          <button onClick={logout} className="btn btn-sm btn-ghost btn-circle" aria-label="Déconnexion">
+          <button
+            onClick={logout}
+            className="btn btn-sm btn-ghost btn-circle"
+            aria-label="Déconnexion"
+          >
             <LogOut size={18} />
           </button>
         </div>

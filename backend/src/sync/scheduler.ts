@@ -30,6 +30,6 @@ export function startScheduler(): void {
   console.log(
     `Auto-sync planifié (${config.syncCron}, ${config.syncTz}). Prochaine exécution : ${
       next ? next.toISOString() : "n/a"
-    }`
+    }`,
   );
 }

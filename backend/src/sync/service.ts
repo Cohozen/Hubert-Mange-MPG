@@ -46,7 +46,7 @@ export async function connectorForManager(managerId: string): Promise<MpgConnect
 
 export async function executeSync(
   trigger: "manual" | "auto",
-  opts?: { leagueId?: string; mpg?: MpgConnector }
+  opts?: { leagueId?: string; mpg?: MpgConnector },
 ) {
   if (running) {
     throw new Error("Un sync est déjà en cours");

@@ -25,9 +25,16 @@ export function RankCard({
           <ul className="space-y-1.5">
             {rows.slice(0, 6).map((r, i) => (
               <li key={r.managerId} className="flex items-center justify-between gap-2 text-sm">
-                <span className={`flex items-center gap-1 min-w-0 ${i === 0 ? "font-semibold" : ""}`}>
+                <span
+                  className={`flex items-center gap-1 min-w-0 ${i === 0 ? "font-semibold" : ""}`}
+                >
                   {i === 0 && <span>👑</span>}
-                  <ManagerLabel name={r.manager} username={r.username} avatarUrl={r.avatarUrl} size={20} />
+                  <ManagerLabel
+                    name={r.manager}
+                    username={r.username}
+                    avatarUrl={r.avatarUrl}
+                    size={20}
+                  />
                 </span>
                 <span className={`font-bold shrink-0 ${accent}`}>
                   {r.value}

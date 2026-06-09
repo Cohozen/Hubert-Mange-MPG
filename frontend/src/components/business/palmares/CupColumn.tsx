@@ -14,7 +14,12 @@ export function CupColumn({ title, icon, rows }: { title: string; icon: string; 
                 <span className="opacity-60 w-10 shrink-0">{c.year}</span>
                 <span className="flex-1 min-w-0 flex items-center gap-1">
                   <span className="shrink-0">{icon}</span>
-                  <ManagerLabel name={c.winner} username={c.username} avatarUrl={c.avatarUrl} size={22} />
+                  <ManagerLabel
+                    name={c.winner}
+                    username={c.username}
+                    avatarUrl={c.avatarUrl}
+                    size={22}
+                  />
                 </span>
                 <a
                   href={c.mpgUrl ?? "#"}
