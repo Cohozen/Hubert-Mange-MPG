@@ -407,17 +407,20 @@ function TournamentsSection({ canDelete }: { canDelete: boolean }) {
 
       <div className="divide-y">
         {rows.map((t) => (
-          <div key={t.mpgTournamentId} className="flex items-center justify-between gap-2 py-2">
-            <label className="flex items-center gap-3 min-w-0 cursor-pointer">
+          <div
+            key={t.mpgTournamentId}
+            className="flex flex-col sm:flex-row sm:items-center gap-2 py-2"
+          >
+            <label className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer">
               <input
                 type="checkbox"
                 className="checkbox checkbox-sm checkbox-success shrink-0"
                 checked={!!t.trackedId && t.active}
                 onChange={() => toggle(t)}
               />
-              <span className="text-sm min-w-0">
-                <span className="font-medium text-base-content flex items-center gap-2">
-                  <span className="truncate">{t.name}</span>
+              <span className="text-sm min-w-0 flex-1">
+                <span className="font-medium text-base-content flex flex-wrap items-center gap-2">
+                  <span className="break-words">{t.name}</span>
                   {t.trackedId && !t.active && (
                     <span className="badge badge-ghost badge-sm shrink-0">en pause</span>
                   )}
@@ -431,7 +434,7 @@ function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                 </span>
               </span>
             </label>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto pl-8 sm:pl-0">
               {t.trackedId && (
                 <select
                   value={t.competitionOverride ?? ""}
