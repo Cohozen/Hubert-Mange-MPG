@@ -37,8 +37,10 @@ export default function StatsPage() {
             value: x.count,
         }));
 
-    // Coupes par manager (affichage indicatif, hors calcul du classement).
+    // Coupes par manager : comptées dans le total de titres affiché, mais hors calcul du classement.
     const cupsByManager = new Map((cups.data?.ranking ?? []).map((c) => [c.managerId, c]));
+    // Total de titres affiché = titres de division + coupes (n'influe pas sur l'ordre, géré par `rank`).
+    const totalWithCups = (r: AllTimeRow) => r.totalTitles + (cupsByManager.get(r.managerId)?.total ?? 0);
 
     return (
         <div className="space-y-8">
@@ -46,8 +48,8 @@ export default function StatsPage() {
                 <h2 className="text-xl font-bold mb-1">Classement all-time</h2>
                 <p className="text-xs opacity-60 mb-3">
                     Façon Jeux Olympiques : on compte les titres (1re place) par division. On départage d'abord sur les
-                    titres de D1, puis de D2, et ainsi de suite. Les coupes (⭐ Crampons · 🎖️ Europa · 🍐 Conference) sont
-                    affichées à titre indicatif, hors calcul.
+                    titres de D1, puis de D2, et ainsi de suite. Les coupes (⭐ Crampons · 🎖️ Europa · 🍐 Conference)
+                    comptent dans le total de titres mais pas dans le classement.
                 </p>
                 {allTime.data?.ranking.length ? (
                     <>
@@ -109,7 +111,7 @@ export default function StatsPage() {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-lg font-bold text-primary">{r.totalTitles}</div>
+                                            <div className="text-lg font-bold text-primary">{totalWithCups(r)}</div>
                                             <div className="text-[10px] opacity-60">titres</div>
                                         </div>
                                     </div>
@@ -160,7 +162,7 @@ export default function StatsPage() {
                                                     {c || "—"}
                                                 </td>
                                             ))}
-                                            <td className="text-center font-bold text-primary">{r.totalTitles}</td>
+                                            <td className="text-center font-bold text-primary">{totalWithCups(r)}</td>
                                             {(() => {
                                                 const c = cupsByManager.get(r.managerId);
                                                 const cell = (n: number) => (
