@@ -424,6 +424,38 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
     });
 });
 
+// Chronologie de carrière d'un manager : une ligne par saison jouée (division, classement, bilan),
+// triée du plus ancien au plus récent. Sert au graphique de trajectoire du profil.
+palmaresRouter.get("/timeline/:managerId", async (req, res) => {
+    const participations = await prisma.participation.findMany({
+        where: { managerId: req.params.managerId },
+        include: { division: { include: { gameSeason: { include: { realSeason: true } } } } },
+    });
+
+    const seasons = participations
+        .map((p) => ({
+            realSeason: p.division.gameSeason.realSeason.name,
+            gameSeason: p.division.gameSeason.name,
+            year: p.division.gameSeason.realSeason.year,
+            mpgSeason: p.division.gameSeason.mpgSeason,
+            index: p.division.gameSeason.index,
+            division: p.division.name,
+            level: p.division.level,
+            finalRank: p.finalRank,
+            points: p.points,
+            played: p.played,
+            won: p.won,
+            drawn: p.drawn,
+            lost: p.lost,
+            goalsFor: p.goalsFor,
+            goalsAgainst: p.goalsAgainst,
+        }))
+        .sort((a, b) => a.year - b.year || a.index - b.index)
+        .map(({ index: _index, ...s }) => s);
+
+    res.json({ seasons });
+});
+
 // Coupes (tournois) : palmarès par compétition/année + classement all-time.
 palmaresRouter.get("/tournaments", async (_req, res) => {
     const tournaments = await prisma.tournament.findMany({
