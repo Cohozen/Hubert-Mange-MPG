@@ -171,7 +171,7 @@ export default function StatsPage() {
                                         const isMe = r.managerId === me?.id;
                                         return (
                                             <tr key={r.managerId} className={isMe ? "bg-primary/5" : ""}>
-                                                <td className={isMe ? "border-l-4 border-primary" : ""}>
+                                                <td className={isMe ? "border-l-4 border-l-primary" : ""}>
                                                     {rankLabel(r.rank, r.totalTitles > 0)}
                                                 </td>
                                                 <td>
