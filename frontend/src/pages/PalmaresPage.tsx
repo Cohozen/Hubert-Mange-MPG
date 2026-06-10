@@ -33,7 +33,7 @@ export default function PalmaresPage() {
                 {cups.data?.ranking.length ? (
                     <div className="flex flex-wrap gap-2 mb-4">
                         {cups.data.ranking.map((m) => (
-                            <span key={m.managerId} className="badge badge-lg gap-1">
+                            <span key={m.managerId} className="badge badge-primary badge-soft">
                                 {m.manager} · {"⭐".repeat(m.ldc)}
                                 {"🎖️".repeat(m.uefa)}
                                 {"🍐".repeat(m.conference)}
