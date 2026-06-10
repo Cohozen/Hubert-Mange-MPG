@@ -16,6 +16,9 @@ synchronisation des données depuis l'API MPG.
     composants métier, ne les définissent pas).
   - Imports via l'**alias `@/`** (`@/api/client`, `@/components/...`), configuré dans
     `tsconfig.json` (`paths`) et `vite.config.ts` (`resolve.alias`). Pas de chemins relatifs.
+  - **Toujours utiliser le skill `daisyui`** avant de générer/modifier du HTML/JSX front : c'est la
+    lib UI de référence (Tailwind v4 + daisyUI v5). Consulter le doc du composant concerné pour la
+    markup exacte (ex. la syntaxe `dropdown` v5).
 
 ## Déploiement
 
@@ -42,6 +45,9 @@ synchronisation des données depuis l'API MPG.
     token MPG de **l'admin connecté** (capturé au login, chiffré sur `Manager`). Ouvert au rôle
     **ADMIN** (pas seulement superadmin) via `requireLeagueAdmin`/`canManageLeagues`.
   - Cron auto-sync + CLI `npm run sync` → identifiants admin `.env` (`MPG_ADMIN_EMAIL/PASSWORD`).
+  - **Tests / preview :** toute l'appli est derrière le login MPG (`App.tsx` : `if (!me)` →
+    `LoginPage`). Pour se connecter en local (et atteindre les pages protégées comme Stats), les
+    identifiants de test sont dans `backend/.env` (`MPG_ADMIN_EMAIL` / `MPG_ADMIN_PASSWORD`).
   - Token expiré → échec explicite « reconnecte-toi » (pas de fallback silencieux).
   - **Multi-admin** : les `TrackedLeague`/`TrackedTournament` sont globales (visibles par tous les
     admins). Le sync manuel est **résilient** : une ligue suivie non visible par le token de l'admin
