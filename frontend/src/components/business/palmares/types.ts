@@ -6,6 +6,7 @@ export interface DivisionWinner {
     winner: string | null;
     username: string | null;
     avatarUrl: string | null;
+    managerId: string | null;
     team: string | null;
     mpgUrl: string | null;
 }
@@ -17,6 +18,7 @@ export interface CupRow {
     winner: string | null;
     username: string | null;
     avatarUrl: string | null;
+    winnerManagerId: string | null;
     mpgUrl: string | null;
 }
 export interface CupCount {
