@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
+import { useAuth } from "@/auth/useAuth";
 import { ManagerLabel } from "@/components/ui/ManagerLabel";
 import { RankCard } from "@/components/business/stats/RankCard";
 import { MyStats } from "@/components/business/stats/MyStats";
@@ -10,6 +11,7 @@ const rankLabel = (rank: number, hasTitles: boolean) =>
     hasTitles && rank <= 3 ? ["🥇", "🥈", "🥉"][rank - 1] : `${rank}.`;
 
 export default function StatsPage() {
+    const { data: me } = useAuth();
     const allTime = useQuery({
         queryKey: ["all-time"],
         queryFn: () => api<{ ranking: AllTimeRow[]; maxLevel: number }>("/api/palmares/all-time"),
@@ -45,17 +47,39 @@ export default function StatsPage() {
     return (
         <div className="space-y-8">
             <section>
-                <h2 className="text-xl font-bold mb-1">Classement all-time</h2>
-                <p className="text-xs opacity-60 mb-3">
-                    Façon Jeux Olympiques : on compte les titres (1re place) par division. On départage d'abord sur les
-                    titres de D1, puis de D2, et ainsi de suite. Les coupes (⭐ Crampons · 🎖️ Europa · 🍐 Conference)
-                    comptent dans le total de titres mais pas dans le classement.
-                </p>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                    <h2 className="text-xl font-bold">Classement all-time</h2>
+                    <div className="dropdown dropdown-end">
+                        <div
+                            tabIndex={0}
+                            role="button"
+                            className="btn btn-ghost btn-circle btn-xs"
+                            aria-label="À propos du classement"
+                        >
+                            ℹ️
+                        </div>
+                        <div
+                            tabIndex={-1}
+                            className="dropdown-content card card-sm bg-base-100 shadow-lg z-10 w-72 sm:w-80"
+                        >
+                            <div className="card-body text-xs opacity-80">
+                                Façon Jeux Olympiques : on compte les titres (1re place) par division. On départage
+                                d'abord sur les titres de D1, puis de D2, et ainsi de suite. Les coupes (⭐ Crampons · 🎖️
+                                Europa · 🍐 Conference) comptent dans le total de titres mais pas dans le classement.
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {allTime.data?.ranking.length ? (
                     <>
                         <div className="sm:hidden space-y-2">
                             {allTime.data.ranking.map((r) => (
-                                <div key={r.managerId} className="card bg-base-100 shadow">
+                                <div
+                                    key={r.managerId}
+                                    className={`card bg-base-100 shadow ${
+                                        r.managerId === me?.id ? "border border-primary" : ""
+                                    }`}
+                                >
                                     <div className="card-body p-3 flex-row items-center gap-3">
                                         <div className={`w-8 text-center ${r.rank > 3 ? "text-lg" : "text-3xl"}`}>
                                             {rankLabel(r.rank, r.totalTitles > 0)}
@@ -88,7 +112,7 @@ export default function StatsPage() {
                                                     return c ? (
                                                         <>
                                                             {c.ldc > 0 && (
-                                                                <span className="badge badge-sm badge-ghost">
+                                                                <span className="badge badge-sm badge-warning font-semibold">
                                                                     ⭐ ×{c.ldc}
                                                                 </span>
                                                             )}
@@ -143,46 +167,53 @@ export default function StatsPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {allTime.data.ranking.map((r) => (
-                                        <tr key={r.managerId}>
-                                            <td>{rankLabel(r.rank, r.totalTitles > 0)}</td>
-                                            <td>
-                                                <ManagerLabel
-                                                    name={r.manager}
-                                                    username={r.username}
-                                                    avatarUrl={r.avatarUrl}
-                                                    size={26}
-                                                />
-                                            </td>
-                                            {r.titles.map((c, lvl) => (
-                                                <td
-                                                    key={lvl}
-                                                    className={`text-center ${c > 0 ? "font-semibold" : "opacity-30"}`}
-                                                >
-                                                    {c || "—"}
+                                    {allTime.data.ranking.map((r) => {
+                                        const isMe = r.managerId === me?.id;
+                                        return (
+                                            <tr key={r.managerId} className={isMe ? "bg-primary/5" : ""}>
+                                                <td className={isMe ? "border-l-4 border-primary" : ""}>
+                                                    {rankLabel(r.rank, r.totalTitles > 0)}
                                                 </td>
-                                            ))}
-                                            <td className="text-center font-bold text-primary">{totalWithCups(r)}</td>
-                                            {(() => {
-                                                const c = cupsByManager.get(r.managerId);
-                                                const cell = (n: number) => (
+                                                <td>
+                                                    <ManagerLabel
+                                                        name={r.manager}
+                                                        username={r.username}
+                                                        avatarUrl={r.avatarUrl}
+                                                        size={26}
+                                                    />
+                                                </td>
+                                                {r.titles.map((c, lvl) => (
                                                     <td
-                                                        className={`text-center ${n > 0 ? "font-semibold" : "opacity-30"}`}
+                                                        key={lvl}
+                                                        className={`text-center ${c > 0 ? "font-semibold" : "opacity-30"}`}
                                                     >
-                                                        {n || "—"}
+                                                        {c || "—"}
                                                     </td>
-                                                );
-                                                return (
-                                                    <>
-                                                        {cell(c?.ldc ?? 0)}
-                                                        {cell(c?.uefa ?? 0)}
-                                                        {cell(c?.conference ?? 0)}
-                                                    </>
-                                                );
-                                            })()}
-                                            <td className="text-center">{r.seasonsPlayed}</td>
-                                        </tr>
-                                    ))}
+                                                ))}
+                                                <td className="text-center font-bold text-primary">
+                                                    {totalWithCups(r)}
+                                                </td>
+                                                {(() => {
+                                                    const c = cupsByManager.get(r.managerId);
+                                                    const cell = (n: number) => (
+                                                        <td
+                                                            className={`text-center ${n > 0 ? "font-semibold" : "opacity-30"}`}
+                                                        >
+                                                            {n || "—"}
+                                                        </td>
+                                                    );
+                                                    return (
+                                                        <>
+                                                            {cell(c?.ldc ?? 0)}
+                                                            {cell(c?.uefa ?? 0)}
+                                                            {cell(c?.conference ?? 0)}
+                                                        </>
+                                                    );
+                                                })()}
+                                                <td className="text-center">{r.seasonsPlayed}</td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
