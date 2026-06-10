@@ -96,6 +96,12 @@ synchronisation des données depuis l'API MPG.
   (côté front, helper `totalWithCups` dans `StatsPage`) **mais jamais dans l'ordre** (`rank` reste
   basé sur les divisions). La liste des **vainqueurs par saison** (`/winners`) est triée du plus
   récent au plus ancien : année desc, puis saison MPG desc, puis division asc.
+- **Séries consécutives (`/fun-stats` : `d1Streak`, `titleStreak`)** : se calculent sur la
+  carrière **triée chronologiquement (`year` → `index`), sans grouper par `mpgLeagueId`**. Piège :
+  l'**ID de ligue MPG change dans le temps** (migrations *séquentielles*, pas des ligues parallèles) —
+  grouper/reset par ligue casserait toute série traversant une migration. Même tri que le timeline
+  du profil (`/timeline`). Une série n'est interrompue que par une saison hors-critère (rang ≠ 1
+  pour les titres, division ≠ D1 pour `d1Streak`).
 - **Formatage : Biome** (config racine `biome.json`, version épinglée). Lancer `npm run format`
   (écrit) ou `npm run format:check` (vérifie) **depuis la racine** — couvre front + back. Style :
   4 espaces, double quotes, point-virgules, largeur 120. **CSS exclu** (`styles.css` = syntaxe
