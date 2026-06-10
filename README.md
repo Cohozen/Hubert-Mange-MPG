@@ -9,7 +9,8 @@ qu'une source qu'on synchronise ; la cagnotte est 100 % maison.
 ## Stack
 
 - **backend/** — API Node + TypeScript (Express), Prisma, SQLite en local (portable Postgres).
-- **frontend/** — React + Vite + TypeScript, TanStack Query, Tailwind v4.
+- **frontend/** — React + Vite + TypeScript, React Router, TanStack Query, Tailwind v4 + DaisyUI,
+  Recharts (graphiques).
 - Seul `backend/src/connector/` parle à MPG (flow OAuth Ligue1, voir le gist de référence).
 
 ## Démarrage
@@ -53,9 +54,16 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
 - ✅ Modèle de données complet (Manager / RealSeason / GameSeason / Division / Participation /
   Match / Tournament / DivisionAward / PrizePool / Contribution / Payout / TrackedLeague·Tournament).
 - ✅ Cagnotte : API lecture + édition admin, page de consultation.
-- ✅ Palmarès : coupes (3 niveaux : Ligue des Crampons ⭐ / Heureux papa's League 🎖️ / Conference 🏵️)
-  + vainqueurs par saison (filtres) + classement all-time + stats fun + H2H perso.
-- ✅ Admin : déclenchement du sync.
+- ✅ Palmarès : coupes (3 niveaux : Ligue des Crampons ⭐ / Heureux papa's League 🎖️ / Conference 🍐)
+  + vainqueurs par saison (filtres) + classement all-time + stats fun. Les classements lient vers
+  le profil des joueurs.
+- ✅ Paramètres : formulaire perso (visible par tous) + encart admin (déclenchement du sync,
+  ligues/tournois suivis) + encart superadmin (attribution des rôles).
+- ✅ **Profil public par joueur** (`/profil/:managerId`) à onglets : **Résumé** (bilan H2H : bête
+  noire, victime préférée, plus large victoire/défaite), **Salle des trophées** (championnats +
+  coupes), **Stats** (frise de carrière en graphique Recharts — niveau de division au fil des
+  saisons, titres marqués — + montées/descentes, %victoires, meilleure/pire saison), **Confrontations**
+  (tous les adversaires). En-tête avec étoiles ⭐ par titre de LDC.
 - ✅ **Sync fonctionnel** : `npm run sync` rapatrie les vraies données MPG (ligues,
   saisons, divisions, managers, classements/participations) — historique des saisons
   passées inclus. Endpoints confirmés sur `api.mpg.football` (voir `src/sync/sync.ts`).
@@ -91,13 +99,12 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
 
 Pistes pour rendre l'appli plus fun et plus « club » :
 
-- 🏆 **Pages profil publiques par joueur** avec **salle des trophées** : titres de division, coupes,
-  Rotaldo d'Or, séries, montées/descentes, et bilan H2H (l'endpoint `/api/palmares/h2h/:managerId`
-  existe déjà et renvoie bête noire / victime préférée / plus large victoire-défaite).
+- 🏅 **Distinctions individuelles dans le profil** : compléter l'onglet Stats/Trophées avec les
+  Rotaldo d'Or possédés, bouc émissaire subis et révélations (`DivisionAward`), titres/podiums.
 - 👕 **Maillot floqué à étoiles** : une étoile par titre de D1 (façon étoiles de champion sur le
   maillot), couleurs/abréviation d'équipe du manager — décliné en avatar/embleme partout.
-- 🔥 **Rivalités** : page de confrontation entre deux joueurs au choix (réutilise les matchs H2H).
-- 🗓️ **Frise chronologique d'un joueur** : sa trajectoire saison par saison (division, rang, titres).
+- 🔥 **Rivalités** : page de confrontation entre deux joueurs au choix (réutilise les matchs H2H ;
+  l'onglet Confrontations du profil liste déjà tous les adversaires).
 - 🥇 **« Ballon d'Or » annuel** : un classement de la saison combinant titres + coupe + Rotaldo.
 - 📈 **Résultats par journée** : déjà captés (matchs en base), à exposer en mini-classements animés.
 - 🏅 **Badges / hauts faits** : série de titres, yo-yo, invincibilité, comeback… débloqués automatiquement.
