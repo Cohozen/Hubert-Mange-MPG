@@ -57,7 +57,7 @@ export default function StatsPage() {
                             {allTime.data.ranking.map((r) => (
                                 <div key={r.managerId} className="card bg-base-100 shadow">
                                     <div className="card-body p-3 flex-row items-center gap-3">
-                                        <div className="text-lg w-8 text-center">
+                                        <div className={`w-8 text-center ${r.rank > 3 ? "text-lg" : "text-3xl"}`}>
                                             {rankLabel(r.rank, r.totalTitles > 0)}
                                         </div>
                                         <div className="flex-1 min-w-0">
@@ -67,7 +67,7 @@ export default function StatsPage() {
                                                 avatarUrl={r.avatarUrl}
                                                 size={26}
                                             />
-                                            <div className="flex flex-wrap gap-1 mt-1">
+                                            <div className="flex flex-wrap gap-2 mt-1">
                                                 {r.titles.map((c, lvl) =>
                                                     c > 0 ? (
                                                         <span
@@ -105,12 +105,12 @@ export default function StatsPage() {
                                                         </>
                                                     ) : null;
                                                 })()}
-                                                <span className="badge badge-sm badge-ghost">
+                                                <span className="badge badge-sm badge-secondary badge-outline">
                                                     {r.seasonsPlayed} saisons
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="text-right">
+                                        <div className="flex flex-col items-center">
                                             <div className="text-lg font-bold text-primary">{totalWithCups(r)}</div>
                                             <div className="text-[10px] opacity-60">titres</div>
                                         </div>
