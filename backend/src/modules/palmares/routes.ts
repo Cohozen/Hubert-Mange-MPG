@@ -255,42 +255,38 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
         if (a.kind === "RAISING_STAR") raisingStar.set(a.managerId, (raisingStar.get(a.managerId) ?? 0) + 1);
     }
 
-    // Plus longue série de titres consécutifs (rang 1 sur saisons jeu consécutives, même ligue).
+    // Plus longue série de titres consécutifs (rang 1 sur saisons jeu consécutives).
     const mgrsForStreak = await prisma.manager.findMany({
-        include: { participations: { include: { division: { include: { gameSeason: true } } } } },
+        include: {
+            participations: { include: { division: { include: { gameSeason: { include: { realSeason: true } } } } } },
+        },
     });
     const streak = new Map<string, number>();
-    // Saisons en D1 (level 1) : total cumulé et plus longue série consécutive (même ligue).
+    // Saisons en D1 (level 1) : total cumulé et plus longue série consécutive.
     const d1Count = new Map<string, number>();
     const d1Streak = new Map<string, number>();
     for (const m of mgrsForStreak) {
+        // Tri chronologique global (year → index MPG), comme le timeline du profil : on ne
+        // groupe PAS par ligue, sinon une migration d'ID de ligue (séquentielle) casserait la série.
         const sorted = m.participations
-            .filter((p) => p.division.gameSeason.mpgSeason != null)
-            .sort((a, b) => {
-                const la = a.division.gameSeason.mpgLeagueId ?? "";
-                const lb = b.division.gameSeason.mpgLeagueId ?? "";
-                if (la !== lb) return la < lb ? -1 : 1;
-                return (a.division.gameSeason.mpgSeason ?? 0) - (b.division.gameSeason.mpgSeason ?? 0);
-            });
+            .slice()
+            .sort(
+                (a, b) =>
+                    a.division.gameSeason.realSeason.year - b.division.gameSeason.realSeason.year ||
+                    a.division.gameSeason.index - b.division.gameSeason.index,
+            );
         let best = 0;
         let cur = 0;
         let bestD1 = 0;
         let curD1 = 0;
         let totalD1 = 0;
-        let prevLeague: string | null = null;
         for (const p of sorted) {
-            const lg = p.division.gameSeason.mpgLeagueId ?? "";
-            if (lg !== prevLeague) {
-                cur = 0;
-                curD1 = 0;
-            }
             cur = p.finalRank === 1 ? cur + 1 : 0;
             if (cur > best) best = cur;
             const isD1 = p.division.level === 1;
             if (isD1) totalD1 += 1;
             curD1 = isD1 ? curD1 + 1 : 0;
             if (curD1 > bestD1) bestD1 = curD1;
-            prevLeague = lg;
         }
         if (best >= 2) streak.set(m.id, best);
         if (totalD1 >= 1) d1Count.set(m.id, totalD1);
@@ -394,7 +390,7 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
         else if (lost) overall.l++;
         else overall.d++;
 
-        const ctx = `${m.division.name} · ${m.division.gameSeason.realSeason.name}`;
+        const ctx = `${m.division.name} · ${m.division.gameSeason.realSeason.name} — ${m.division.gameSeason.name}`;
         const oppInfo = {
             opponent: oppMgr.displayName,
             opponentId: oppId,
@@ -422,6 +418,38 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
         biggestWin,
         biggestLoss,
     });
+});
+
+// Chronologie de carrière d'un manager : une ligne par saison jouée (division, classement, bilan),
+// triée du plus ancien au plus récent. Sert au graphique de trajectoire du profil.
+palmaresRouter.get("/timeline/:managerId", async (req, res) => {
+    const participations = await prisma.participation.findMany({
+        where: { managerId: req.params.managerId },
+        include: { division: { include: { gameSeason: { include: { realSeason: true } } } } },
+    });
+
+    const seasons = participations
+        .map((p) => ({
+            realSeason: p.division.gameSeason.realSeason.name,
+            gameSeason: p.division.gameSeason.name,
+            year: p.division.gameSeason.realSeason.year,
+            mpgSeason: p.division.gameSeason.mpgSeason,
+            index: p.division.gameSeason.index,
+            division: p.division.name,
+            level: p.division.level,
+            finalRank: p.finalRank,
+            points: p.points,
+            played: p.played,
+            won: p.won,
+            drawn: p.drawn,
+            lost: p.lost,
+            goalsFor: p.goalsFor,
+            goalsAgainst: p.goalsAgainst,
+        }))
+        .sort((a, b) => a.year - b.year || a.index - b.index)
+        .map(({ index: _index, ...s }) => s);
+
+    res.json({ seasons });
 });
 
 // Coupes (tournois) : palmarès par compétition/année + classement all-time.

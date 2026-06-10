@@ -109,6 +109,7 @@ export default function PalmaresPage() {
                                     <div className="card-body p-3">
                                         <div className="flex justify-between items-center gap-2">
                                             <ManagerLabel
+                                                managerId={w.managerId}
                                                 name={w.winner}
                                                 username={w.username}
                                                 avatarUrl={w.avatarUrl}
@@ -153,6 +154,7 @@ export default function PalmaresPage() {
                                             <td>{w.division}</td>
                                             <td>
                                                 <ManagerLabel
+                                                    managerId={w.managerId}
                                                     name={w.winner}
                                                     username={w.username}
                                                     avatarUrl={w.avatarUrl}

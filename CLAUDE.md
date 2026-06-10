@@ -6,12 +6,14 @@ synchronisation des données depuis l'API MPG.
 ## Structure
 
 - `backend/` — API Express + TypeScript, Prisma. SQLite en local, Postgres (Supabase) en prod.
-- `frontend/` — Vite + React 18, React Router, TanStack Query, Tailwind + DaisyUI.
+- `frontend/` — Vite + React 18, React Router, TanStack Query, Tailwind + DaisyUI, Recharts
+  (graphiques, ex. la frise de carrière du profil).
   - **Un seul composant par fichier, un seul fichier par composant.** Pas de sous-composant
     défini dans une page.
   - Composants **métier** → `src/components/business/<domaine>/` (ex. `cagnotte/`, `stats/`,
-    `palmares/`, `admin/`) ; UI **générique réutilisable** (Avatar, ManagerLabel, Field, Empty…)
-    → `src/components/ui/`. Les types partagés d'un domaine vont dans son `types.ts`.
+    `palmares/`, `admin/`, `profile/`, `settings/`) ; UI **générique réutilisable** (Avatar,
+    ManagerLabel, Field, Empty…) → `src/components/ui/`. Les types partagés d'un domaine vont dans
+    son `types.ts`.
   - Les `src/pages/*.tsx` ne font que **data-fetching + composition** (elles assemblent les
     composants métier, ne les définissent pas).
   - Imports via l'**alias `@/`** (`@/api/client`, `@/components/...`), configuré dans
@@ -58,6 +60,13 @@ synchronisation des données depuis l'API MPG.
   `ADMIN`/`TREASURER` sont stockés sur `Manager`. **ADMIN** gère ligues/tournois suivis + sync +
   cagnotte. **SUPERADMIN seul** : backfill de structure, attribution des rôles, fusion de managers,
   et la **suppression** d'une ligue/tournoi suivi.
+- **Pages & navigation** : la page **Paramètres** (`/parametres` ; `/admin` redirige) regroupe le
+  formulaire perso (visible par **tous**) + un encart **admin** (sync/ligues/tournois) et un encart
+  **superadmin** (rôles), gatés par rôle. Le **profil public** d'un joueur est sur `/profil/:managerId`
+  (`/profil` = soi), à onglets (Résumé / Salle des trophées / Stats / Confrontations). Pour lier vers
+  un profil depuis un classement, passer `managerId` à `ManagerLabel` (rend l'identité cliquable).
+  Stats H2H + frise de carrière (graphique Recharts, données via `/api/palmares/timeline/:managerId`)
+  vivent dans le profil, pas sur la page Stats (qui ne garde que les stats globales).
 - **Désactiver ≠ supprimer une ligue/tournoi** : stats/palmarès agrègent **toutes** les données
   synchronisées (pas de filtre `active`). Décocher une ligue = `active:false` → *gèle* le sync, les
   données **restent** au classement. La **supprimer** (`DELETE`, superadmin) efface ses `GameSeason`

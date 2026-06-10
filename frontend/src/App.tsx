@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { NavLink, Navigate, Route, Routes, Link } from "react-router-dom";
 import { Wallet, Trophy, BarChart3, User, Settings, LogOut, Sun, Moon } from "lucide-react";
-import { isLeagueAdmin, useAuth, useLogout } from "@/auth/useAuth";
+import { useAuth, useLogout } from "@/auth/useAuth";
 import { Avatar } from "@/components/ui/Avatar";
 import LoginPage from "@/pages/LoginPage";
 import CagnottePage from "@/pages/CagnottePage";
 import PalmaresPage from "@/pages/PalmaresPage";
 import StatsPage from "@/pages/StatsPage";
-import AdminPage from "@/pages/AdminPage";
+import SettingsPage from "@/pages/SettingsPage";
 import ProfilePage from "@/pages/ProfilePage";
 
 interface NavItem {
@@ -61,7 +61,7 @@ export default function App() {
         { to: "/stats", label: "Stats", icon: BarChart3 },
         { to: "/cagnotte", label: "Cagnotte", icon: Wallet },
         { to: "/profil", label: "Profil", icon: User, desktopHidden: true },
-        ...(isLeagueAdmin(me) ? [{ to: "/admin", label: "Admin", icon: Settings }] : []),
+        { to: "/parametres", label: "Paramètres", icon: Settings },
     ];
 
     return (
@@ -110,7 +110,9 @@ export default function App() {
                     <Route path="/stats" element={<StatsPage />} />
                     <Route path="/cagnotte" element={<CagnottePage />} />
                     <Route path="/profil" element={<ProfilePage />} />
-                    <Route path="/admin" element={isLeagueAdmin(me) ? <AdminPage /> : <Navigate to="/" />} />
+                    <Route path="/profil/:managerId" element={<ProfilePage />} />
+                    <Route path="/parametres" element={<SettingsPage />} />
+                    <Route path="/admin" element={<Navigate to="/parametres" />} />
                     <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
             </main>

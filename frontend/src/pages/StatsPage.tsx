@@ -3,7 +3,6 @@ import { api } from "@/api/client";
 import { useAuth } from "@/auth/useAuth";
 import { ManagerLabel } from "@/components/ui/ManagerLabel";
 import { RankCard } from "@/components/business/stats/RankCard";
-import { MyStats } from "@/components/business/stats/MyStats";
 import { AllTimeRow, CupCount, FunStats, Movement, RankRow } from "@/components/business/stats/types";
 
 // Médaille pour le top 3 (uniquement si le manager a au moins un titre), sinon le rang.
@@ -86,6 +85,7 @@ export default function StatsPage() {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <ManagerLabel
+                                                managerId={r.managerId}
                                                 name={r.manager}
                                                 username={r.username}
                                                 avatarUrl={r.avatarUrl}
@@ -176,6 +176,7 @@ export default function StatsPage() {
                                                 </td>
                                                 <td>
                                                     <ManagerLabel
+                                                        managerId={r.managerId}
                                                         name={r.manager}
                                                         username={r.username}
                                                         avatarUrl={r.avatarUrl}
@@ -328,8 +329,6 @@ export default function StatsPage() {
                     />
                 </div>
             </section>
-
-            <MyStats />
         </div>
     );
 }
