@@ -110,6 +110,7 @@ export default function App() {
                     <Route path="/stats" element={<StatsPage />} />
                     <Route path="/cagnotte" element={<CagnottePage />} />
                     <Route path="/profil" element={<ProfilePage />} />
+                    <Route path="/profil/:managerId" element={<ProfilePage />} />
                     <Route path="/parametres" element={<SettingsPage />} />
                     <Route path="/admin" element={<Navigate to="/parametres" />} />
                     <Route path="*" element={<Navigate to="/" />} />
