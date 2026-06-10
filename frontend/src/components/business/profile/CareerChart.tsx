@@ -1,5 +1,18 @@
+import { useEffect, useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { TimelineSeason } from "@/components/business/profile/types";
+
+function useIsMobile() {
+    const query = "(max-width: 639px)";
+    const [isMobile, setIsMobile] = useState(() => window.matchMedia(query).matches);
+    useEffect(() => {
+        const mq = window.matchMedia(query);
+        const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+        mq.addEventListener("change", handler);
+        return () => mq.removeEventListener("change", handler);
+    }, []);
+    return isMobile;
+}
 
 // "2024-2025" → "24-25"
 const shortYear = (realSeason: string) =>
@@ -39,17 +52,21 @@ export function CareerChart({ seasons }: { seasons: TimelineSeason[] }) {
     const maxLevel = Math.max(1, ...seasons.map((s) => s.level));
     const yTicks = Array.from({ length: maxLevel }, (_, i) => i + 1);
 
+    // Mobile : on espace les libellés X (~6 max) pour rester lisible ; desktop : tous.
+    const isMobile = useIsMobile();
+    const xInterval = isMobile ? Math.max(0, Math.ceil(data.length / 6) - 1) : 0;
+
     return (
-        <div className="bg-base-100 rounded-box shadow p-4 h-72">
+        <div className="bg-base-100 rounded-box shadow p-4 h-72 [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none">
             <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data} margin={{ top: 10, right: 16, bottom: 28, left: -8 }}>
+                <LineChart data={data} margin={{ top: 10, right: 16, bottom: 28, left: -8 }} accessibilityLayer={false}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-base-300)" />
                     <XAxis
                         dataKey="label"
                         angle={-35}
                         textAnchor="end"
                         height={50}
-                        interval={0}
+                        interval={xInterval}
                         tick={{ fontSize: 10, fill: "var(--color-base-content)" }}
                     />
                     <YAxis
