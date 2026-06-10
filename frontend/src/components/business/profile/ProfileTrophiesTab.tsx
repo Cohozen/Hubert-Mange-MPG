@@ -30,7 +30,7 @@ export function ProfileTrophiesTab({ managerId }: { managerId: string }) {
     return (
         <div className="space-y-6">
             <section>
-                <h3 className="font-semibold mb-2">🏆 Championnat ({titles.length})</h3>
+                <h3 className="font-semibold mb-2">🏆 Championnats ({titles.length})</h3>
                 {titles.length ? (
                     <ul className="list bg-base-100 rounded-box shadow">
                         {titles.map((t, i) => (
