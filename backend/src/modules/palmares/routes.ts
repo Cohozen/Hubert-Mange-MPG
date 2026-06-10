@@ -255,42 +255,38 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
         if (a.kind === "RAISING_STAR") raisingStar.set(a.managerId, (raisingStar.get(a.managerId) ?? 0) + 1);
     }
 
-    // Plus longue série de titres consécutifs (rang 1 sur saisons jeu consécutives, même ligue).
+    // Plus longue série de titres consécutifs (rang 1 sur saisons jeu consécutives).
     const mgrsForStreak = await prisma.manager.findMany({
-        include: { participations: { include: { division: { include: { gameSeason: true } } } } },
+        include: {
+            participations: { include: { division: { include: { gameSeason: { include: { realSeason: true } } } } } },
+        },
     });
     const streak = new Map<string, number>();
-    // Saisons en D1 (level 1) : total cumulé et plus longue série consécutive (même ligue).
+    // Saisons en D1 (level 1) : total cumulé et plus longue série consécutive.
     const d1Count = new Map<string, number>();
     const d1Streak = new Map<string, number>();
     for (const m of mgrsForStreak) {
+        // Tri chronologique global (year → index MPG), comme le timeline du profil : on ne
+        // groupe PAS par ligue, sinon une migration d'ID de ligue (séquentielle) casserait la série.
         const sorted = m.participations
-            .filter((p) => p.division.gameSeason.mpgSeason != null)
-            .sort((a, b) => {
-                const la = a.division.gameSeason.mpgLeagueId ?? "";
-                const lb = b.division.gameSeason.mpgLeagueId ?? "";
-                if (la !== lb) return la < lb ? -1 : 1;
-                return (a.division.gameSeason.mpgSeason ?? 0) - (b.division.gameSeason.mpgSeason ?? 0);
-            });
+            .slice()
+            .sort(
+                (a, b) =>
+                    a.division.gameSeason.realSeason.year - b.division.gameSeason.realSeason.year ||
+                    a.division.gameSeason.index - b.division.gameSeason.index,
+            );
         let best = 0;
         let cur = 0;
         let bestD1 = 0;
         let curD1 = 0;
         let totalD1 = 0;
-        let prevLeague: string | null = null;
         for (const p of sorted) {
-            const lg = p.division.gameSeason.mpgLeagueId ?? "";
-            if (lg !== prevLeague) {
-                cur = 0;
-                curD1 = 0;
-            }
             cur = p.finalRank === 1 ? cur + 1 : 0;
             if (cur > best) best = cur;
             const isD1 = p.division.level === 1;
             if (isD1) totalD1 += 1;
             curD1 = isD1 ? curD1 + 1 : 0;
             if (curD1 > bestD1) bestD1 = curD1;
-            prevLeague = lg;
         }
         if (best >= 2) streak.set(m.id, best);
         if (totalD1 >= 1) d1Count.set(m.id, totalD1);
