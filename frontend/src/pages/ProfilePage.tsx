@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/auth/useAuth";
 import { ProfileHeader } from "@/components/business/profile/ProfileHeader";
@@ -25,6 +25,12 @@ export default function ProfilePage() {
     // Repart sur l'onglet Résumé quand on consulte un autre manager.
     useEffect(() => setTab("resume"), [targetId]);
 
+    // Amène l'onglet actif dans la vue en douceur (sans scroller verticalement la page).
+    const activeRef = useRef<HTMLButtonElement>(null);
+    useEffect(() => {
+        activeRef.current?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }, [tab]);
+
     if (!targetId) {
         return (
             <div className="min-h-[40vh] grid place-items-center">
@@ -43,8 +49,9 @@ export default function ProfilePage() {
                     return (
                         <button
                             key={t.key}
+                            ref={active ? activeRef : undefined}
                             onClick={() => setTab(t.key)}
-                            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition whitespace-nowrap ${
+                            className={`shrink-0 cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition whitespace-nowrap ${
                                 active
                                     ? "bg-primary text-primary-content shadow"
                                     : "bg-base-100 border border-base-300 hover:bg-base-200"

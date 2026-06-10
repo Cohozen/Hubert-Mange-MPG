@@ -20,32 +20,30 @@ export function ProfileConfrontationsTab({ managerId }: { managerId: string }) {
     }
 
     return (
-        <div className="bg-base-100 rounded-box shadow overflow-hidden">
-            <ul className="divide-y divide-base-200">
-                {h.opponents.map((o) => (
-                    <li key={o.opponentId} className="flex items-center gap-2 p-3 text-sm">
-                        <span className="flex-1 min-w-0">
-                            <ManagerLabel
-                                managerId={o.opponentId}
-                                name={o.manager}
-                                username={o.username}
-                                avatarUrl={o.avatarUrl}
-                                size={24}
-                            />
-                        </span>
-                        <span className="shrink-0 tabular-nums">
-                            <span className="text-success">{o.w}</span>
-                            <span className="opacity-40">–</span>
-                            <span>{o.d}</span>
-                            <span className="opacity-40">–</span>
-                            <span className="text-error">{o.l}</span>
-                        </span>
-                        <span className="shrink-0 opacity-50 text-xs w-16 text-right">
-                            {o.gf}:{o.ga}
-                        </span>
-                    </li>
-                ))}
-            </ul>
-        </div>
+        <ul className="list bg-base-100 rounded-box shadow">
+            {h.opponents.map((o) => (
+                <li key={o.opponentId} className="list-row items-center text-sm">
+                    <span className="list-col-grow min-w-0">
+                        <ManagerLabel
+                            managerId={o.opponentId}
+                            name={o.manager}
+                            username={o.username}
+                            avatarUrl={o.avatarUrl}
+                            size={24}
+                        />
+                    </span>
+                    <span className="shrink-0 tabular-nums">
+                        <span className="text-success">{o.w}</span>
+                        <span className="opacity-40">–</span>
+                        <span>{o.d}</span>
+                        <span className="opacity-40">–</span>
+                        <span className="text-error">{o.l}</span>
+                    </span>
+                    <span className="shrink-0 opacity-50 text-xs w-16 text-right">
+                        {o.gf}:{o.ga}
+                    </span>
+                </li>
+            ))}
+        </ul>
     );
 }

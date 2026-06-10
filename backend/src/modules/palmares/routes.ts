@@ -394,7 +394,7 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
         else if (lost) overall.l++;
         else overall.d++;
 
-        const ctx = `${m.division.name} · ${m.division.gameSeason.realSeason.name}`;
+        const ctx = `${m.division.name} · ${m.division.gameSeason.realSeason.name} — ${m.division.gameSeason.name}`;
         const oppInfo = {
             opponent: oppMgr.displayName,
             opponentId: oppId,

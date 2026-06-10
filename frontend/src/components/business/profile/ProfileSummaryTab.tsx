@@ -35,8 +35,8 @@ export function ProfileSummaryTab({ managerId }: { managerId: string }) {
 
             {/* Cartes fun */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <DuelCard title="🐉 Bête noire" subtitle="le bat le plus" opp={h.beteNoire} />
-                <DuelCard title="🎯 Victime préférée" subtitle="il la bat le plus" opp={h.victimePreferee} />
+                <DuelCard title="🐉 Bête noire" opp={h.beteNoire} />
+                <DuelCard title="🎯 Victime préférée" opp={h.victimePreferee} />
                 <BigMatchCard title="💥 Plus large victoire" m={h.biggestWin} />
                 <BigMatchCard title="🩹 Plus large défaite" m={h.biggestLoss} />
             </div>

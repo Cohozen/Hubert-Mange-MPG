@@ -1,9 +1,8 @@
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import { useAuth } from "@/auth/useAuth";
 import { Avatar } from "@/components/ui/Avatar";
-import { AllTimeRow } from "@/components/business/stats/types";
+import { AllTimeRow, CupCount } from "@/components/business/stats/types";
 
 export function ProfileHeader({ managerId }: { managerId: string }) {
     const { data: me } = useAuth();
@@ -11,9 +10,14 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
         queryKey: ["all-time"],
         queryFn: () => api<{ ranking: AllTimeRow[]; maxLevel: number }>("/api/palmares/all-time"),
     });
+    const { data: cups } = useQuery({
+        queryKey: ["tournaments"],
+        queryFn: () => api<{ ranking: CupCount[] }>("/api/palmares/tournaments"),
+    });
 
     const row = data?.ranking.find((r) => r.managerId === managerId);
     const isMe = managerId === me?.id;
+    const ldc = cups?.ranking.find((c) => c.managerId === managerId)?.ldc ?? 0;
 
     const name = row?.manager ?? (isMe ? me?.displayName : null) ?? "—";
     const username = row?.username ?? (isMe ? me?.username : null);
@@ -26,6 +30,11 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
                 <div className="flex items-center gap-2 flex-wrap">
                     <h1 className="text-xl font-bold truncate">{name}</h1>
                     {isMe && <span className="badge badge-primary badge-sm">toi</span>}
+                    {ldc > 0 && (
+                        <span title="Ligue des Crampons" className="whitespace-nowrap">
+                            {"⭐".repeat(ldc)}
+                        </span>
+                    )}
                 </div>
                 {username && <p className="text-sm opacity-50 truncate">{username}</p>}
                 {row && (
@@ -36,11 +45,6 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
                     </p>
                 )}
             </div>
-            {isMe && (
-                <Link to="/parametres" className="btn btn-sm btn-ghost shrink-0">
-                    Modifier mes infos
-                </Link>
-            )}
         </div>
     );
 }

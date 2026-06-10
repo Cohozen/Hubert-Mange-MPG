@@ -30,18 +30,17 @@ export function ProfileTrophiesTab({ managerId }: { managerId: string }) {
     return (
         <div className="space-y-6">
             <section>
-                <h3 className="font-semibold mb-2">🏆 Titres de division ({titles.length})</h3>
+                <h3 className="font-semibold mb-2">🏆 Championnat ({titles.length})</h3>
                 {titles.length ? (
-                    <div className="grid sm:grid-cols-2 gap-3">
+                    <ul className="list bg-base-100 rounded-box shadow">
                         {titles.map((t, i) => (
-                            <div key={i} className="card bg-base-100 shadow">
-                                <div className="card-body p-3 flex-row items-center justify-between gap-2">
-                                    <span className="font-medium">{t.division}</span>
-                                    <span className="text-xs opacity-60 text-right">{t.season}</span>
-                                </div>
-                            </div>
+                            <li key={i} className="list-row items-center">
+                                <span className="text-2xl">{t.level === 1 ? "🥇" : "🏆"}</span>
+                                <span className="list-col-grow font-medium">{t.division}</span>
+                                <span className="text-xs opacity-60 text-right">{t.season}</span>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 ) : (
                     <p className="text-sm opacity-50">Aucun titre de division.</p>
                 )}
@@ -50,19 +49,15 @@ export function ProfileTrophiesTab({ managerId }: { managerId: string }) {
             <section>
                 <h3 className="font-semibold mb-2">Coupes ({cupWins.length})</h3>
                 {cupWins.length ? (
-                    <div className="grid sm:grid-cols-2 gap-3">
+                    <ul className="list bg-base-100 rounded-box shadow">
                         {cupWins.map((c) => (
-                            <div key={c.id} className="card bg-base-100 shadow">
-                                <div className="card-body p-3 flex-row items-center gap-3">
-                                    <span className="text-2xl">{CUP_ICON[c.competition] ?? "🏆"}</span>
-                                    <span className="min-w-0 flex-1">
-                                        <span className="font-medium block truncate">{c.name}</span>
-                                        <span className="text-xs opacity-60">{c.year}</span>
-                                    </span>
-                                </div>
-                            </div>
+                            <li key={c.id} className="list-row items-center">
+                                <span className="text-2xl">{CUP_ICON[c.competition] ?? "🏆"}</span>
+                                <span className="list-col-grow min-w-0 font-medium truncate">{c.name}</span>
+                                <span className="text-xs opacity-60">{c.year}</span>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 ) : (
                     <p className="text-sm opacity-50">Aucune coupe.</p>
                 )}
