@@ -25,7 +25,7 @@ export default function SettingsPage() {
 
             {isSuperadmin(me) && (
                 <section>
-                    <div className="divider text-sm font-semibold uppercase opacity-60">Rôles (superadmin)</div>
+                    <div className="divider text-sm font-semibold uppercase opacity-60">Superadmin</div>
                     <RolesSection />
                 </section>
             )}

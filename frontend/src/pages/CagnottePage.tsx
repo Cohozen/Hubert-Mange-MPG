@@ -27,7 +27,7 @@ export default function CagnottePage() {
 
     return (
         <div className="space-y-6">
-            <label className="select w-full max-w-xs">
+            <label className="select w-full max-w-full lg:max-w-xs">
                 <span className="label">Saison</span>
                 <select value={current?.id ?? ""} onChange={(e) => setSelId(e.target.value)}>
                     {tabs.map((s) => (

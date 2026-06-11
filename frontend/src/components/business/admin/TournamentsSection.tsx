@@ -121,9 +121,9 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
     return (
         <section className="bg-base-100 rounded-box shadow p-6">
             <h2 className="text-lg font-bold text-base-content mb-1">Tournois suivis (coupes)</h2>
-            <p className="text-sm opacity-60 mb-3">
-                Coche un tournoi pour le synchroniser. Décocher met le sync en pause. Le type de coupe est déduit du nom
-                ; force-le via le menu si la détection se trompe. « Supprimer » efface le tournoi et ses données.
+            <p className="text-sm opacity-60 mb-3 text-justify">
+                Coche un tournoi pour le synchroniser. Décocher met le sync en pause. Le type de coupe est déduit du nom.
+                Force-le via le menu si la détection se trompe.
             </p>
 
             {available.isError && (
@@ -143,8 +143,8 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                                 checked={!!t.trackedId && t.active}
                                 onChange={() => toggle(t)}
                             />
-                            <span className="text-sm min-w-0 flex-1">
-                                <span className="font-medium text-base-content flex flex-wrap items-center gap-2">
+                            <span className=" flex flex-col gap-1 text-sm min-w-0 flex-1">
+                                <span className="font-medium text-base-content flex flex-wrap items-center gap-1">
                                     <span className="break-words">{t.name}</span>
                                     {t.trackedId && !t.active && (
                                         <span className="badge badge-ghost badge-sm shrink-0">en pause</span>
@@ -154,12 +154,22 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                                     {t.winner
                                         ? `🏆 ${t.winner}`
                                         : t.trackedId && !t.inMyDashboard
-                                          ? "hors de ton compte MPG"
-                                          : ""}
+                                            ? "hors de ton compte MPG"
+                                            : ""}
                                 </span>
+
                             </span>
+                            {t.trackedId && canDelete && (
+                                <button
+                                    onClick={() => remove(t)}
+                                    title="Supprimer le tournoi et ses données"
+                                    className="text-xs rounded-full p-2 border border-base-300 text-error hover:border-error"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            )}
                         </label>
-                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto pl-8 sm:pl-0">
+                        <div className="flex items-center gap-2 shrink-0 sm:self-auto pl-8 sm:pl-0">
                             {t.trackedId && (
                                 <select
                                     value={t.competitionOverride ?? ""}
@@ -173,15 +183,6 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                                         </option>
                                     ))}
                                 </select>
-                            )}
-                            {t.trackedId && canDelete && (
-                                <button
-                                    onClick={() => remove(t)}
-                                    title="Supprimer le tournoi et ses données"
-                                    className="text-xs rounded-full p-2 border border-base-300 text-error hover:border-error"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
                             )}
                         </div>
                     </div>

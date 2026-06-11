@@ -46,9 +46,8 @@ export function SyncSection() {
     return (
         <section className="bg-base-100 rounded-box shadow p-6 space-y-3">
             <h2 className="text-lg font-bold text-base-content">Synchronisation MPG</h2>
-            <p className="text-sm opacity-60">
-                Synchro automatique chaque lundi matin (résultats publiés vers 8h). Tu peux aussi la déclencher
-                manuellement.
+            <p className="text-sm opacity-60 text-justify">
+                Synchro automatique chaque lundi matin. Tu peux aussi la déclencher manuellement.
             </p>
             <button onClick={runSync} disabled={loading} className="btn btn-primary">
                 {loading && <span className="loading loading-spinner loading-sm" />}
@@ -60,13 +59,12 @@ export function SyncSection() {
                 <div className="border-t pt-3 text-sm">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span
-                            className={`inline-block w-2 h-2 rounded-full shrink-0 ${
-                                run.status === "success"
+                            className={`inline-block w-2 h-2 rounded-full shrink-0 ${run.status === "success"
                                     ? "bg-success"
                                     : run.status === "error"
-                                      ? "bg-error"
-                                      : "bg-warning"
-                            }`}
+                                        ? "bg-error"
+                                        : "bg-warning"
+                                }`}
                         />
                         <span className="font-medium text-base-content">
                             Dernière synchro : {run.status} ({run.trigger})
@@ -77,7 +75,7 @@ export function SyncSection() {
                     </div>
                     {run.summary && (
                         <p className="opacity-60 mt-1">
-                            {run.summary.leagues} ligue(s) · {run.summary.gameSeasons} saisons · {run.summary.divisions}{" "}
+                            {run.summary.leagues} ligues · {run.summary.gameSeasons} saisons · {run.summary.divisions}{" "}
                             divisions · {run.summary.managers} managers
                         </p>
                     )}

@@ -119,7 +119,7 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
     return (
         <section className="bg-base-100 rounded-box shadow p-6">
             <h2 className="text-lg font-bold text-base-content mb-1">Ligues suivies</h2>
-            <p className="text-sm opacity-60 mb-3">
+            <p className="text-sm opacity-60 mb-3 text-justify">
                 Coche une ligue pour la synchroniser. Décocher met le sync en pause (les données déjà synchronisées
                 restent dans le classement). « Supprimer » efface la ligue et ses données.
             </p>

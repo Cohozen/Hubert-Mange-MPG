@@ -67,7 +67,7 @@ export default function StatsPage() {
                             tabIndex={-1}
                             className="dropdown-content card card-sm bg-base-100 shadow-lg z-10 w-72 sm:w-80"
                         >
-                            <div className="card-body text-xs opacity-80">
+                            <div className="card-body text-xs opacity-80 text-justify">
                                 Façon Jeux Olympiques : on compte les titres (1re place) par division. On départage
                                 d'abord sur les titres de D1, puis de D2, et ainsi de suite, puis sur le nombre de
                                 coupes. Les coupes (⭐ Crampons · 🎖️ Europa · 🍐 Conference) comptent dans le total de
