@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
-import { MiniStat } from "@/components/business/stats/MiniStat";
-import { DuelCard } from "@/components/business/stats/DuelCard";
-import { BigMatchCard } from "@/components/business/stats/BigMatchCard";
 import { WinRateDonut } from "@/components/business/profile/WinRateDonut";
+import { BigMatchCard } from "@/components/business/stats/BigMatchCard";
+import { DuelCard } from "@/components/business/stats/DuelCard";
+import { MiniStat } from "@/components/business/stats/MiniStat";
 import { H2H } from "@/components/business/stats/types";
 
 export function ProfileSummaryTab({ managerId }: { managerId: string }) {

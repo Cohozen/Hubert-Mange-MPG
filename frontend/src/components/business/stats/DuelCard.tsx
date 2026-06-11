@@ -1,5 +1,5 @@
-import { ManagerLabel } from "@/components/ui/ManagerLabel";
 import { OppRow } from "@/components/business/stats/types";
+import { ManagerLabel } from "@/components/ui/ManagerLabel";
 
 export function DuelCard({ title, subtitle, opp }: { title: string; subtitle?: string; opp: OppRow | null }) {
     return (

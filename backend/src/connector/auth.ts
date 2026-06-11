@@ -1,5 +1,5 @@
-import axios, { AxiosResponse } from "axios";
 import crypto from "node:crypto";
+import axios, { AxiosResponse } from "axios";
 
 /**
  * Flow d'authentification MPG, reproduit depuis le gist de référence

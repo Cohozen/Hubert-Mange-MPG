@@ -1,6 +1,6 @@
-import { useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
+import { useMemo } from "react";
 import { api } from "@/api/client";
 
 interface AvailableLeague {

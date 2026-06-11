@@ -103,9 +103,13 @@ synchronisation des données depuis l'API MPG.
   du profil (`/timeline`). Une série n'est interrompue que par une saison hors-critère (rang ≠ 1
   pour les titres, division ≠ D1 pour `d1Streak`).
 - **Formatage : Biome** (config racine `biome.json`, version épinglée). Lancer `npm run format`
-  (écrit) ou `npm run format:check` (vérifie) **depuis la racine** — couvre front + back. Style :
-  4 espaces, double quotes, point-virgules, largeur 120. **CSS exclu** (`styles.css` = syntaxe
-  Tailwind v4 / daisyUI non comprise par le parseur) ; **linter désactivé** pour l'instant.
+  (écrit) ou `npm run format:check` (vérifie) **depuis la racine** — couvre front + back. Les deux
+  scripts pointent sur **`biome check`** (pas `biome format`) : il formate **et** trie les imports.
+  Style : 4 espaces, double quotes, point-virgules, largeur 120. **Tri des imports** = action
+  d'« assist » `source.organizeImports` (PAS une règle de linter — l'IDE le signale même linter
+  off ; appliqué par `biome check --write`). **Linter désactivé** pour l'instant. **Formateur CSS
+  désactivé** (`styles.css` n'est jamais reformaté) ; le parseur CSS accepte la syntaxe Tailwind v4 /
+  daisyUI via `css.parser.tailwindDirectives` (sinon `@plugin`/`@import` font planter `biome check`).
 
 ## Commandes
 

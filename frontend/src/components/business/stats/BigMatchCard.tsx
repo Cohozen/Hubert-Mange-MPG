@@ -1,5 +1,5 @@
-import { ManagerLabel } from "@/components/ui/ManagerLabel";
 import { BigMatch } from "@/components/business/stats/types";
+import { ManagerLabel } from "@/components/ui/ManagerLabel";
 
 export function BigMatchCard({ title, m }: { title: string; m: BigMatch | null }) {
     return (

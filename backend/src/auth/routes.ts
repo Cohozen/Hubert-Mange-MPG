@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { z } from "zod";
-import { prisma } from "../db/client.js";
-import { MpgConnector } from "../connector/index.js";
 import { config } from "../config.js";
-import { clearSession, issueSession } from "./session.js";
+import { MpgConnector } from "../connector/index.js";
+import { prisma } from "../db/client.js";
 import { requireAuth } from "../http/middleware.js";
 import { encrypt, isEncryptionConfigured } from "../lib/crypto.js";
+import { clearSession, issueSession } from "./session.js";
 
 export const authRouter = Router();
 

@@ -9,8 +9,8 @@
 // (provider sqlite). On vide la base locale puis on réinsère dans l'ordre des
 // dépendances de clés étrangères. Les montants restent en centimes (Int).
 import "dotenv/config";
-import pg from "pg";
 import { PrismaClient } from "@prisma/client";
+import pg from "pg";
 
 const PROD_URL = process.env.PROD_DATABASE_URL;
 if (!PROD_URL) {

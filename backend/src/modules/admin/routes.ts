@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
-import { prisma } from "../../db/client.js";
-import { requireSuperadmin, requireAuth, requireLeagueAdmin } from "../../http/middleware.js";
 import { ASSIGNABLE_ROLES, serializeRoles } from "../../auth/roles.js";
+import { prisma } from "../../db/client.js";
+import { requireAuth, requireLeagueAdmin, requireSuperadmin } from "../../http/middleware.js";
 import { connectorForManager } from "../../sync/service.js";
 import { competitionFromName } from "../../sync/sync.js";
 

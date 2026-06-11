@@ -1,5 +1,5 @@
-import jwt from "jsonwebtoken";
 import { Response } from "express";
+import jwt from "jsonwebtoken";
 import { config } from "../config.js";
 
 const COOKIE_NAME = "mpg_session";

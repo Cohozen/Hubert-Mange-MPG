@@ -79,5 +79,5 @@ export class MpgConnector {
     }
 }
 
-export { authenticateMPG } from "./auth.js";
 export type { MpgSession } from "./auth.js";
+export { authenticateMPG } from "./auth.js";

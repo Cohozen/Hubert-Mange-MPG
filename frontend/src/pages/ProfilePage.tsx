@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/auth/useAuth";
+import { ProfileConfrontationsTab } from "@/components/business/profile/ProfileConfrontationsTab";
 import { ProfileHeader } from "@/components/business/profile/ProfileHeader";
+import { ProfileStatsTab } from "@/components/business/profile/ProfileStatsTab";
 import { ProfileSummaryTab } from "@/components/business/profile/ProfileSummaryTab";
 import { ProfileTrophiesTab } from "@/components/business/profile/ProfileTrophiesTab";
-import { ProfileStatsTab } from "@/components/business/profile/ProfileStatsTab";
-import { ProfileConfrontationsTab } from "@/components/business/profile/ProfileConfrontationsTab";
 
 type TabKey = "resume" | "trophees" | "stats" | "confrontations";
 

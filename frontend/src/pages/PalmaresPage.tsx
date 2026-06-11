@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
+import { useState } from "react";
 import { api } from "@/api/client";
-import { ManagerLabel } from "@/components/ui/ManagerLabel";
-import { Empty } from "@/components/ui/Empty";
 import { CupColumn } from "@/components/business/palmares/CupColumn";
 import { CupCount, CupRow, DivisionWinner } from "@/components/business/palmares/types";
+import { Empty } from "@/components/ui/Empty";
+import { ManagerLabel } from "@/components/ui/ManagerLabel";
 
 export default function PalmaresPage() {
     const winners = useQuery({

@@ -1,6 +1,6 @@
 import { ExternalLink } from "lucide-react";
-import { ManagerLabel } from "@/components/ui/ManagerLabel";
 import { CupRow } from "@/components/business/palmares/types";
+import { ManagerLabel } from "@/components/ui/ManagerLabel";
 
 export function CupColumn({ title, icon, rows }: { title: string; icon: string; rows?: CupRow[] }) {
     return (

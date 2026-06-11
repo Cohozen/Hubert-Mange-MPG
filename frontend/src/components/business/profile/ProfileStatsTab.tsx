@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
-import { MiniStat } from "@/components/business/stats/MiniStat";
 import { CareerChart } from "@/components/business/profile/CareerChart";
 import { TimelineSeason } from "@/components/business/profile/types";
+import { MiniStat } from "@/components/business/stats/MiniStat";
 
 const sum = (xs: (number | null)[]): number => xs.reduce<number>((a, b) => a + (b ?? 0), 0);
 

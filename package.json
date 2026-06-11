@@ -2,8 +2,8 @@
     "name": "mpg-enhanced",
     "private": true,
     "scripts": {
-        "format": "biome format --write .",
-        "format:check": "biome format ."
+        "format": "biome check --write .",
+        "format:check": "biome check ."
     },
     "devDependencies": {
         "@biomejs/biome": "2.4.16"

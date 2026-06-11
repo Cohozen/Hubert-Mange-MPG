@@ -1,9 +1,9 @@
 import { isLeagueAdmin, isSuperadmin, useAuth } from "@/auth/useAuth";
-import { ProfileForm } from "@/components/business/settings/ProfileForm";
-import { SyncSection } from "@/components/business/admin/SyncSection";
 import { LeaguesSection } from "@/components/business/admin/LeaguesSection";
-import { TournamentsSection } from "@/components/business/admin/TournamentsSection";
 import { RolesSection } from "@/components/business/admin/RolesSection";
+import { SyncSection } from "@/components/business/admin/SyncSection";
+import { TournamentsSection } from "@/components/business/admin/TournamentsSection";
+import { ProfileForm } from "@/components/business/settings/ProfileForm";
 
 export default function SettingsPage() {
     const { data: me } = useAuth();

@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import { useAuth } from "@/auth/useAuth";
-import { ManagerLabel } from "@/components/ui/ManagerLabel";
 import { RankCard } from "@/components/business/stats/RankCard";
 import { AllTimeRow, CupCount, FunStats, Movement, RankRow } from "@/components/business/stats/types";
+import { ManagerLabel } from "@/components/ui/ManagerLabel";
 
 // Médaille pour le top 3 (uniquement si le manager a au moins un titre), sinon le rang.
 const rankLabel = (rank: number, hasTitles: boolean) =>

@@ -1,9 +1,9 @@
 import { api, formatMoney } from "@/api/client";
-import { Stat } from "@/components/business/cagnotte/Stat";
 import { BuyInEditor } from "@/components/business/cagnotte/BuyInEditor";
 import { ContributionsPanel } from "@/components/business/cagnotte/ContributionsPanel";
-import { RulesEditor } from "@/components/business/cagnotte/RulesEditor";
 import { PayoutsPanel } from "@/components/business/cagnotte/PayoutsPanel";
+import { RulesEditor } from "@/components/business/cagnotte/RulesEditor";
+import { Stat } from "@/components/business/cagnotte/Stat";
 import { PoolDetail } from "@/components/business/cagnotte/types";
 
 export function PoolView({ pool, editor, onChange }: { pool: PoolDetail; editor: boolean; onChange: () => void }) {

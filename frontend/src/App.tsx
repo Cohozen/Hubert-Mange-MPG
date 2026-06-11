@@ -1,14 +1,14 @@
+import { BarChart3, LogOut, Moon, Settings, Sun, Trophy, User, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
-import { NavLink, Navigate, Route, Routes, Link } from "react-router-dom";
-import { Wallet, Trophy, BarChart3, User, Settings, LogOut, Sun, Moon } from "lucide-react";
+import { Link, Navigate, NavLink, Route, Routes } from "react-router-dom";
 import { useAuth, useLogout } from "@/auth/useAuth";
 import { Avatar } from "@/components/ui/Avatar";
-import LoginPage from "@/pages/LoginPage";
 import CagnottePage from "@/pages/CagnottePage";
+import LoginPage from "@/pages/LoginPage";
 import PalmaresPage from "@/pages/PalmaresPage";
-import StatsPage from "@/pages/StatsPage";
-import SettingsPage from "@/pages/SettingsPage";
 import ProfilePage from "@/pages/ProfilePage";
+import SettingsPage from "@/pages/SettingsPage";
+import StatsPage from "@/pages/StatsPage";
 
 interface NavItem {
     to: string;

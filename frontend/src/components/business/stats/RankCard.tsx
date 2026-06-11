@@ -1,5 +1,5 @@
-import { ManagerLabel } from "@/components/ui/ManagerLabel";
 import { RankRow } from "@/components/business/stats/types";
+import { ManagerLabel } from "@/components/ui/ManagerLabel";
 
 export function RankCard({
     title,

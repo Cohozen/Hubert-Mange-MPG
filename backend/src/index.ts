@@ -1,16 +1,16 @@
 import express from "express";
 import "express-async-errors"; // permet de catcher les erreurs async des routes
 import cookieParser from "cookie-parser";
-import { config } from "./config.js";
-import { attachSession, requireLeagueAdmin } from "./http/middleware.js";
 import { authRouter } from "./auth/routes.js";
+import { config } from "./config.js";
+import { prisma } from "./db/client.js";
+import { attachSession, requireLeagueAdmin } from "./http/middleware.js";
+import { adminRouter } from "./modules/admin/routes.js";
 import { cagnotteRouter } from "./modules/cagnotte/routes.js";
 import { palmaresRouter } from "./modules/palmares/routes.js";
-import { adminRouter } from "./modules/admin/routes.js";
 import { profileRouter } from "./modules/profile/routes.js";
-import { prisma } from "./db/client.js";
-import { executeSync, connectorForManager } from "./sync/service.js";
 import { startScheduler } from "./sync/scheduler.js";
+import { connectorForManager, executeSync } from "./sync/service.js";
 
 const app = express();
 

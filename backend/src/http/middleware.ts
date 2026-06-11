@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
+import { canEditCagnotte, canManageLeagues, isSuperadmin, parseRoles, ROLES } from "../auth/roles.js";
+import { readSession, SESSION_COOKIE } from "../auth/session.js";
 import { config } from "../config.js";
 import { prisma } from "../db/client.js";
-import { readSession, SESSION_COOKIE } from "../auth/session.js";
-import { canEditCagnotte, canManageLeagues, isSuperadmin, parseRoles, ROLES } from "../auth/roles.js";
 
 export interface AuthContext {
     managerId: string;

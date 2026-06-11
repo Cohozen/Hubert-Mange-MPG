@@ -1,6 +1,6 @@
 import { config } from "../config.js";
-import { prisma } from "../db/client.js";
 import { MpgConnector } from "../connector/index.js";
+import { prisma } from "../db/client.js";
 import { decrypt, isEncryptionConfigured } from "../lib/crypto.js";
 import { runSync } from "./sync.js";
 

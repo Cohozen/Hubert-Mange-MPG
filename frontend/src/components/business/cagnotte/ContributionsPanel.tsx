@@ -1,6 +1,6 @@
 import { api, formatMoney } from "@/api/client";
-import { ManagerLabel } from "@/components/ui/ManagerLabel";
 import { Contribution, PoolDetail } from "@/components/business/cagnotte/types";
+import { ManagerLabel } from "@/components/ui/ManagerLabel";
 
 export function ContributionsPanel({
     pool,

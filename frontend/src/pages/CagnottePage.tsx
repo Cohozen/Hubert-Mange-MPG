@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/api/client";
 import { canEditCagnotte, useAuth } from "@/auth/useAuth";
 import { SeasonView } from "@/components/business/cagnotte/SeasonView";

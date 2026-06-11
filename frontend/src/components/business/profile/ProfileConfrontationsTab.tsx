@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
-import { ManagerLabel } from "@/components/ui/ManagerLabel";
 import { H2H } from "@/components/business/stats/types";
+import { ManagerLabel } from "@/components/ui/ManagerLabel";
 
 export function ProfileConfrontationsTab({ managerId }: { managerId: string }) {
     const { data: h } = useQuery({

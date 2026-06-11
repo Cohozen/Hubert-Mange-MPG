@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import { useAuth } from "@/auth/useAuth";
-import { Avatar } from "@/components/ui/Avatar";
 import { AllTimeRow, CupCount } from "@/components/business/stats/types";
+import { Avatar } from "@/components/ui/Avatar";
 
 export function ProfileHeader({ managerId }: { managerId: string }) {
     const { data: me } = useAuth();
