@@ -59,6 +59,16 @@ palmaresRouter.get("/all-time", async (_req, res) => {
         include: { participations: { include: { division: true } } },
     });
 
+    // Coupes par manager : départagent le classement APRÈS les championnats (cf. comparateur plus bas).
+    const cupRows = await prisma.tournament.findMany({
+        where: { winnerManagerId: { not: null } },
+        select: { winnerManagerId: true },
+    });
+    const cupTotals = new Map<string, number>();
+    for (const t of cupRows) {
+        cupTotals.set(t.winnerManagerId!, (cupTotals.get(t.winnerManagerId!) ?? 0) + 1);
+    }
+
     let maxLevel = 1;
     const rows = managers
         .map((m) => {
@@ -92,23 +102,26 @@ palmaresRouter.get("/all-time", async (_req, res) => {
             seasonsPlayed: r.seasonsPlayed,
             titles,
             totalTitles: titles.reduce((a, b) => a + b, 0),
+            // Total des coupes (toutes compétitions) : sert uniquement au départage, pas à `totalTitles`.
+            cupTitles: cupTotals.get(r.managerId) ?? 0,
         };
     });
 
-    // Tri médailles : plus de titres D1, puis D2, ... ; à vecteur égal, moins de saisons puis le nom.
-    const sameTitles = (a: { titles: number[] }, b: { titles: number[] }) =>
-        a.titles.every((v, i) => v === b.titles[i]);
+    // Tri médailles : plus de titres D1, puis D2, ... ; à vecteur égal on départage par le nombre de
+    // coupes, PUIS par moins de saisons jouées, puis le nom.
+    const sameRank = (a: { titles: number[]; cupTitles: number }, b: { titles: number[]; cupTitles: number }) =>
+        a.cupTitles === b.cupTitles && a.titles.every((v, i) => v === b.titles[i]);
     withTitles.sort((a, b) => {
         for (let i = 0; i < maxLevel; i++) {
             if (b.titles[i] !== a.titles[i]) return b.titles[i] - a.titles[i];
         }
-        return a.seasonsPlayed - b.seasonsPlayed || a.manager.localeCompare(b.manager);
+        return b.cupTitles - a.cupTitles || a.seasonsPlayed - b.seasonsPlayed || a.manager.localeCompare(b.manager);
     });
 
-    // Rang avec ex æquo : un vecteur de titres identique partage le même rang.
+    // Rang avec ex æquo : mêmes titres de division ET même nombre de coupes → même rang.
     const ranking = withTitles.map((r, i) => ({ ...r, rank: i + 1 }));
     for (let i = 1; i < ranking.length; i++) {
-        if (sameTitles(ranking[i], ranking[i - 1])) ranking[i].rank = ranking[i - 1].rank;
+        if (sameRank(ranking[i], ranking[i - 1])) ranking[i].rank = ranking[i - 1].rank;
     }
 
     res.json({ ranking, maxLevel });
@@ -488,9 +501,13 @@ palmaresRouter.get("/tournaments", async (_req, res) => {
         e.total++;
         counts.set(t.winnerManagerId, e);
     }
+    // Tri hiérarchique LDC > UEFA > CONFERENCE : la Conference ne passe jamais devant une UEFA.
     const ranking = [...counts.entries()]
         .map(([managerId, v]) => ({ managerId, ...v }))
-        .sort((a, b) => b.ldc - a.ldc || b.total - a.total);
+        .sort(
+            (a, b) =>
+                b.ldc - a.ldc || b.uefa - a.uefa || b.conference - a.conference || a.manager.localeCompare(b.manager),
+        );
 
     res.json({ list, ranking });
 });

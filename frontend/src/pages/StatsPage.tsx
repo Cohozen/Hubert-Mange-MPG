@@ -69,8 +69,9 @@ export default function StatsPage() {
                         >
                             <div className="card-body text-xs opacity-80">
                                 Façon Jeux Olympiques : on compte les titres (1re place) par division. On départage
-                                d'abord sur les titres de D1, puis de D2, et ainsi de suite. Les coupes (⭐ Crampons · 🎖️
-                                Europa · 🍐 Conference) comptent dans le total de titres mais pas dans le classement.
+                                d'abord sur les titres de D1, puis de D2, et ainsi de suite, puis sur le nombre de
+                                coupes. Les coupes (⭐ Crampons · 🎖️ Europa · 🍐 Conference) comptent dans le total de
+                                titres et départagent après les championnats.
                             </div>
                         </div>
                     </div>
@@ -142,7 +143,9 @@ export default function StatsPage() {
                                         </div>
                                         <div className="flex flex-col items-center">
                                             <div className="text-lg font-bold text-primary">{totalWithCups(r)}</div>
-                                            <div className="text-[10px] opacity-60">titres</div>
+                                            <div className="text-[10px] opacity-60">
+                                                titre{totalWithCups(r) > 1 ? "s" : ""}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

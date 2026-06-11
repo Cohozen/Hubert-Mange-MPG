@@ -78,6 +78,8 @@ synchronisation des données depuis l'API MPG.
   AVANT `papa`/`heureu`** (un nom Conference contient aussi « papa »). Le scope cagnotte
   (`PayoutRule`) suit les mêmes codes (`DIVISION|LDC|UEFA|CONFERENCE`). **Icônes d'affichage**
   (à garder cohérentes dans tout le front) : ⭐ `LDC` · 🎖️ `UEFA` (Europa) · 🍐 `CONFERENCE`.
+  **Classement des coupes** (`/api/palmares/tournaments` → `ranking`) trié **hiérarchiquement**
+  `LDC > UEFA > CONFERENCE` (puis nom) : une Conference ne passe jamais devant une UEFA.
 - **Override manuel du type** : la détection par nom échoue si le type n'est identifiable qu'au logo
   (ex. coupe Conference nommée « Heureux Papa's League 🍐 » → classée UEFA par défaut). On peut forcer
   le type via `TrackedTournament.competitionOverride` (nullable ; `null` = détection auto). Le sync
@@ -91,11 +93,13 @@ synchronisation des données depuis l'API MPG.
   inchangée : **coupe année N ↔ `RealSeason` N-1**. Pour corriger des données déjà en prod
   (reclasser/recalculer) : **relancer un sync** (upsert idempotent sur `mpgTournamentId`), pas de
   script dédié.
-- **Classement all-time (`/api/palmares/all-time`)** : ordonné **façon JO** sur les seuls titres de
-  **division** (départage sur D1, puis D2…). Les **coupes comptent dans le total de titres affiché**
-  (côté front, helper `totalWithCups` dans `StatsPage`) **mais jamais dans l'ordre** (`rank` reste
-  basé sur les divisions). La liste des **vainqueurs par saison** (`/winners`) est triée du plus
-  récent au plus ancien : année desc, puis saison MPG desc, puis division asc.
+- **Classement all-time (`/api/palmares/all-time`)** : ordonné **façon JO** sur les titres de
+  **division** d'abord (départage sur D1, puis D2…), **puis** par **nombre total de coupes** (les
+  coupes départagent désormais *après* les championnats), enfin moins de saisons jouées puis le nom.
+  L'ex æquo (`sameRank`) exige mêmes titres de division **ET** même nombre de coupes. `totalTitles`
+  reste **divisions seules** ; le **total affiché = divisions + coupes** (côté front, helper
+  `totalWithCups` dans `StatsPage`). La liste des **vainqueurs par saison** (`/winners`) est triée du
+  plus récent au plus ancien : année desc, puis saison MPG desc, puis division asc.
 - **Séries consécutives (`/fun-stats` : `d1Streak`, `titleStreak`)** : se calculent sur la
   carrière **triée chronologiquement (`year` → `index`), sans grouper par `mpgLeagueId`**. Piège :
   l'**ID de ligue MPG change dans le temps** (migrations *séquentielles*, pas des ligues parallèles) —
