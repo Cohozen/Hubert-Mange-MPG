@@ -1,8 +1,12 @@
-// Client API minimal vers le backend. Le proxy Vite route /api et /auth vers :3001,
-// donc on reste same-origin et le cookie de session est envoyé automatiquement.
+// Client API minimal vers le backend.
+// - En local : VITE_API_BASE_URL est vide → on reste same-origin, le proxy Vite route
+//   /api et /auth vers :3001.
+// - En prod : VITE_API_BASE_URL = https://api.ligue-hubert-mange.fr → appel direct du
+//   sous-domaine API (front et API sont same-site, le cookie de session passe).
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 export async function api<T = any>(path: string, options: RequestInit = {}): Promise<T> {
-    const res = await fetch(path, {
+    const res = await fetch(`${API_BASE}${path}`, {
         credentials: "include",
         headers: { "Content-Type": "application/json", ...(options.headers ?? {}) },
         ...options,

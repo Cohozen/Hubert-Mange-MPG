@@ -1,14 +1,4 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
-    "rewrites": [
-        {
-            "source": "/api/:path*",
-            "destination": "https://hubert-mange-mpg-production.up.railway.app/api/:path*"
-        },
-        {
-            "source": "/auth/:path*",
-            "destination": "https://hubert-mange-mpg-production.up.railway.app/auth/:path*"
-        },
-        { "source": "/((?!assets/).*)", "destination": "/index.html" }
-    ]
+    "rewrites": [{ "source": "/((?!assets/).*)", "destination": "/index.html" }]
 }

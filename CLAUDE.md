@@ -33,8 +33,17 @@ synchronisation des données depuis l'API MPG.
 
 ## Déploiement
 
-- Frontend → Vercel · Backend → Railway · DB → Supabase (Postgres).
+- Frontend → Vercel (`www.ligue-hubert-mange.fr`) · Backend → Railway
+  (`api.ligue-hubert-mange.fr`) · DB → Supabase (Postgres).
 - Le cron auto-sync nécessite un **process Node persistant** (Railway), pas du serverless.
+- **URL de l'API variabilisée** : le front appelle l'API **directement** via
+  `VITE_API_BASE_URL` (préfixée dans `api()`, `frontend/src/api/client.ts`). En local la
+  var est **vide** → proxy Vite (`/api`, `/auth` → `localhost:3001`) ; en prod c'est
+  `https://api.ligue-hubert-mange.fr` (env Vercel, scope Production, injectée **au build**
+  → redéployer après changement). **Plus de proxy dans `vercel.json`** (il ne garde que le
+  fallback SPA). Front et API étant **same-site** (sous-domaines du même domaine), le
+  cookie de session `SameSite=Lax` passe tel quel ; le CORS est piloté par `FRONTEND_ORIGIN`
+  côté backend (= `https://www.ligue-hubert-mange.fr`).
 
 ## Pièges & conventions (à connaître avant de toucher au code)
 
