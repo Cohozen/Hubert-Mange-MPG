@@ -122,8 +122,8 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
         <section className="bg-base-100 rounded-box shadow p-6">
             <h2 className="text-lg font-bold text-base-content mb-1">Tournois suivis (coupes)</h2>
             <p className="text-sm opacity-60 mb-3 text-justify">
-                Coche un tournoi pour le synchroniser. Décocher met le sync en pause. Le type de coupe est déduit du nom.
-                Force-le via le menu si la détection se trompe.
+                Coche un tournoi pour le synchroniser. Décocher met le sync en pause. Le type de coupe est déduit du
+                nom. Force-le via le menu si la détection se trompe.
             </p>
 
             {available.isError && (
@@ -154,10 +154,9 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                                     {t.winner
                                         ? `🏆 ${t.winner}`
                                         : t.trackedId && !t.inMyDashboard
-                                            ? "hors de ton compte MPG"
-                                            : ""}
+                                          ? "hors de ton compte MPG"
+                                          : ""}
                                 </span>
-
                             </span>
                             {t.trackedId && canDelete && (
                                 <button

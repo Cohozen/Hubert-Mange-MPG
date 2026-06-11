@@ -59,12 +59,13 @@ export function SyncSection() {
                 <div className="border-t pt-3 text-sm">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span
-                            className={`inline-block w-2 h-2 rounded-full shrink-0 ${run.status === "success"
+                            className={`inline-block w-2 h-2 rounded-full shrink-0 ${
+                                run.status === "success"
                                     ? "bg-success"
                                     : run.status === "error"
-                                        ? "bg-error"
-                                        : "bg-warning"
-                                }`}
+                                      ? "bg-error"
+                                      : "bg-warning"
+                            }`}
                         />
                         <span className="font-medium text-base-content">
                             Dernière synchro : {run.status} ({run.trigger})
