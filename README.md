@@ -92,8 +92,10 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
 - ✅ **Classement all-time « façon JO »** : tableau des médailles par division — on compte les
   titres (1re place) et on classe sur les titres de D1 d'abord, puis D2, etc. (les podiums ont leur
   propre classement dans les stats fun).
-- ✅ **Dark mode** (toggle dans le header) + UI responsive mobile-first (DaisyUI, nav bas mobile,
-  classements en cartes sur petit écran, montées/descentes/yo-yo).
+- ✅ **Thème maison « Or & Nuit »** (or sur base nuit-stade, cohérent avec la bannière) en clair
+  (`hubert`) + sombre (`hubert-dark`), toggle dans le header. UI responsive mobile-first (DaisyUI,
+  nav bas mobile, classements en cartes sur petit écran, montées/descentes/yo-yo). Bannière
+  promotionnelle en tête de la page Stats.
 
 ## Idées de features (v2/v3)
 

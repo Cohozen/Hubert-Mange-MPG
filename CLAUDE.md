@@ -21,6 +21,15 @@ synchronisation des données depuis l'API MPG.
   - **Toujours utiliser le skill `daisyui`** avant de générer/modifier du HTML/JSX front : c'est la
     lib UI de référence (Tailwind v4 + daisyUI v5). Consulter le doc du composant concerné pour la
     markup exacte (ex. la syntaxe `dropdown` v5).
+  - **Thème maison « Or & Nuit »** (or sur base nuit-stade) défini dans `src/styles.css` :
+    `hubert` (clair, `default`) + `hubert-dark` (sombre, `prefersdark`). Le toggle du header bascule
+    entre les deux (`data-theme` sur `<html>` + `localStorage`, voir `useTheme` dans `App.tsx`).
+    **Toujours utiliser les couleurs sémantiques** daisyUI (`primary`, `base-*`, `success`, `error`,
+    `warning`…) pour qu'elles suivent le thème — pas de couleurs Tailwind brutes (`bg-red-500`…).
+    `primary` = or, `warning` = or aussi (les coupes ⭐ utilisent `badge-warning`). Recharts lit les
+    `var(--color-*)` → s'adapte tout seul.
+  - **Bannière de la page Stats** : asset statique `public/stats-banner.jpg` (servi à
+    `/stats-banner.jpg`). À remplacer manuellement en fin de saison si le podium change.
 
 ## Déploiement
 
