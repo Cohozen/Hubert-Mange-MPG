@@ -45,6 +45,12 @@ export default function StatsPage() {
 
     return (
         <div className="space-y-8">
+            <img
+                src="/stats-banner.jpg"
+                alt="Mega Ligue — Hubert mange"
+                className="w-full rounded-lg shadow object-cover"
+                loading="lazy"
+            />
             <section>
                 <div className="flex items-center justify-between gap-2 mb-3">
                     <h2 className="text-xl font-bold">Classement all-time</h2>
