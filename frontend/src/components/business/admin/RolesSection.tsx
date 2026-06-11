@@ -63,7 +63,7 @@ export function RolesSection() {
                                         disabled={m.roles.includes("SUPERADMIN")}
                                         className={`text-xs rounded-full px-3 py-1 border disabled:opacity-40 ${
                                             active
-                                                ? "bg-emerald-600 text-white border-emerald-600"
+                                                ? "bg-primary text-primary-content border-primary"
                                                 : "bg-base-100 opacity-60 border-base-300 hover:border-base-content/40"
                                         }`}
                                     >

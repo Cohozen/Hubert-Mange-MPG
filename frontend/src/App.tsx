@@ -18,20 +18,27 @@ interface NavItem {
     desktopHidden?: boolean;
 }
 
+const LIGHT_THEME = "hubert";
+const DARK_THEME = "hubert-dark";
+
 function useTheme() {
-    const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "emerald");
+    const [theme, setTheme] = useState(() => {
+        const stored = localStorage.getItem("theme");
+        // Retombe sur le thème clair si la valeur stockée est inconnue (ex. ancien "emerald"/"dark").
+        return stored === LIGHT_THEME || stored === DARK_THEME ? stored : LIGHT_THEME;
+    });
     useEffect(() => {
         document.documentElement.setAttribute("data-theme", theme);
         localStorage.setItem("theme", theme);
     }, [theme]);
-    return { theme, toggle: () => setTheme((t) => (t === "dark" ? "emerald" : "dark")) };
+    return { theme, toggle: () => setTheme((t) => (t === DARK_THEME ? LIGHT_THEME : DARK_THEME)) };
 }
 
 function ThemeToggle() {
     const { theme, toggle } = useTheme();
     return (
         <button onClick={toggle} className="btn btn-sm btn-ghost btn-circle" aria-label="Thème">
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === DARK_THEME ? <Sun size={18} /> : <Moon size={18} />}
         </button>
     );
 }

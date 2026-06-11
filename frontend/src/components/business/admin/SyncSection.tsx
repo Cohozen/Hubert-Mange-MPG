@@ -64,8 +64,8 @@ export function SyncSection() {
                                 run.status === "success"
                                     ? "bg-success"
                                     : run.status === "error"
-                                      ? "bg-red-500"
-                                      : "bg-amber-400"
+                                      ? "bg-error"
+                                      : "bg-warning"
                             }`}
                         />
                         <span className="font-medium text-base-content">
