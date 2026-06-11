@@ -107,7 +107,11 @@ Pistes pour rendre l'appli plus fun et plus « club » :
   l'onglet Confrontations du profil liste déjà tous les adversaires).
 - 🥇 **« Ballon d'Or » annuel** : un classement de la saison combinant titres + coupe + Rotaldo.
 - 📈 **Résultats par journée** : déjà captés (matchs en base), à exposer en mini-classements animés.
+- 🤖 **Résumé IA après chaque journée** : un agent IA génère un compte-rendu de la journée
+  (résultats marquants, mouvements au classement, exploits/flops) à partir des données synchronisées.
 - 🏅 **Badges / hauts faits** : série de titres, yo-yo, invincibilité, comeback… débloqués automatiquement.
 - 📣 **Récap partageable** (image/story) du palmarès ou de la fin de saison pour le groupe.
 - 🔔 **Notifications** du lundi matin (résultats publiés, « tu as gagné la cagnotte »).
+- 🚨 **Notifications quand un record est battu** : alerte automatique lorsqu'un record est dépassé
+  (plus longue série de titres/D1, plus large victoire, nouveau record de points…).
 - 📺 **Mode présentation / soirée de remise des prix** (plein écran) pour la fin de saison.
