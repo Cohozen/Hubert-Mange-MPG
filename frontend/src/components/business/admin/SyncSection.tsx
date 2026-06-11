@@ -58,9 +58,9 @@ export function SyncSection() {
 
             {run && (
                 <div className="border-t pt-3 text-sm">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span
-                            className={`inline-block w-2 h-2 rounded-full ${
+                            className={`inline-block w-2 h-2 rounded-full shrink-0 ${
                                 run.status === "success"
                                     ? "bg-success"
                                     : run.status === "error"
@@ -71,7 +71,9 @@ export function SyncSection() {
                         <span className="font-medium text-base-content">
                             Dernière synchro : {run.status} ({run.trigger})
                         </span>
-                        <span className="opacity-50">{new Date(run.startedAt).toLocaleString("fr-FR")}</span>
+                        <span className="opacity-50 w-full sm:w-auto pl-4 sm:pl-0">
+                            {new Date(run.startedAt).toLocaleString("fr-FR")}
+                        </span>
                     </div>
                     {run.summary && (
                         <p className="opacity-60 mt-1">

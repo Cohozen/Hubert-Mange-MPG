@@ -77,12 +77,12 @@ export function ProfileStatsTab({ managerId }: { managerId: string }) {
     return (
         <div className="space-y-6">
             <section>
-                <h3 className="font-semibold mb-2">📈 Trajectoire</h3>
+                <h3 className="font-semibold mb-2">📈 Historique</h3>
                 <CareerChart seasons={seasons} />
             </section>
 
             <section>
-                <h3 className="font-semibold mb-2">Trajectoire & mouvements</h3>
+                <h3 className="font-semibold mb-2">Mouvements</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <MiniStat label="Montées" value={s.promotions} accent="text-success" />
                     <MiniStat label="Descentes" value={s.relegations} accent="text-error" />

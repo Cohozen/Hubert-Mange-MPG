@@ -75,7 +75,7 @@ export function ProfileForm() {
             <h2 className="text-xl font-bold text-base-content mb-1">Mon profil</h2>
             <p className="text-sm opacity-60 mb-4">
                 Ces coordonnées servent au banquier pour te verser tes gains. Elles ne sont visibles que par toi et le
-                banquier. Ton IBAN est chiffré.
+                banquier.
             </p>
 
             <form onSubmit={onSubmit} className="bg-base-100 rounded-box shadow p-6 space-y-4">
@@ -127,6 +127,7 @@ export function ProfileForm() {
                         placeholder={data?.hasIban ? "Laisser vide pour conserver l'IBAN actuel" : "FR76 ..."}
                         className="input input-bordered w-full font-mono"
                     />
+                    <span className="text-xs opacity-50">🔒 Ton IBAN est chiffré au repos.</span>
                 </Field>
 
                 {msg && <p className="text-sm text-success">{msg}</p>}

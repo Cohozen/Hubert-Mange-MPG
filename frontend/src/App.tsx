@@ -76,8 +76,9 @@ export default function App() {
             {/* Barre du haut */}
             <header className="navbar bg-base-100 shadow-sm px-4 sticky top-0 z-30">
                 <div className="flex-1">
-                    <Link to="/" className="text-lg font-bold text-primary">
-                        Ligue Hubert Mange
+                    <Link to="/" className="font-bold text-primary leading-tight flex flex-col">
+                        <span className="text-base sm:text-lg whitespace-nowrap">Mega Ligue</span>
+                        <span className="text-sm sm:text-base whitespace-nowrap">Hubert Mange</span>
                     </Link>
                 </div>
                 {/* Onglets desktop */}
