@@ -102,6 +102,9 @@ export function RulesEditor({ poolId, onChange }: { poolId: string; onChange: ()
                         />
                     </label>
                 ))}
+            </div>
+            {/* Coupes : pleine largeur en mobile pour afficher le nom complet sur une seule ligne. */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <label className="text-sm">
                     <span className="opacity-70">⭐ Ligue des Crampons</span>
                     <input
