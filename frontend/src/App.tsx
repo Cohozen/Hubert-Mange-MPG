@@ -1,8 +1,8 @@
-import { BarChart3, LogOut, Moon, Settings, Sun, Trophy, User, Wallet } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, Navigate, NavLink, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth, useLogout } from "@/auth/useAuth";
-import { Avatar } from "@/components/ui/Avatar";
+import { AppShell } from "@/components/layout/AppShell";
+import AccueilPage from "@/pages/AccueilPage";
 import CagnottePage from "@/pages/CagnottePage";
 import LoginPage from "@/pages/LoginPage";
 import PalmaresPage from "@/pages/PalmaresPage";
@@ -10,49 +10,31 @@ import ProfilePage from "@/pages/ProfilePage";
 import SettingsPage from "@/pages/SettingsPage";
 import StatsPage from "@/pages/StatsPage";
 
-interface NavItem {
-    to: string;
-    label: string;
-    icon: typeof Wallet;
-    end?: boolean;
-    desktopHidden?: boolean;
-}
-
-const LIGHT_THEME = "hubert";
-const DARK_THEME = "hubert-dark";
-
-function useTheme() {
-    const [theme, setTheme] = useState(() => {
-        const stored = localStorage.getItem("theme");
-        // Retombe sur le thème clair si la valeur stockée est inconnue (ex. ancien "emerald"/"dark").
-        return stored === LIGHT_THEME || stored === DARK_THEME ? stored : LIGHT_THEME;
-    });
+/** Force le thème sombre « Broadcast » (dark-only au départ). */
+function useDarkTheme() {
     useEffect(() => {
-        document.documentElement.setAttribute("data-theme", theme);
-        localStorage.setItem("theme", theme);
-    }, [theme]);
-    return { theme, toggle: () => setTheme((t) => (t === DARK_THEME ? LIGHT_THEME : DARK_THEME)) };
+        const html = document.documentElement;
+        html.classList.add("dark");
+        // hubert-dark : tant que DaisyUI cohabite (pages pas encore migrées).
+        html.setAttribute("data-theme", "hubert-dark");
+    }, []);
 }
 
-function ThemeToggle() {
-    const { theme, toggle } = useTheme();
+function FullScreenLoader() {
     return (
-        <button onClick={toggle} className="btn btn-sm btn-ghost btn-circle" aria-label="Thème">
-            {theme === DARK_THEME ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+        <div className="grid min-h-screen place-items-center bg-nuit">
+            <div className="size-10 animate-spin rounded-full border-4 border-bord border-t-rose" />
+        </div>
     );
 }
 
 export default function App() {
+    useDarkTheme();
     const { data: me, isLoading } = useAuth();
     const logout = useLogout();
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen grid place-items-center">
-                <span className="loading loading-spinner loading-lg text-primary" />
-            </div>
-        );
+        return <FullScreenLoader />;
     }
 
     if (!me) {
@@ -63,82 +45,19 @@ export default function App() {
         );
     }
 
-    const items: NavItem[] = [
-        { to: "/", label: "Palmarès", icon: Trophy, end: true },
-        { to: "/stats", label: "Stats", icon: BarChart3 },
-        { to: "/cagnotte", label: "Cagnotte", icon: Wallet },
-        { to: "/profil", label: "Profil", icon: User, desktopHidden: true },
-        { to: "/parametres", label: "Paramètres", icon: Settings },
-    ];
-
     return (
-        <div className="min-h-screen bg-base-200">
-            {/* Barre du haut */}
-            <header className="navbar bg-base-100 shadow-sm px-4 sticky top-0 z-30">
-                <div className="flex-1">
-                    <Link to="/" className="font-bold text-primary leading-tight flex flex-col">
-                        <span className="text-base sm:text-lg whitespace-nowrap">Mega Ligue</span>
-                        <span className="text-sm sm:text-base whitespace-nowrap">Hubert Mange</span>
-                    </Link>
-                </div>
-                {/* Onglets desktop */}
-                <nav className="hidden sm:flex items-center gap-1">
-                    {items
-                        .filter((it) => !it.desktopHidden)
-                        .map((it) => (
-                            <NavLink
-                                key={it.to}
-                                to={it.to}
-                                end={it.end}
-                                className={({ isActive }) =>
-                                    `btn btn-sm btn-ghost gap-2 ${isActive ? "btn-outline btn-primary" : ""}`
-                                }
-                            >
-                                <it.icon size={16} />
-                                {it.label}
-                            </NavLink>
-                        ))}
-                </nav>
-                <div className="flex items-center gap-1 ml-2">
-                    <Link to="/profil" className="hidden sm:flex items-center gap-2 mr-1 hover:opacity-80">
-                        <Avatar url={me.avatarUrl} name={me.displayName} size={28} />
-                        <span className="text-sm opacity-70">{me.displayName}</span>
-                    </Link>
-                    <ThemeToggle />
-                    <button onClick={logout} className="btn btn-sm btn-ghost btn-circle" aria-label="Déconnexion">
-                        <LogOut size={18} />
-                    </button>
-                </div>
-            </header>
-
-            {/* Contenu (padding bas pour la nav mobile) */}
-            <main className="max-w-5xl mx-auto px-4 py-6 pb-24 sm:pb-6">
-                <Routes>
-                    <Route path="/" element={<PalmaresPage />} />
-                    <Route path="/stats" element={<StatsPage />} />
-                    <Route path="/cagnotte" element={<CagnottePage />} />
-                    <Route path="/profil" element={<ProfilePage />} />
-                    <Route path="/profil/:managerId" element={<ProfilePage />} />
-                    <Route path="/parametres" element={<SettingsPage />} />
-                    <Route path="/admin" element={<Navigate to="/parametres" />} />
-                    <Route path="*" element={<Navigate to="/" />} />
-                </Routes>
-            </main>
-
-            {/* Nav mobile (barre du bas) */}
-            <nav className="sm:hidden dock">
-                {items.map((it) => (
-                    <NavLink
-                        key={it.to}
-                        to={it.to}
-                        end={it.end}
-                        className={({ isActive }) => `${isActive ? "dock-active" : ""}`}
-                    >
-                        <it.icon size={20} />
-                        <span className="dock-label">{it.label}</span>
-                    </NavLink>
-                ))}
-            </nav>
-        </div>
+        <AppShell me={me} onLogout={logout}>
+            <Routes>
+                <Route path="/" element={<AccueilPage />} />
+                <Route path="/palmares" element={<PalmaresPage />} />
+                <Route path="/stats" element={<StatsPage />} />
+                <Route path="/cagnotte" element={<CagnottePage />} />
+                <Route path="/profil" element={<ProfilePage />} />
+                <Route path="/profil/:managerId" element={<ProfilePage />} />
+                <Route path="/parametres" element={<SettingsPage />} />
+                <Route path="/admin" element={<Navigate to="/parametres" />} />
+                <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+        </AppShell>
     );
 }

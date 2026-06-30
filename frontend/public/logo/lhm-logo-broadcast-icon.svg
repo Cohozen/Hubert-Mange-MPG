@@ -1,0 +1,22 @@
+<svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+  <title>LHM — App icon broadcast</title>
+  <defs>
+    <linearGradient id="shield" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6D28D9"/>
+      <stop offset="0.55" stop-color="#FF2D78"/>
+      <stop offset="1" stop-color="#FF6B35"/>
+    </linearGradient>
+    <clipPath id="clip"><path d="M120 28 L210 56 L210 150 Q210 212 120 252 Q30 212 30 150 L30 56 Z"/></clipPath>
+  </defs>
+  <rect width="240" height="240" rx="52" fill="#0A0E27"/>
+  <path d="M120 28 L206 54 L206 142 Q206 198 120 234 Q34 198 34 142 L34 54 Z" fill="url(#shield)"/>
+  <g clip-path="url(#clip)" opacity="0.12">
+    <line x1="34" y1="90" x2="206" y2="90" stroke="#fff" stroke-width="16"/>
+    <line x1="34" y1="135" x2="206" y2="135" stroke="#fff" stroke-width="16"/>
+    <line x1="34" y1="180" x2="206" y2="180" stroke="#fff" stroke-width="16"/>
+  </g>
+  <polygon points="80,78 83,87 92,87 85,93 88,102 80,96 72,102 75,93 68,87 77,87" fill="#fff"/>
+  <polygon points="120,66 123,75 132,75 125,81 128,90 120,84 112,90 115,81 108,75 117,75" fill="#fff"/>
+  <polygon points="160,78 163,87 172,87 165,93 168,102 160,96 152,102 155,93 148,87 157,87" fill="#fff"/>
+  <text x="120" y="170" text-anchor="middle" font-family="Archivo, 'Arial Black', sans-serif" font-size="62" font-weight="900" fill="#fff" letter-spacing="-2">LHM</text>
+</svg>
