@@ -1,9 +1,15 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+/* ------------------------------------------------------------------ *
+ * DaisyUI — CONSERVÉ EN TRANSITION (migration incrémentale vers       *
+ * shadcn/ui). À retirer en phase finale une fois toutes les pages     *
+ * migrées. Ne plus l'utiliser dans le nouveau code.                   *
+ * ------------------------------------------------------------------ */
 @plugin "daisyui";
 
 @plugin "daisyui/theme" {
   name: "hubert";
-  default: true;
   color-scheme: light;
   --color-base-100: #fffdf6;
   --color-base-200: #f6f3ea;
@@ -37,6 +43,7 @@
 
 @plugin "daisyui/theme" {
   name: "hubert-dark";
+  default: true;
   prefersdark: true;
   color-scheme: dark;
   --color-base-100: #181c26;
@@ -67,4 +74,187 @@
   --border: 1px;
   --depth: 1;
   --noise: 0;
+}
+
+/* ================================================================== *
+ * DESIGN SYSTEM « BROADCAST » (V2) — tokens repris de                 *
+ * docs/mockups/lhm-design-system.html                                 *
+ * ================================================================== */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Polices */
+  --font-display: "Archivo", "Inter", ui-sans-serif, sans-serif;
+  --font-ui: "Inter", ui-sans-serif, sans-serif;
+
+  /* Couleurs de marque — génèrent bg-/text-/border-<nom> ET exposent
+     var(--color-<nom>) pour Recharts */
+  --color-violet: #6d28d9;
+  --color-violet-clair: #a78bfa;
+  --color-rose: #ff2d78;
+  --color-orange: #ff6b35;
+  --color-menthe: #00e5a0;
+  --color-menthe-2: #34d399;
+  --color-jaune: #ffd23f;
+  --color-rouge: #ff3b5c;
+
+  /* Surfaces dark */
+  --color-nuit: #0a0e27;
+  --color-carte: #141a3d;
+  --color-carte-2: #1b2350;
+  --color-bord: #2a3160;
+
+  /* Texte */
+  --color-texte: #ffffff;
+  --color-texte-2: #8b92c4;
+
+  /* Surfaces light — réservées pour le futur light mode */
+  --color-light-bg: #f4f5fb;
+  --color-light-carte: #ffffff;
+  --color-light-bord: #e2e5f0;
+  --color-texte-light: #1a1f3d;
+  --color-texte-light-2: #6a7299;
+
+  /* Rayons Broadcast */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+  --radius-pill: 999px;
+}
+
+/* Variables sémantiques shadcn (dark-only au départ : :root = .dark) */
+:root,
+.dark {
+  --background: #0a0e27;
+  --foreground: #ffffff;
+  --card: #141a3d;
+  --card-foreground: #ffffff;
+  --popover: #141a3d;
+  --popover-foreground: #ffffff;
+  --primary: #ff2d78;
+  --primary-foreground: #ffffff;
+  --secondary: #1b2350;
+  --secondary-foreground: #ffffff;
+  --muted: #1b2350;
+  --muted-foreground: #8b92c4;
+  --accent: #6d28d9;
+  --accent-foreground: #ffffff;
+  --destructive: #ff3b5c;
+  --destructive-foreground: #ffffff;
+  --border: #2a3160;
+  --input: #2a3160;
+  --ring: #ff2d78;
+
+  /* Dégradés signature */
+  --grad-energy: linear-gradient(90deg, #ff2d78, #ff6b35);
+  --grad-banner: linear-gradient(90deg, #6d28d9, #ff2d78, #ff6b35);
+  --grad-primary: linear-gradient(135deg, #2d1b69, #6d28d9);
+  --grad-lime: linear-gradient(90deg, #00e5a0, #34d399);
+  --grad-shield: linear-gradient(135deg, #6d28d9 0%, #ff2d78 55%, #ff6b35 100%);
+}
+
+/* Mapping des variables sémantiques → tokens Tailwind (utilitaires
+   bg-background, text-foreground, border-border, bg-card, ring-ring…) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* Dégradés réutilisables en classes utilitaires */
+.grad-energy {
+  background-image: var(--grad-energy);
+}
+.grad-banner {
+  background-image: var(--grad-banner);
+}
+.grad-primary {
+  background-image: var(--grad-primary);
+}
+.grad-lime {
+  background-image: var(--grad-lime);
+}
+.grad-shield {
+  background-image: var(--grad-shield);
+}
+
+/* Carte « broadcast » avec micro-interaction au survol */
+.lhm-card {
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    border-color 0.14s ease;
+}
+.lhm-card:hover {
+  transform: translateY(-3px);
+  border-color: #3a4280;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* Animations reprises des maquettes */
+@keyframes lhmPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes lhmHalo {
+  0%,
+  100% {
+    transform: translate(-5%, -3%) scale(1);
+  }
+  50% {
+    transform: translate(5%, 3%) scale(1.1);
+  }
+}
+@keyframes lhmShine {
+  0% {
+    transform: translateX(-130%) rotate(8deg);
+  }
+  60%,
+  100% {
+    transform: translateX(230%) rotate(8deg);
+  }
+}
+
+@layer base {
+  body {
+    font-family: var(--font-ui);
+    background-color: var(--color-nuit);
+    color: var(--color-texte);
+  }
+  /* Scrollbar broadcast */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-bord);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
