@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Archivo:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<meta name="design_doc_mode" content="canvas">
+<style>
+  @keyframes lhmSpin { to{ transform:rotate(360deg) } }
+  @keyframes lhmPulse { 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+  @keyframes lhmHalo { 0%,100%{ transform:translate(-5%,-3%) scale(1) } 50%{ transform:translate(5%,3%) scale(1.1) } }
+  @keyframes lhmDlg { 0%{ opacity:0; transform:translateY(10px) scale(.97) } 100%{ opacity:1; transform:translateY(0) scale(1) } }
+  .lhm-card{ transition:transform .14s ease, box-shadow .14s ease, border-color .14s ease; }
+  .lhm-nav:hover{ color:#fff !important; }
+  .lhm-row:hover{ border-color:#3A4280 !important; }
+  .lhm-btn:hover{ filter:brightness(1.07); transform:translateY(-1px); }
+  .lhm-ghost:hover{ background:#1B2350 !important; border-color:#3A4280 !important; color:#fff !important; }
+  .lhm-ghost-red:hover{ background:rgba(255,59,92,.14) !important; border-color:rgba(255,59,92,.6) !important; color:#FF6B8A !important; }
+  .lhm-del:hover{ background:rgba(255,59,92,.16) !important; border-color:rgba(255,59,92,.6) !important; }
+  .lhm-select{ appearance:none; -webkit-appearance:none; transition:border-color .14s ease; }
+  .lhm-select:focus{ border-color:#FF2D78 !important; }
+  ::-webkit-scrollbar{ width:8px; height:8px; } ::-webkit-scrollbar-thumb{ background:#2A3160; border-radius:8px; } ::-webkit-scrollbar-track{ background:transparent; }
+</style>
+</helmet>
+
+<!-- ===================== MOBILE FRAME ===================== -->
+<div style="position:absolute; left:0px; top:0px; width:430px;">
+  <div data-drags-parent="1" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:2px; color:#8B92C4; margin-bottom:14px; text-transform:uppercase;">Mobile · Administration</div>
+  <div data-screen-label="Admin Mobile" style="width:430px; height:1180px; background:#0A0E27; border-radius:30px; overflow:hidden; position:relative; box-shadow:0 24px 60px rgba(0,0,0,.45); border:1px solid #1B2350; font-family:'Inter',sans-serif; display:flex; flex-direction:column;">
+
+    <div style="height:5px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); flex-shrink:0;"></div>
+
+    <!-- header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px 10px; flex-shrink:0;">
+      <div style="display:flex; align-items:center; gap:11px;">
+        <span class="lhm-nav" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#8B92C4; cursor:pointer;">←</span>
+        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff;">Administration</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:9px;">
+        <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:1px; color:{{ roleColor }}; background:{{ roleBg }}; border:1px solid {{ roleBd }}; padding:5px 10px; border-radius:999px; text-transform:uppercase;">{{ roleLabel }}</span>
+        <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#fff; border:2px solid #2A3160;">HM</div>
+      </div>
+    </div>
+
+    <!-- scroll -->
+    <div style="flex:1; overflow-y:auto; padding:8px 18px 22px;">
+
+      <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:30px; letter-spacing:-1px; color:#fff; text-transform:uppercase; line-height:1;">Régie</div>
+      <div style="font-size:13px; color:#8B92C4; margin-top:6px; margin-bottom:18px;">La salle de contrôle de la ligue. Synchro MPG, ligues &amp; tournois suivis, attribution des rôles.</div>
+
+      <!-- ===== SYNCHRONISATION MPG ===== -->
+      <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden; margin-bottom:14px;">
+        <div style="height:4px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35);"></div>
+        <div style="padding:18px 17px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="width:4px; height:17px; border-radius:3px; background:linear-gradient(180deg,#6D28D9,#FF2D78);"></span>
+              <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#fff; text-transform:uppercase;">Synchronisation MPG</span>
+            </div>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:8px; letter-spacing:1px; color:#A78BFA; background:rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.4); padding:4px 8px; border-radius:999px; text-transform:uppercase;">API</span>
+          </div>
+
+          <!-- sync button -->
+          <button onClick="{{ doSync }}" class="lhm-btn" style="width:100%; border:none; border-radius:14px; padding:15px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; letter-spacing:1.5px; cursor:pointer; box-shadow:0 8px 22px rgba(255,45,120,.32); transition:transform .12s, filter .12s; display:flex; align-items:center; justify-content:center; gap:10px;">
+            <sc-if value="{{ syncing }}" hint-placeholder-val="{{ false }}"><span style="width:15px; height:15px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation:lhmSpin .7s linear infinite; display:inline-block;"></span>SYNCHRONISATION…</sc-if>
+            <sc-if value="{{ notSyncing }}" hint-placeholder-val="{{ true }}"><span style="width:13px; height:13px; border-radius:50%; border:2px solid #fff;"></span>SYNCHRONISER MPG</sc-if>
+          </button>
+
+          <!-- last sync status -->
+          <sc-if value="{{ lastSyncOk }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; align-items:center; gap:11px; background:#0A0E27; border:1px solid rgba(0,229,160,.32); border-radius:14px; padding:13px 14px; margin-top:13px;">
+              <span style="width:30px; height:30px; flex-shrink:0; border-radius:9px; background:rgba(0,229,160,.13); border:1px solid rgba(0,229,160,.4); display:flex; align-items:center; justify-content:center; color:#00E5A0; font-weight:900; font-size:14px;">✓</span>
+              <div style="flex:1; min-width:0;">
+                <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#00E5A0; letter-spacing:.3px;">Dernière synchro réussie</div>
+                <div style="font-size:11px; color:#8B92C4; margin-top:2px;">{{ lastSyncWhen }} · {{ lastSyncMeta }}</div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ lastSyncErr }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:center; gap:11px; background:#0A0E27; border:1px solid rgba(255,59,92,.34); border-radius:14px; padding:13px 14px; margin-top:13px;">
+              <span style="width:30px; height:30px; flex-shrink:0; border-radius:9px; background:rgba(255,59,92,.13); border:1px solid rgba(255,59,92,.42); display:flex; align-items:center; justify-content:center; color:#FF6B8A; font-weight:900; font-size:14px;">!</span>
+              <div style="flex:1; min-width:0;">
+                <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#FF6B8A; letter-spacing:.3px;">Échec de la dernière synchro</div>
+                <div style="font-size:11px; color:#8B92C4; margin-top:2px;">{{ lastSyncWhen }} · clé API à vérifier</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- cron -->
+          <div style="display:flex; align-items:center; justify-content:space-between; background:#0A0E27; border:1px solid #2A3160; border-radius:14px; padding:13px 14px; margin-top:11px;">
+            <div style="flex:1;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:13px; color:#fff;">Auto-sync (cron)</div>
+                <sc-if value="{{ cronOn }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex; align-items:center; gap:5px; font-family:'Archivo',sans-serif; font-weight:900; font-size:8px; letter-spacing:.5px; color:#00E5A0; background:rgba(0,229,160,.12); border:1px solid rgba(0,229,160,.4); padding:3px 8px; border-radius:999px; text-transform:uppercase;"><span style="width:5px; height:5px; border-radius:50%; background:#00E5A0; animation:lhmPulse 1.6s infinite;"></span>Active</span></sc-if>
+                <sc-if value="{{ cronOff }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:8px; letter-spacing:.5px; color:#8B92C4; background:rgba(139,146,196,.12); border:1px solid #2A3160; padding:3px 8px; border-radius:999px; text-transform:uppercase;">Inactive</span></sc-if>
+              </div>
+              <div style="font-size:11px; color:#8B92C4; margin-top:3px;">Toutes les 6 h · 03:00, 09:00, 15:00, 21:00</div>
+            </div>
+            <button onClick="{{ toggleCron }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0;"><dc-import name="LHMSwitch" on="{{ cronOn }}" hint-size="52px,30px"></dc-import></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== LIGUES SUIVIES ===== -->
+      <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden; margin-bottom:14px;">
+        <div style="height:4px; background:linear-gradient(90deg,#00E5A0,#34D399);"></div>
+        <div style="padding:18px 17px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="width:4px; height:17px; border-radius:3px; background:linear-gradient(180deg,#00E5A0,#34D399);"></span>
+              <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#fff; text-transform:uppercase;">Ligues suivies</span>
+            </div>
+            <span style="font-size:11px; color:#8B92C4; font-weight:600;">{{ leaguesActiveCount }} actives</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:9px;">
+            <sc-for list="{{ leagues }}" as="lg" hint-placeholder-count="4">
+              <div class="lhm-row" style="display:flex; align-items:center; gap:11px; background:#0A0E27; border:1px solid #2A3160; border-radius:14px; padding:12px 13px; transition:border-color .14s;">
+                <div style="width:38px; height:38px; flex-shrink:0; border-radius:11px; background:{{ lg.color }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; color:#fff;">{{ lg.tag }}</div>
+                <div style="flex:1; min-width:0;">
+                  <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ lg.name }}</div>
+                  <div style="font-size:10px; color:#8B92C4; margin-top:2px;">{{ lg.sub }}</div>
+                </div>
+                <button onClick="{{ lg.onToggle }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0; flex-shrink:0;"><dc-import name="LHMSwitch" on="{{ lg.active }}" hint-size="52px,30px"></dc-import></button>
+                <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ lg.onDeleteM }}" class="lhm-del" title="Supprimer" style="width:34px; height:34px; flex-shrink:0; border-radius:10px; border:1px solid rgba(255,59,92,.32); background:rgba(255,59,92,.07); color:#FF6B8A; font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; cursor:pointer; transition:background .14s, border-color .14s; display:flex; align-items:center; justify-content:center;">×</button>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <button onClick="{{ addLeague }}" class="lhm-ghost" style="width:100%; margin-top:11px; border:1px dashed #3A4280; background:transparent; color:#C7CEEF; border-radius:13px; padding:12px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.8px; cursor:pointer; transition:background .14s, border-color .14s, color .14s; display:flex; align-items:center; justify-content:center; gap:8px;"><span style="font-size:15px;">+</span>AJOUTER UNE LIGUE</button>
+        </div>
+      </div>
+
+      <!-- ===== TOURNOIS SUIVIS ===== -->
+      <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden; margin-bottom:14px;">
+        <div style="height:4px; background:linear-gradient(90deg,#6D28D9,#A78BFA);"></div>
+        <div style="padding:18px 17px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="width:4px; height:17px; border-radius:3px; background:linear-gradient(180deg,#6D28D9,#A78BFA);"></span>
+              <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#fff; text-transform:uppercase;">Tournois suivis</span>
+            </div>
+            <span style="font-size:11px; color:#8B92C4; font-weight:600;">Type override</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:9px;">
+            <sc-for list="{{ tournaments }}" as="t" hint-placeholder-count="3">
+              <div class="lhm-row" style="background:#0A0E27; border:1px solid #2A3160; border-radius:14px; padding:12px 13px; transition:border-color .14s;">
+                <div style="display:flex; align-items:center; gap:11px;">
+                  <div style="width:38px; height:38px; flex-shrink:0; border-radius:11px; background:{{ t.color }}; display:flex; align-items:center; justify-content:center; font-size:17px;">{{ t.icon }}</div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#fff; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.name }}</div>
+                    <div style="font-size:10px; color:#8B92C4; margin-top:2px;">{{ t.sub }}</div>
+                  </div>
+                  <button onClick="{{ t.onToggle }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0; flex-shrink:0;"><dc-import name="LHMSwitch" on="{{ t.active }}" hint-size="52px,30px"></dc-import></button>
+                  <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ true }}">
+                    <button onClick="{{ t.onDeleteM }}" class="lhm-del" style="width:34px; height:34px; flex-shrink:0; border-radius:10px; border:1px solid rgba(255,59,92,.32); background:rgba(255,59,92,.07); color:#FF6B8A; font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; cursor:pointer; transition:background .14s, border-color .14s; display:flex; align-items:center; justify-content:center;">×</button>
+                  </sc-if>
+                </div>
+                <div style="display:flex; align-items:center; gap:9px; margin-top:11px; padding-top:11px; border-top:1px solid #2A3160;">
+                  <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:9px; letter-spacing:1px; color:#8B92C4; text-transform:uppercase;">Type de compétition</span>
+                  <div style="position:relative; flex:1;">
+                    <select value="{{ t.type }}" onChange="{{ t.onType }}" class="lhm-select" style="width:100%; box-sizing:border-box; background:#141A3D; border:1px solid #2A3160; color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; padding:9px 30px 9px 12px; border-radius:10px; cursor:pointer; outline:none;">
+                      <option value="LDC">LDC · Champions</option>
+                      <option value="Europa">Europa League</option>
+                      <option value="Conférence">Conférence</option>
+                    </select>
+                    <span style="position:absolute; right:11px; top:50%; transform:translateY(-50%); pointer-events:none; color:#8B92C4; font-size:8px;">▼</span>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <button onClick="{{ addTournament }}" class="lhm-ghost" style="width:100%; margin-top:11px; border:1px dashed #3A4280; background:transparent; color:#C7CEEF; border-radius:13px; padding:12px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.8px; cursor:pointer; transition:background .14s, border-color .14s, color .14s; display:flex; align-items:center; justify-content:center; gap:8px;"><span style="font-size:15px;">+</span>AJOUTER UN TOURNOI</button>
+        </div>
+      </div>
+
+      <!-- ===== GESTION DES RÔLES (Superadmin) ===== -->
+      <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ true }}">
+      <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden;">
+        <div style="height:4px; background:linear-gradient(90deg,#FF2D78,#FF6B35);"></div>
+        <div style="padding:18px 17px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="width:4px; height:17px; border-radius:3px; background:linear-gradient(180deg,#FF2D78,#FF6B35);"></span>
+              <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#fff; text-transform:uppercase;">Gestion des rôles</span>
+            </div>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:8px; letter-spacing:1px; color:#FF6B8A; background:rgba(255,59,92,.12); border:1px solid rgba(255,59,92,.4); padding:4px 8px; border-radius:999px; text-transform:uppercase;">Superadmin</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:9px;">
+            <sc-for list="{{ members }}" as="m" hint-placeholder-count="5">
+              <div class="lhm-row" style="display:flex; align-items:center; gap:11px; background:#0A0E27; border:1px solid #2A3160; border-radius:14px; padding:11px 13px; transition:border-color .14s;">
+                <div style="width:38px; height:38px; flex-shrink:0; border-radius:50%; background:{{ m.color }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#fff;">{{ m.initials }}</div>
+                <div style="flex:1; min-width:0;">
+                  <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ m.name }}</div>
+                  <div style="font-size:10px; color:#8B92C4; margin-top:2px;">{{ m.sub }}</div>
+                </div>
+                <div style="position:relative; flex-shrink:0;">
+                  <select value="{{ m.role }}" onChange="{{ m.onRole }}" class="lhm-select" style="background:#141A3D; border:1px solid #2A3160; color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; padding:9px 28px 9px 12px; border-radius:10px; cursor:pointer; outline:none;">
+                    <option value="Membre">Membre</option>
+                    <option value="Trésorier">Trésorier</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                  <span style="position:absolute; right:10px; top:50%; transform:translateY(-50%); pointer-events:none; color:#8B92C4; font-size:8px;">▼</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- SUPERADMIN divider -->
+          <div style="display:flex; align-items:center; gap:11px; margin:18px 0 12px;">
+            <span style="height:1px; flex:1; background:linear-gradient(90deg,transparent,rgba(255,59,92,.45));"></span>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; letter-spacing:2px; color:#FF6B8A; text-transform:uppercase;">⬩ Superadmin</span>
+            <span style="height:1px; flex:1; background:linear-gradient(90deg,rgba(255,59,92,.45),transparent);"></span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:9px;">
+            <sc-for list="{{ superadmins }}" as="s" hint-placeholder-count="1">
+              <div style="display:flex; align-items:center; gap:11px; background:rgba(255,59,92,.05); border:1px solid rgba(255,59,92,.28); border-radius:14px; padding:11px 13px;">
+                <div style="width:38px; height:38px; flex-shrink:0; border-radius:50%; background:{{ s.color }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#fff;">{{ s.initials }}</div>
+                <div style="flex:1; min-width:0;">
+                  <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff; letter-spacing:.2px;">{{ s.name }}</div>
+                  <div style="font-size:10px; color:#8B92C4; margin-top:2px;">{{ s.sub }}</div>
+                </div>
+                <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:.8px; color:#FF6B8A; background:rgba(255,59,92,.12); border:1px solid rgba(255,59,92,.4); padding:6px 11px; border-radius:999px; text-transform:uppercase;">Superadmin</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:11px; color:#5A6293; margin-top:12px; line-height:1.45;">Le rôle Superadmin ne peut être attribué que depuis la console serveur. Les actions destructives lui sont réservées.</div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- locked role card for ADMIN -->
+      <sc-if value="{{ isAdminOnly }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#141A3D; border:1px dashed #2A3160; border-radius:20px; overflow:hidden;">
+        <div style="padding:20px 17px; display:flex; align-items:center; gap:13px;">
+          <div style="width:42px; height:42px; flex-shrink:0; border-radius:12px; background:rgba(255,59,92,.1); border:1px solid rgba(255,59,92,.32); display:flex; align-items:center; justify-content:center; font-size:19px;">🔒</div>
+          <div style="flex:1;">
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff; letter-spacing:.3px;">Gestion des rôles</div>
+            <div style="font-size:11px; color:#8B92C4; margin-top:4px; line-height:1.45;">Réservé au <b style="color:#FF6B8A;">Superadmin</b>. Tu peux gérer la synchro, les ligues et les tournois.</div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+    </div>
+
+
+    <!-- MOBILE confirm dialog -->
+    <sc-if value="{{ confirmMOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; z-index:50; background:rgba(6,9,26,.74); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:26px;">
+        <div style="width:100%; background:#141A3D; border:1px solid rgba(255,59,92,.4); border-radius:20px; overflow:hidden; box-shadow:0 30px 70px rgba(0,0,0,.6); animation:lhmDlg .18s ease;">
+          <div style="height:4px; background:linear-gradient(90deg,#FF3B5C,#FF6B35);"></div>
+          <div style="padding:22px 20px;">
+            <div style="width:46px; height:46px; border-radius:13px; background:rgba(255,59,92,.12); border:1px solid rgba(255,59,92,.4); display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:14px;">⚠️</div>
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:18px; color:#fff; letter-spacing:-.3px;">Supprimer « {{ confirmName }} » ?</div>
+            <div style="font-size:13px; color:#8B92C4; margin-top:8px; line-height:1.5;">{{ confirmDesc }}</div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+              <button onClick="{{ cancelConfirm }}" class="lhm-ghost" style="flex:1; border:1px solid #2A3160; background:#0A0E27; color:#C7CEEF; border-radius:13px; padding:13px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.8px; cursor:pointer; transition:background .14s, border-color .14s, color .14s; text-transform:uppercase;">Annuler</button>
+              <button onClick="{{ doConfirm }}" class="lhm-btn" style="flex:1.2; border:none; border-radius:13px; padding:13px; background:linear-gradient(90deg,#FF3B5C,#FF6B35); color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.8px; cursor:pointer; box-shadow:0 8px 20px rgba(255,59,92,.32); transition:transform .12s, filter .12s; text-transform:uppercase;">Supprimer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+<!-- ===================== DESKTOP FRAME ===================== -->
+<div style="position:absolute; left:540px; top:0px; width:1320px;">
+  <div data-drags-parent="1" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:2px; color:#8B92C4; margin-bottom:14px; text-transform:uppercase;">Desktop · Administration</div>
+  <div data-screen-label="Admin Desktop" style="width:1320px; height:900px; background:#0A0E27; border-radius:20px; overflow:hidden; position:relative; box-shadow:0 30px 80px rgba(0,0,0,.5); border:1px solid #1B2350; font-family:'Inter',sans-serif; display:flex;">
+
+    <!-- SIDEBAR -->
+    <div style="width:230px; flex-shrink:0; background:#141A3D; border-right:1px solid #2A3160; display:flex; flex-direction:column; padding:22px 16px;">
+      <div style="display:flex; align-items:center; gap:11px; padding:0 8px 18px; margin-bottom:14px; border-bottom:1px solid #2A3160;">
+        <svg viewBox="0 0 360 360" width="38" height="38"><defs><linearGradient id="admLogo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6D28D9"></stop><stop offset="0.55" stop-color="#FF2D78"></stop><stop offset="1" stop-color="#FF6B35"></stop></linearGradient></defs><path d="M180 46 L294 80 L294 210 Q294 298 180 350 Q66 298 66 210 L66 80 Z" fill="url(#admLogo)"></path><text x="180" y="232" text-anchor="middle" font-family="Archivo,'Arial Black',sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-3">LHM</text></svg>
+        <div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#fff; letter-spacing:.3px;">LHM</div><div style="font-size:9px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Saison 2025/2026</div></div>
+      </div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Accueil</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Palmarès</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Rétro</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Cagnotte</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Profil</div>
+      <div style="flex:1;"></div>
+      <div style="border-top:1px solid #2A3160; padding-top:12px;">
+        <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:4px;"><span style="width:15px; height:15px; border-radius:5px; border:2px solid currentColor;"></span>Paramètres</div>
+        <div style="display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px; background:linear-gradient(90deg,#FF2D78,#FF6B35); font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; color:#fff;"><span style="width:15px; height:15px; border-radius:5px; background:#fff;"></span>Admin</div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+      <!-- topbar -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 30px; border-bottom:1px solid #2A3160; flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:24px; letter-spacing:-.5px; color:#fff; text-transform:uppercase;">Administration</div>
+          <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; letter-spacing:1px; color:{{ roleColor }}; background:{{ roleBg }}; border:1px solid {{ roleBd }}; padding:5px 12px; border-radius:999px; text-transform:uppercase;">{{ roleLabel }}</span>
+          <span style="font-size:12px; color:#8B92C4;">La régie de la ligue</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <sc-if value="{{ lastSyncOk }}" hint-placeholder-val="{{ true }}"><span style="display:flex; align-items:center; gap:7px; padding:7px 14px; border-radius:999px; background:#141A3D; border:1px solid rgba(0,229,160,.32); font-size:11px; font-weight:600; color:#00E5A0;"><span style="width:7px; height:7px; border-radius:50%; background:#00E5A0; animation:lhmPulse 1.6s infinite;"></span>Synchro OK · {{ lastSyncWhen }}</span></sc-if>
+          <sc-if value="{{ lastSyncErr }}" hint-placeholder-val="{{ false }}"><span style="display:flex; align-items:center; gap:7px; padding:7px 14px; border-radius:999px; background:#141A3D; border:1px solid rgba(255,59,92,.34); font-size:11px; font-weight:600; color:#FF6B8A;"><span style="width:7px; height:7px; border-radius:50%; background:#FF6B8A;"></span>Synchro en échec</span></sc-if>
+          <div style="text-align:right;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff;">Hubert Mange</div><div style="font-size:10px; color:#8B92C4;">{{ roleLabel }} · Fondateur</div></div>
+          <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#fff;">HM</div>
+        </div>
+      </div>
+
+      <!-- content -->
+      <div style="flex:1; overflow-y:auto; padding:26px 30px 30px;">
+        <div style="display:grid; grid-template-columns:1.15fr .85fr; gap:22px; align-items:start;">
+
+          <!-- ===== LEFT COLUMN ===== -->
+          <div style="display:flex; flex-direction:column; gap:22px;">
+
+            <!-- Synchronisation MPG -->
+            <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden;">
+              <div style="height:4px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35);"></div>
+              <div style="padding:24px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+                  <div style="display:flex; align-items:center; gap:11px;">
+                    <span style="width:5px; height:20px; border-radius:3px; background:linear-gradient(180deg,#6D28D9,#FF2D78);"></span>
+                    <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; letter-spacing:.5px; color:#fff; text-transform:uppercase;">Synchronisation MPG</span>
+                  </div>
+                  <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:1px; color:#A78BFA; background:rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.4); padding:5px 11px; border-radius:999px; text-transform:uppercase;">API · Mon Petit Gazon</span>
+                </div>
+
+                <div style="display:flex; gap:16px; align-items:stretch;">
+                  <button onClick="{{ doSync }}" class="lhm-btn" style="flex:0 0 270px; border:none; border-radius:15px; padding:18px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; letter-spacing:1.5px; cursor:pointer; box-shadow:0 10px 26px rgba(255,45,120,.32); transition:transform .12s, filter .12s; display:flex; align-items:center; justify-content:center; gap:11px;">
+                    <sc-if value="{{ syncing }}" hint-placeholder-val="{{ false }}"><span style="width:17px; height:17px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation:lhmSpin .7s linear infinite; display:inline-block;"></span>SYNCHRONISATION…</sc-if>
+                    <sc-if value="{{ notSyncing }}" hint-placeholder-val="{{ true }}"><span style="width:14px; height:14px; border-radius:50%; border:2px solid #fff;"></span>SYNCHRONISER MPG</sc-if>
+                  </button>
+
+                  <sc-if value="{{ lastSyncOk }}" hint-placeholder-val="{{ true }}">
+                    <div style="flex:1; display:flex; align-items:center; gap:13px; background:#0A0E27; border:1px solid rgba(0,229,160,.32); border-radius:15px; padding:16px 18px;">
+                      <span style="width:38px; height:38px; flex-shrink:0; border-radius:11px; background:rgba(0,229,160,.13); border:1px solid rgba(0,229,160,.4); display:flex; align-items:center; justify-content:center; color:#00E5A0; font-weight:900; font-size:17px;">✓</span>
+                      <div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#00E5A0; letter-spacing:.3px;">Dernière synchro réussie</div><div style="font-size:12px; color:#8B92C4; margin-top:3px;">{{ lastSyncWhen }} · {{ lastSyncMeta }}</div></div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ lastSyncErr }}" hint-placeholder-val="{{ false }}">
+                    <div style="flex:1; display:flex; align-items:center; gap:13px; background:#0A0E27; border:1px solid rgba(255,59,92,.34); border-radius:15px; padding:16px 18px;">
+                      <span style="width:38px; height:38px; flex-shrink:0; border-radius:11px; background:rgba(255,59,92,.13); border:1px solid rgba(255,59,92,.42); display:flex; align-items:center; justify-content:center; color:#FF6B8A; font-weight:900; font-size:17px;">!</span>
+                      <div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#FF6B8A; letter-spacing:.3px;">Échec de la dernière synchro</div><div style="font-size:12px; color:#8B92C4; margin-top:3px;">{{ lastSyncWhen }} · vérifie la clé API MPG</div></div>
+                    </div>
+                  </sc-if>
+                </div>
+
+                <div style="display:flex; align-items:center; justify-content:space-between; background:#0A0E27; border:1px solid #2A3160; border-radius:15px; padding:15px 18px; margin-top:14px;">
+                  <div style="display:flex; align-items:center; gap:13px;">
+                    <div style="width:38px; height:38px; flex-shrink:0; border-radius:11px; background:rgba(167,139,250,.1); border:1px solid rgba(167,139,250,.3); display:flex; align-items:center; justify-content:center; font-size:18px;">⏱</div>
+                    <div>
+                      <div style="display:flex; align-items:center; gap:9px;">
+                        <span style="font-family:'Inter',sans-serif; font-weight:700; font-size:14px; color:#fff;">Auto-sync (cron)</span>
+                        <sc-if value="{{ cronOn }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex; align-items:center; gap:5px; font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:.5px; color:#00E5A0; background:rgba(0,229,160,.12); border:1px solid rgba(0,229,160,.4); padding:4px 9px; border-radius:999px; text-transform:uppercase;"><span style="width:5px; height:5px; border-radius:50%; background:#00E5A0; animation:lhmPulse 1.6s infinite;"></span>Active</span></sc-if>
+                        <sc-if value="{{ cronOff }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:.5px; color:#8B92C4; background:rgba(139,146,196,.12); border:1px solid #2A3160; padding:4px 9px; border-radius:999px; text-transform:uppercase;">Inactive</span></sc-if>
+                      </div>
+                      <div style="font-size:12px; color:#8B92C4; margin-top:3px;">Synchro automatique toutes les 6 h · 03:00 / 09:00 / 15:00 / 21:00</div>
+                    </div>
+                  </div>
+                  <button onClick="{{ toggleCron }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0;"><dc-import name="LHMSwitch" on="{{ cronOn }}" hint-size="52px,30px"></dc-import></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ligues suivies -->
+            <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden;">
+              <div style="height:4px; background:linear-gradient(90deg,#00E5A0,#34D399);"></div>
+              <div style="padding:24px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+                  <div style="display:flex; align-items:center; gap:11px;">
+                    <span style="width:5px; height:20px; border-radius:3px; background:linear-gradient(180deg,#00E5A0,#34D399);"></span>
+                    <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; letter-spacing:.5px; color:#fff; text-transform:uppercase;">Ligues suivies</span>
+                  </div>
+                  <span style="font-size:12px; color:#8B92C4; font-weight:600;">{{ leaguesActiveCount }} actives sur {{ leaguesCount }}</span>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                  <sc-for list="{{ leagues }}" as="lg" hint-placeholder-count="4">
+                    <div class="lhm-row" style="display:flex; align-items:center; gap:14px; background:#0A0E27; border:1px solid #2A3160; border-radius:15px; padding:13px 16px; transition:border-color .14s;">
+                      <div style="width:42px; height:42px; flex-shrink:0; border-radius:12px; background:{{ lg.color }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#fff;">{{ lg.tag }}</div>
+                      <div style="flex:1; min-width:0;">
+                        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff; letter-spacing:.2px;">{{ lg.name }}</div>
+                        <div style="font-size:11px; color:#8B92C4; margin-top:2px;">{{ lg.sub }}</div>
+                      </div>
+                      <button onClick="{{ lg.onToggle }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0; flex-shrink:0;"><dc-import name="LHMSwitch" on="{{ lg.active }}" hint-size="52px,30px"></dc-import></button>
+                      <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ true }}">
+                        <button onClick="{{ lg.onDeleteD }}" class="lhm-del" title="Supprimer" style="width:38px; height:38px; flex-shrink:0; border-radius:11px; border:1px solid rgba(255,59,92,.32); background:rgba(255,59,92,.07); color:#FF6B8A; font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; cursor:pointer; transition:background .14s, border-color .14s; display:flex; align-items:center; justify-content:center;">×</button>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <button onClick="{{ addLeague }}" class="lhm-ghost" style="width:100%; margin-top:13px; border:1px dashed #3A4280; background:transparent; color:#C7CEEF; border-radius:14px; padding:13px; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:.8px; cursor:pointer; transition:background .14s, border-color .14s, color .14s; display:flex; align-items:center; justify-content:center; gap:9px;"><span style="font-size:16px;">+</span>AJOUTER UNE LIGUE</button>
+              </div>
+            </div>
+
+            <!-- Tournois suivis -->
+            <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden;">
+              <div style="height:4px; background:linear-gradient(90deg,#6D28D9,#A78BFA);"></div>
+              <div style="padding:24px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+                  <div style="display:flex; align-items:center; gap:11px;">
+                    <span style="width:5px; height:20px; border-radius:3px; background:linear-gradient(180deg,#6D28D9,#A78BFA);"></span>
+                    <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; letter-spacing:.5px; color:#fff; text-transform:uppercase;">Tournois suivis</span>
+                  </div>
+                  <span style="font-size:12px; color:#8B92C4; font-weight:600;">Type override manuel</span>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                  <sc-for list="{{ tournaments }}" as="t" hint-placeholder-count="3">
+                    <div class="lhm-row" style="display:flex; align-items:center; gap:14px; background:#0A0E27; border:1px solid #2A3160; border-radius:15px; padding:13px 16px; transition:border-color .14s;">
+                      <div style="width:42px; height:42px; flex-shrink:0; border-radius:12px; background:{{ t.color }}; display:flex; align-items:center; justify-content:center; font-size:19px;">{{ t.icon }}</div>
+                      <div style="flex:1; min-width:0;">
+                        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff; letter-spacing:.2px;">{{ t.name }}</div>
+                        <div style="font-size:11px; color:#8B92C4; margin-top:2px;">{{ t.sub }}</div>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                        <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:9px; letter-spacing:1px; color:#5A6293; text-transform:uppercase;">Type</span>
+                        <div style="position:relative;">
+                          <select value="{{ t.type }}" onChange="{{ t.onType }}" class="lhm-select" style="background:#141A3D; border:1px solid #2A3160; color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; padding:9px 30px 9px 13px; border-radius:11px; cursor:pointer; outline:none;">
+                            <option value="LDC">LDC · Champions</option>
+                            <option value="Europa">Europa League</option>
+                            <option value="Conférence">Conférence</option>
+                          </select>
+                          <span style="position:absolute; right:11px; top:50%; transform:translateY(-50%); pointer-events:none; color:#8B92C4; font-size:8px;">▼</span>
+                        </div>
+                      </div>
+                      <button onClick="{{ t.onToggle }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0; flex-shrink:0;"><dc-import name="LHMSwitch" on="{{ t.active }}" hint-size="52px,30px"></dc-import></button>
+                      <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ true }}">
+                        <button onClick="{{ t.onDeleteD }}" class="lhm-del" title="Supprimer" style="width:38px; height:38px; flex-shrink:0; border-radius:11px; border:1px solid rgba(255,59,92,.32); background:rgba(255,59,92,.07); color:#FF6B8A; font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; cursor:pointer; transition:background .14s, border-color .14s; display:flex; align-items:center; justify-content:center;">×</button>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <button onClick="{{ addTournament }}" class="lhm-ghost" style="width:100%; margin-top:13px; border:1px dashed #3A4280; background:transparent; color:#C7CEEF; border-radius:14px; padding:13px; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:.8px; cursor:pointer; transition:background .14s, border-color .14s, color .14s; display:flex; align-items:center; justify-content:center; gap:9px;"><span style="font-size:16px;">+</span>AJOUTER UN TOURNOI</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== RIGHT COLUMN ===== -->
+          <div style="display:flex; flex-direction:column; gap:22px;">
+
+            <!-- Gestion des rôles (Superadmin) -->
+            <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ true }}">
+            <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden;">
+              <div style="height:4px; background:linear-gradient(90deg,#FF2D78,#FF6B35);"></div>
+              <div style="padding:24px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                  <div style="display:flex; align-items:center; gap:11px;">
+                    <span style="width:5px; height:20px; border-radius:3px; background:linear-gradient(180deg,#FF2D78,#FF6B35);"></span>
+                    <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; letter-spacing:.5px; color:#fff; text-transform:uppercase;">Gestion des rôles</span>
+                  </div>
+                  <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:1px; color:#FF6B8A; background:rgba(255,59,92,.12); border:1px solid rgba(255,59,92,.4); padding:5px 11px; border-radius:999px; text-transform:uppercase;">Superadmin</span>
+                </div>
+                <div style="font-size:12px; color:#8B92C4; margin-bottom:18px;">Attribue Membre, Trésorier ou Admin à chaque manager.</div>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                  <sc-for list="{{ members }}" as="m" hint-placeholder-count="5">
+                    <div class="lhm-row" style="display:flex; align-items:center; gap:13px; background:#0A0E27; border:1px solid #2A3160; border-radius:15px; padding:12px 15px; transition:border-color .14s;">
+                      <div style="width:42px; height:42px; flex-shrink:0; border-radius:50%; background:{{ m.color }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff;">{{ m.initials }}</div>
+                      <div style="flex:1; min-width:0;">
+                        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff; letter-spacing:.2px;">{{ m.name }}</div>
+                        <div style="font-size:11px; color:#8B92C4; margin-top:2px;">{{ m.sub }}</div>
+                      </div>
+                      <div style="position:relative; flex-shrink:0;">
+                        <select value="{{ m.role }}" onChange="{{ m.onRole }}" class="lhm-select" style="background:#141A3D; border:1px solid #2A3160; color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.5px; padding:10px 32px 10px 14px; border-radius:11px; cursor:pointer; outline:none;">
+                          <option value="Membre">Membre</option>
+                          <option value="Trésorier">Trésorier</option>
+                          <option value="Admin">Admin</option>
+                        </select>
+                        <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:#8B92C4; font-size:8px;">▼</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <!-- SUPERADMIN divider -->
+                <div style="display:flex; align-items:center; gap:12px; margin:20px 0 13px;">
+                  <span style="height:1px; flex:1; background:linear-gradient(90deg,transparent,rgba(255,59,92,.45));"></span>
+                  <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:2.5px; color:#FF6B8A; text-transform:uppercase;">⬩ Superadmin ⬩</span>
+                  <span style="height:1px; flex:1; background:linear-gradient(90deg,rgba(255,59,92,.45),transparent);"></span>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                  <sc-for list="{{ superadmins }}" as="s" hint-placeholder-count="1">
+                    <div style="display:flex; align-items:center; gap:13px; background:rgba(255,59,92,.05); border:1px solid rgba(255,59,92,.28); border-radius:15px; padding:12px 15px;">
+                      <div style="width:42px; height:42px; flex-shrink:0; border-radius:50%; background:{{ s.color }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff;">{{ s.initials }}</div>
+                      <div style="flex:1; min-width:0;">
+                        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff; letter-spacing:.2px;">{{ s.name }}</div>
+                        <div style="font-size:11px; color:#8B92C4; margin-top:2px;">{{ s.sub }}</div>
+                      </div>
+                      <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; letter-spacing:.8px; color:#FF6B8A; background:rgba(255,59,92,.12); border:1px solid rgba(255,59,92,.4); padding:7px 13px; border-radius:999px; text-transform:uppercase;">Superadmin</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="font-size:12px; color:#5A6293; margin-top:14px; line-height:1.5; padding-top:14px; border-top:1px solid #2A3160;">Le rôle <b style="color:#8B92C4;">Superadmin</b> ne s'attribue que depuis la console serveur. Les actions destructives (suppression de ligue ou de tournoi) lui sont réservées.</div>
+              </div>
+            </div>
+            </sc-if>
+
+            <!-- locked role card for ADMIN -->
+            <sc-if value="{{ isAdminOnly }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#141A3D; border:1px dashed #2A3160; border-radius:20px; overflow:hidden;">
+              <div style="height:4px; background:linear-gradient(90deg,#2A3160,#3A4280);"></div>
+              <div style="padding:30px 26px; text-align:center;">
+                <div style="width:60px; height:60px; margin:0 auto 18px; border-radius:17px; background:rgba(255,59,92,.1); border:1px solid rgba(255,59,92,.32); display:flex; align-items:center; justify-content:center; font-size:27px;">🔒</div>
+                <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:19px; color:#fff; text-transform:uppercase; letter-spacing:.3px;">Gestion des rôles</div>
+                <div style="font-size:13px; color:#8B92C4; margin-top:10px; line-height:1.55; max-width:340px; margin-left:auto; margin-right:auto;">Cette section est réservée au <b style="color:#FF6B8A;">Superadmin</b>. En tant qu'<b style="color:#fff;">Admin</b>, tu pilotes la synchro MPG, les ligues et les tournois suivis.</div>
+                <div style="display:inline-flex; align-items:center; gap:8px; margin-top:18px; padding:9px 16px; border-radius:999px; background:#0A0E27; border:1px solid #2A3160; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; color:#8B92C4; text-transform:uppercase;"><span style="width:7px; height:7px; border-radius:50%; background:#A78BFA;"></span>Accès Admin</div>
+              </div>
+            </div>
+            </sc-if>
+
+            <!-- control room note -->
+            <div style="display:flex; align-items:center; gap:14px; background:linear-gradient(135deg,#1B2350,#141A3D); border:1px dashed #2A3160; border-radius:18px; padding:18px 20px;">
+              <div style="width:42px; height:42px; border-radius:12px; background:rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.35); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">🛰️</div>
+              <div style="flex:1;">
+                <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#fff; letter-spacing:.3px;">Régie connectée à MPG</div>
+                <div style="font-size:11px; color:#8B92C4; margin-top:3px; line-height:1.45;">Les données de cotes, journées et résultats sont tirées de l'API Mon Petit Gazon à chaque synchro.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESKTOP confirm dialog -->
+    <sc-if value="{{ confirmDOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; z-index:50; background:rgba(6,9,26,.72); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:40px;">
+        <div style="width:440px; background:#141A3D; border:1px solid rgba(255,59,92,.4); border-radius:22px; overflow:hidden; box-shadow:0 40px 90px rgba(0,0,0,.6); animation:lhmDlg .18s ease;">
+          <div style="height:4px; background:linear-gradient(90deg,#FF3B5C,#FF6B35);"></div>
+          <div style="padding:28px 26px;">
+            <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+              <div style="width:50px; height:50px; flex-shrink:0; border-radius:14px; background:rgba(255,59,92,.12); border:1px solid rgba(255,59,92,.4); display:flex; align-items:center; justify-content:center; font-size:24px;">⚠️</div>
+              <div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:1.5px; color:#FF6B8A; text-transform:uppercase;">Action Superadmin · irréversible</div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:21px; color:#fff; letter-spacing:-.3px; margin-top:4px;">Supprimer « {{ confirmName }} » ?</div></div>
+            </div>
+            <div style="font-size:13px; color:#8B92C4; line-height:1.55;">{{ confirmDesc }}</div>
+            <div style="display:flex; gap:12px; margin-top:24px;">
+              <button onClick="{{ cancelConfirm }}" class="lhm-ghost" style="flex:1; border:1px solid #2A3160; background:#0A0E27; color:#C7CEEF; border-radius:13px; padding:14px; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:.8px; cursor:pointer; transition:background .14s, border-color .14s, color .14s; text-transform:uppercase;">Annuler</button>
+              <button onClick="{{ doConfirm }}" class="lhm-btn" style="flex:1.2; border:none; border-radius:13px; padding:14px; background:linear-gradient(90deg,#FF3B5C,#FF6B35); color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:.8px; cursor:pointer; box-shadow:0 10px 24px rgba(255,59,92,.32); transition:transform .12s, filter .12s; text-transform:uppercase;">Supprimer définitivement</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;SUPERADMIN&quot;,&quot;ADMIN&quot;],&quot;default&quot;:&quot;SUPERADMIN&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Accès&quot;},&quot;syncStatus&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;success&quot;,&quot;error&quot;],&quot;default&quot;:&quot;success&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Synchro MPG&quot;},&quot;cronActive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Synchro MPG&quot;}}">
+class Component extends DCLogic {
+  state = {
+    syncing: false,
+    lastSync: null,
+    cron: true,
+    cronTouched: false,
+    confirm: null,
+    leagues: [
+      { id: "l1", name: "Ligue 1 McDonald's", sub: "France · 18 clubs", tag: "L1", color: "linear-gradient(135deg,#0A2472,#2A6FDB)", active: true },
+      { id: "l2", name: "Premier League", sub: "Angleterre · 20 clubs", tag: "PL", color: "linear-gradient(135deg,#3D1A6E,#A78BFA)", active: true },
+      { id: "l3", name: "La Liga", sub: "Espagne · 20 clubs", tag: "LL", color: "linear-gradient(135deg,#B91C1C,#FF6B35)", active: false },
+      { id: "l4", name: "Serie A", sub: "Italie · 20 clubs", tag: "SA", color: "linear-gradient(135deg,#0E5A3C,#00E5A0)", active: true },
+    ],
+    tournaments: [
+      { id: "t1", name: "UEFA Champions League", sub: "Phase de ligue · 36 équipes", icon: "🏆", color: "linear-gradient(135deg,#2D1B69,#6D28D9)", type: "LDC", active: true },
+      { id: "t2", name: "UEFA Europa League", sub: "Phase de ligue · 36 équipes", icon: "🥈", color: "linear-gradient(135deg,#B45309,#FF6B35)", type: "Europa", active: true },
+      { id: "t3", name: "Conference League", sub: "Phase de ligue · 36 équipes", icon: "🥉", color: "linear-gradient(135deg,#0E5A3C,#34D399)", type: "Conférence", active: false },
+    ],
+    members: [
+      { id: "m1", name: "Julien Dupont", sub: "Division 1 · membre depuis 2021", initials: "JD", color: "linear-gradient(135deg,#6D28D9,#FF2D78)", role: "Admin" },
+      { id: "m2", name: "Marc Leroy", sub: "Division 1 · membre depuis 2022", initials: "ML", color: "linear-gradient(135deg,#FF6B35,#FFD23F)", role: "Trésorier" },
+      { id: "m3", name: "Sophie Bernard", sub: "Division 2 · membre depuis 2023", initials: "SB", color: "linear-gradient(135deg,#00E5A0,#34D399)", role: "Membre" },
+      { id: "m4", name: "Karim Haddad", sub: "Division 1 · membre depuis 2021", initials: "KH", color: "linear-gradient(135deg,#A78BFA,#6D28D9)", role: "Membre" },
+      { id: "m5", name: "Léa Moreau", sub: "Division 3 · membre depuis 2024", initials: "LM", color: "linear-gradient(135deg,#FF2D78,#A78BFA)", role: "Membre" },
+    ],
+    superadmins: [
+      { id: "s1", name: "Hubert Mange", sub: "Fondateur de la ligue · toi", initials: "HM", color: "linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35)" },
+    ],
+  };
+
+  doSync = () => {
+    if (this.state.syncing) return;
+    this.setState({ syncing: true });
+    clearTimeout(this._st);
+    this._st = setTimeout(() => {
+      const n = 280 + Math.floor(Math.random() * 120);
+      this.setState({ syncing: false, lastSync: { ok: true, when: "À l'instant", meta: n + " cotes mises à jour" } });
+    }, 2000);
+  };
+
+  toggleCron = () => this.setState((s) => {
+    const cur = s.cronTouched ? s.cron : (this.props.cronActive ?? true);
+    return { cronTouched: true, cron: !cur };
+  });
+
+  addLeague = () => this.setState((s) => ({
+    leagues: [...s.leagues, { id: "l" + Date.now(), name: "Nouvelle ligue MPG", sub: "À configurer · import API", tag: "??", color: "linear-gradient(135deg,#2A3160,#3A4280)", active: false }],
+  }));
+
+  addTournament = () => this.setState((s) => ({
+    tournaments: [...s.tournaments, { id: "t" + Date.now(), name: "Nouveau tournoi", sub: "À configurer · import API", icon: "🎯", color: "linear-gradient(135deg,#2A3160,#3A4280)", type: "LDC", active: false }],
+  }));
+
+  askDelete = (frame, kind, id, name) => this.setState({ confirm: { frame, kind, id, name } });
+  cancelConfirm = () => this.setState({ confirm: null });
+  doConfirm = () => {
+    const c = this.state.confirm;
+    if (!c) return;
+    if (c.kind === "league") this.setState((s) => ({ leagues: s.leagues.filter((x) => x.id !== c.id), confirm: null }));
+    else this.setState((s) => ({ tournaments: s.tournaments.filter((x) => x.id !== c.id), confirm: null }));
+  };
+
+  componentWillUnmount() { clearTimeout(this._st); }
+
+  renderVals() {
+    const role = this.props.role ?? "SUPERADMIN";
+    const isSuper = role === "SUPERADMIN";
+
+    const roleColor = isSuper ? "#FF6B8A" : "#A78BFA";
+    const roleBg = isSuper ? "rgba(255,59,92,.12)" : "rgba(167,139,250,.12)";
+    const roleBd = isSuper ? "rgba(255,59,92,.4)" : "rgba(167,139,250,.4)";
+
+    const ls = this.state.lastSync || (this.props.syncStatus === "error"
+      ? { ok: false, when: "Hier · 23:14" }
+      : { ok: true, when: "Aujourd'hui · 08:42", meta: "342 cotes mises à jour" });
+
+    const cronOn = this.state.cronTouched ? this.state.cron : (this.props.cronActive ?? true);
+
+    const leagues = this.state.leagues.map((l) => ({
+      ...l,
+      onToggle: () => this.setState((s) => ({ leagues: s.leagues.map((x) => x.id === l.id ? { ...x, active: !x.active } : x) })),
+      onDeleteM: () => this.askDelete("m", "league", l.id, l.name),
+      onDeleteD: () => this.askDelete("d", "league", l.id, l.name),
+    }));
+
+    const tournaments = this.state.tournaments.map((t) => ({
+      ...t,
+      onToggle: () => this.setState((s) => ({ tournaments: s.tournaments.map((x) => x.id === t.id ? { ...x, active: !x.active } : x) })),
+      onType: (e) => { const v = e.target.value; this.setState((s) => ({ tournaments: s.tournaments.map((x) => x.id === t.id ? { ...x, type: v } : x) })); },
+      onDeleteM: () => this.askDelete("m", "tournament", t.id, t.name),
+      onDeleteD: () => this.askDelete("d", "tournament", t.id, t.name),
+    }));
+
+    const members = this.state.members.map((m) => ({
+      ...m,
+      onRole: (e) => { const v = e.target.value; this.setState((s) => ({ members: s.members.map((x) => x.id === m.id ? { ...x, role: v } : x) })); },
+    }));
+
+    const c = this.state.confirm;
+    const confirmDesc = c
+      ? (c.kind === "league"
+          ? "Cette ligue ne sera plus suivie ni synchronisée avec MPG. Les données associées resteront en base mais ne seront plus mises à jour."
+          : "Ce tournoi ne sera plus suivi. Le type de compétition associé (LDC / Europa / Conférence) sera perdu.")
+      : "";
+
+    return {
+      isSuper, isAdminOnly: !isSuper,
+      roleLabel: role, roleColor, roleBg, roleBd,
+      syncing: this.state.syncing, notSyncing: !this.state.syncing, doSync: this.doSync,
+      lastSyncOk: ls.ok, lastSyncErr: !ls.ok, lastSyncWhen: ls.when, lastSyncMeta: ls.meta || "",
+      cronOn, cronOff: !cronOn, toggleCron: this.toggleCron,
+      leagues, addLeague: this.addLeague,
+      leaguesCount: this.state.leagues.length,
+      leaguesActiveCount: this.state.leagues.filter((x) => x.active).length,
+      tournaments, addTournament: this.addTournament,
+      members, superadmins: this.state.superadmins,
+      confirmMOpen: !!c && c.frame === "m", confirmDOpen: !!c && c.frame === "d",
+      confirmName: c ? c.name : "", confirmDesc,
+      cancelConfirm: this.cancelConfirm, doConfirm: this.doConfirm,
+    };
+  }
+}
+</script>
+</body>
+</html>

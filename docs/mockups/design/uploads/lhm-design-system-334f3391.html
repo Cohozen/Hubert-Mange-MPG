@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LHM — Design System Broadcast</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Archivo:wght@600;700;800;900&display=swap');
+
+:root{
+  /* Couleurs de marque */
+  --violet:#6D28D9;
+  --violet-clair:#A78BFA;
+  --rose:#FF2D78;
+  --orange:#FF6B35;
+  --menthe:#00E5A0;
+  --jaune:#FFD23F;
+  --rouge:#FF3B5C;
+  /* Surfaces dark */
+  --nuit:#0A0E27;
+  --carte:#141A3D;
+  --carte-2:#1B2350;
+  --bord:#2A3160;
+  /* Surfaces light */
+  --light-bg:#F4F5FB;
+  --light-carte:#FFFFFF;
+  --light-bord:#E2E5F0;
+  /* Texte */
+  --texte:#FFFFFF;
+  --texte-2:#8B92C4;
+  --texte-light:#1A1F3D;
+  --texte-light-2:#6A7299;
+  /* Gradients */
+  --grad-energy:linear-gradient(90deg,#FF2D78,#FF6B35);
+  --grad-banner:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35);
+  --grad-primary:linear-gradient(135deg,#2D1B69,#6D28D9);
+  --grad-lime:linear-gradient(90deg,#00E5A0,#34D399);
+  --grad-shield:linear-gradient(135deg,#6D28D9 0%,#FF2D78 55%,#FF6B35 100%);
+  /* Rayons */
+  --r-sm:10px; --r-md:16px; --r-lg:20px; --r-xl:24px; --r-pill:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--nuit);color:var(--texte);font-family:'Inter',sans-serif;line-height:1.5;padding-bottom:80px}
+.display{font-family:'Archivo','Inter',sans-serif;font-weight:900;letter-spacing:-0.02em}
+.mono{font-family:'Courier New',monospace}
+
+.topbar-grad{height:6px;background:var(--grad-banner)}
+.header{display:flex;align-items:center;gap:14px;padding:24px 28px}
+.h-logo{display:flex;align-items:center;gap:13px}
+.logo-mark{width:46px;height:52px;flex-shrink:0}
+.logo-lhm{font-family:'Archivo';font-weight:900;font-size:28px;letter-spacing:-1px}
+.logo-divider{width:3px;height:28px;background:var(--rose);border-radius:2px}
+.logo-text{font-size:13px;font-weight:700;color:var(--menthe);letter-spacing:1px}
+.logo-sub{font-size:11px;color:var(--texte-2);letter-spacing:.5px}
+
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+.section{margin-top:52px}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.section-title{font-family:'Archivo';font-weight:900;font-size:14px;letter-spacing:2px}
+.section-bar{width:40px;height:3px;border-radius:2px}
+.subsection{font-family:'Archivo';font-weight:800;font-size:11px;letter-spacing:1.5px;color:var(--texte-2);margin:24px 0 14px}
+
+/* palette */
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.swatch{height:108px;border-radius:var(--r-md);padding:14px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;border:1.5px solid transparent}
+.swatch .nm{font-size:11px;font-weight:800;font-family:'Archivo'}
+.swatch .hx{font-family:monospace;font-size:10px;opacity:.85;margin-top:2px}
+.swatch .role{font-size:9px;opacity:.75;margin-top:4px;line-height:1.3}
+.grad-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.grad-card{height:72px;border-radius:var(--r-md);padding:12px;display:flex;flex-direction:column;justify-content:flex-end}
+.grad-card .nm{font-size:11px;font-weight:800;font-family:'Archivo';color:#fff}
+.grad-card .var{font-family:monospace;font-size:9px;color:rgba(255,255,255,.85);margin-top:2px}
+
+/* typo */
+.type-card{background:var(--carte);border-radius:var(--r-md);padding:24px 26px;position:relative;overflow:hidden;margin-bottom:14px;border:1.5px solid var(--bord)}
+.type-card .accent{position:absolute;left:0;top:0;bottom:0;width:6px}
+.type-usage{font-family:'Archivo';font-weight:900;font-size:12px;letter-spacing:1px;margin-top:10px}
+.type-note{font-size:11px;color:var(--texte-2);margin-top:4px}
+.type-scale{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--bord)}
+.type-scale span{font-size:11px;color:var(--texte-2)}
+.type-scale b{color:#fff;font-weight:600}
+
+/* buttons */
+.btn-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px;align-items:center}
+.btn{border:none;border-radius:var(--r-pill);padding:13px 26px;font-family:'Archivo';font-weight:900;font-size:13px;letter-spacing:.5px;cursor:pointer;color:#fff}
+.btn-primary{background:var(--grad-energy)}
+.btn-violet{background:var(--violet)}
+.btn-outline{background:transparent;border:2px solid var(--menthe);color:var(--menthe)}
+.btn-ghost{background:var(--carte);border:1.5px solid var(--bord);color:var(--texte-2);font-family:'Inter';font-weight:600}
+.btn-danger{background:var(--rouge)}
+.btn-sm{padding:9px 18px;font-size:11px}
+
+/* badges */
+.badge-row{display:flex;flex-wrap:wrap;gap:10px}
+.badge{border-radius:var(--r-pill);padding:7px 16px;font-size:11px;font-weight:700}
+.badge-champ{background:var(--grad-banner);color:#fff;font-family:'Archivo';font-weight:900}
+.badge-ldc{background:var(--menthe);color:var(--nuit);font-family:'Archivo';font-weight:900}
+.badge-europa{background:var(--jaune);color:#3D2E00;font-family:'Archivo';font-weight:900}
+.badge-conf{background:var(--violet-clair);color:var(--nuit);font-family:'Archivo';font-weight:900}
+.badge-admin{background:var(--rose);color:#fff}
+.badge-tres{background:var(--carte);border:1.5px solid var(--bord);color:var(--texte-2)}
+.badge-member{background:var(--carte-2);color:var(--texte-2)}
+
+/* cards grid */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.cards{grid-template-columns:1fr}.palette{grid-template-columns:repeat(3,1fr)}.grad-strip{grid-template-columns:repeat(2,1fr)}}
+
+.player-card{background:var(--carte);border-radius:var(--r-lg);overflow:hidden;position:relative;border:1.5px solid var(--bord)}
+.player-card .pc-top{height:6px;background:var(--grad-energy)}
+.player-card .pc-body{padding:22px;display:flex;align-items:center;gap:16px}
+.avatar{width:62px;height:62px;border-radius:50%;background:var(--grad-banner);display:flex;align-items:center;justify-content:center;font-family:'Archivo';font-weight:900;font-size:22px;flex-shrink:0}
+.pc-name{font-family:'Archivo';font-weight:900;font-size:22px;letter-spacing:-.5px}
+.pc-div{font-size:12px;font-weight:600;color:var(--menthe);margin-top:2px}
+.pc-stars{color:var(--orange);font-size:15px;margin-top:4px}
+.pc-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1.5px solid var(--bord);padding:16px 22px}
+.pc-stat{text-align:center}
+.pc-stat .v{font-family:'Archivo';font-weight:900;font-size:20px}
+.pc-stat .l{font-size:9px;font-weight:600;color:var(--texte-2);letter-spacing:.5px;margin-top:2px}
+
+.rank-card{background:var(--grad-primary);border-radius:var(--r-lg);padding:24px;position:relative;overflow:hidden}
+.rank-label{font-size:11px;font-weight:700;color:var(--violet-clair);letter-spacing:1px}
+.rank-big{display:flex;align-items:baseline;gap:14px;margin:8px 0 16px}
+.rank-num{font-family:'Archivo';font-weight:900;font-size:60px;line-height:.9}
+.rank-delta{font-family:'Archivo';font-weight:900;font-size:20px;color:var(--menthe)}
+.rank-bar{height:8px;border-radius:4px;background:rgba(10,14,39,.4);overflow:hidden}
+.rank-bar i{display:block;height:100%;width:72%;background:var(--grad-lime);border-radius:4px}
+.rank-meta{font-size:11px;color:var(--violet-clair);margin-top:10px}
+
+.score-strip{background:var(--carte);border-radius:var(--r-md);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;margin-top:16px;position:relative;overflow:hidden;border:1.5px solid var(--bord)}
+.score-strip::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--grad-energy)}
+.score-team{display:flex;align-items:center;gap:12px}
+.score-team .badge-mini{width:38px;height:38px;border-radius:10px;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;font-family:'Archivo';font-weight:900;font-size:14px}
+.score-num{font-family:'Archivo';font-weight:900;font-size:30px}
+.score-vs{font-size:11px;font-weight:700;color:var(--texte-2);padding:4px 10px;background:var(--nuit);border-radius:8px}
+
+/* nav mobile */
+.nav{background:var(--carte);border-radius:var(--r-lg);padding:10px;display:flex;align-items:center;gap:6px;max-width:520px;border:1.5px solid var(--bord)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;border-radius:14px;font-size:10px;color:var(--texte-2);font-weight:600}
+.nav-item.active{background:var(--grad-energy);color:#fff;flex:1.4;flex-direction:row;justify-content:center;font-family:'Archivo';font-weight:900;font-size:12px}
+.nav-dot{width:14px;height:14px;border-radius:50%;border:2px solid currentColor}
+.nav-item.active .nav-dot{background:#fff;border:none}
+
+/* sidebar desktop */
+.shell-demo{display:grid;grid-template-columns:200px 1fr;gap:0;border-radius:var(--r-lg);overflow:hidden;border:1.5px solid var(--bord);min-height:280px}
+.sidebar{background:var(--carte);padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+.sb-logo{display:flex;align-items:center;gap:8px;padding:0 8px 16px;margin-bottom:8px;border-bottom:1px solid var(--bord)}
+.sb-logo .lm{font-family:'Archivo';font-weight:900;font-size:20px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;font-size:13px;font-weight:600;color:var(--texte-2)}
+.sb-item .ic{width:16px;height:16px;border-radius:5px;border:2px solid currentColor;flex-shrink:0}
+.sb-item.active{background:var(--grad-energy);color:#fff;font-family:'Archivo';font-weight:800}
+.sb-item.active .ic{background:#fff;border:none}
+.shell-main{background:var(--nuit);padding:20px}
+.shell-topbar{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--bord);margin-bottom:16px}
+.shell-title{font-family:'Archivo';font-weight:900;font-size:18px}
+.shell-actions{display:flex;align-items:center;gap:10px}
+.pill-mini{padding:6px 14px;border-radius:var(--r-pill);background:var(--carte);font-size:11px;font-weight:600;color:var(--texte-2);border:1px solid var(--bord)}
+.av-mini{width:32px;height:32px;border-radius:50%;background:var(--grad-banner);display:flex;align-items:center;justify-content:center;font-family:'Archivo';font-weight:900;font-size:12px}
+.shell-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini-card{background:var(--carte);border:1.5px solid var(--bord);border-radius:var(--r-md);padding:16px;position:relative;overflow:hidden}
+.mini-card::before{content:'';position:absolute;left:0;top:0;right:0;height:4px;background:var(--grad-energy)}
+.mini-card .mc-l{font-size:10px;color:var(--texte-2);font-weight:600;letter-spacing:.5px}
+.mini-card .mc-v{font-family:'Archivo';font-weight:900;font-size:26px;margin-top:4px}
+
+/* responsive note cards */
+.resp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.resp-grid{grid-template-columns:1fr}}
+.resp-card{background:var(--carte);border:1.5px solid var(--bord);border-radius:var(--r-md);padding:20px}
+.resp-card h4{font-family:'Archivo';font-weight:900;font-size:13px;letter-spacing:1px;margin-bottom:10px}
+.resp-card ul{list-style:none;font-size:12px;color:var(--texte-2);line-height:1.9}
+.resp-card li::before{content:'▸ ';color:var(--menthe);font-weight:900}
+
+/* tokens table */
+.tok-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.tok-grid{grid-template-columns:1fr}}
+.tok-block{background:var(--carte);border:1.5px solid var(--bord);border-radius:var(--r-md);overflow:hidden}
+.tok-head{background:var(--grad-primary);padding:11px 16px;font-family:'Archivo';font-weight:900;font-size:11px;letter-spacing:1.5px}
+.tok-row{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--bord);font-size:12px}
+.tok-row:last-child{border-bottom:none}
+.tok-dot{width:14px;height:14px;border-radius:5px;flex-shrink:0}
+.tok-name{font-family:monospace;flex:1;color:#fff}
+.tok-val{font-family:monospace;font-size:11px;color:var(--texte-2)}
+
+.footer{text-align:center;margin-top:64px;color:var(--texte-2);font-size:12px}
+.footer b{color:var(--menthe)}
+</style>
+</head>
+<body>
+
+<div class="topbar-grad"></div>
+<div class="header">
+  <div class="h-logo">
+    <svg class="logo-mark" viewBox="0 0 300 340" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="hdr-shield" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#6D28D9"/><stop offset="0.55" stop-color="#FF2D78"/><stop offset="1" stop-color="#FF6B35"/>
+        </linearGradient>
+        <clipPath id="hdr-clip"><path d="M150 16 L264 50 L264 180 Q264 268 150 320 Q36 268 36 180 L36 50 Z"/></clipPath>
+      </defs>
+      <path d="M150 16 L264 50 L264 180 Q264 268 150 320 Q36 268 36 180 L36 50 Z" fill="url(#hdr-shield)"/>
+      <g clip-path="url(#hdr-clip)" opacity="0.12">
+        <line x1="36" y1="90" x2="264" y2="90" stroke="#fff" stroke-width="20"/>
+        <line x1="36" y1="150" x2="264" y2="150" stroke="#fff" stroke-width="20"/>
+        <line x1="36" y1="210" x2="264" y2="210" stroke="#fff" stroke-width="20"/>
+      </g>
+      <text x="150" y="200" text-anchor="middle" font-family="Archivo,sans-serif" font-size="84" font-weight="900" fill="#fff" letter-spacing="-3">LHM</text>
+    </svg>
+    <div class="logo-divider"></div>
+    <div>
+      <div class="logo-text">LIGUE HUBERT MANGE</div>
+      <div class="logo-sub">DESIGN SYSTEM · BROADCAST v1</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- PALETTE -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">PALETTE</div>
+      <div class="section-bar" style="background:var(--rose)"></div>
+    </div>
+
+    <div class="subsection">COULEURS DE MARQUE</div>
+    <div class="palette">
+      <div class="swatch" style="background:#6D28D9"><div class="nm">VIOLET ÉLEC.</div><div class="hx">#6D28D9</div><div class="role">Primaire · marque</div></div>
+      <div class="swatch" style="background:#FF2D78"><div class="nm">ROSE PUNCH</div><div class="hx">#FF2D78</div><div class="role">Accent · CTA · énergie</div></div>
+      <div class="swatch" style="background:#FF6B35"><div class="nm">ORANGE</div><div class="hx">#FF6B35</div><div class="role">Accent secondaire</div></div>
+      <div class="swatch" style="background:#00E5A0;color:#063D2C"><div class="nm" style="color:#063D2C">MENTHE NÉON</div><div class="hx" style="color:#063D2C">#00E5A0</div><div class="role" style="color:#063D2C">Succès · live · data ↑</div></div>
+      <div class="swatch" style="background:#FFD23F;color:#3D2E00"><div class="nm" style="color:#3D2E00">JAUNE OR</div><div class="hx" style="color:#3D2E00">#FFD23F</div><div class="role" style="color:#3D2E00">Trophées · Europa</div></div>
+      <div class="swatch" style="background:#A78BFA;color:#1A0E3D"><div class="nm" style="color:#1A0E3D">VIOLET CLAIR</div><div class="hx" style="color:#1A0E3D">#A78BFA</div><div class="role" style="color:#1A0E3D">Conference · accent doux</div></div>
+    </div>
+
+    <div class="subsection">SURFACES & TEXTE</div>
+    <div class="palette">
+      <div class="swatch" style="background:#0A0E27;border-color:#2A3160"><div class="nm">NUIT</div><div class="hx">#0A0E27</div><div class="role">Fond dark mode</div></div>
+      <div class="swatch" style="background:#141A3D;border-color:#2A3160"><div class="nm">CARTE</div><div class="hx">#141A3D</div><div class="role">Surface dark</div></div>
+      <div class="swatch" style="background:#2A3160"><div class="nm">BORD</div><div class="hx">#2A3160</div><div class="role">Bordures dark</div></div>
+      <div class="swatch" style="background:#F4F5FB;color:#1A1F3D;border-color:#E2E5F0"><div class="nm" style="color:#1A1F3D">LIGHT BG</div><div class="hx" style="color:#6A7299">#F4F5FB</div><div class="role" style="color:#6A7299">Fond light mode</div></div>
+      <div class="swatch" style="background:#FFFFFF;color:#1A1F3D;border-color:#E2E5F0"><div class="nm" style="color:#1A1F3D">LIGHT CARTE</div><div class="hx" style="color:#6A7299">#FFFFFF</div><div class="role" style="color:#6A7299">Surface light</div></div>
+      <div class="swatch" style="background:#8B92C4;color:#0A0E27"><div class="nm" style="color:#0A0E27">TEXTE 2</div><div class="hx" style="color:#0A0E27">#8B92C4</div><div class="role" style="color:#0A0E27">Texte secondaire</div></div>
+    </div>
+
+    <div class="subsection">DÉGRADÉS SIGNATURE</div>
+    <div class="grad-strip">
+      <div class="grad-card" style="background:linear-gradient(90deg,#FF2D78,#FF6B35)"><div class="nm">ENERGY</div><div class="var">rose → orange · CTA</div></div>
+      <div class="grad-card" style="background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35)"><div class="nm">BANNER</div><div class="var">violet → rose → orange</div></div>
+      <div class="grad-card" style="background:linear-gradient(135deg,#2D1B69,#6D28D9)"><div class="nm">PRIMARY</div><div class="var">violet foncé → violet</div></div>
+      <div class="grad-card" style="background:linear-gradient(90deg,#00E5A0,#34D399)"><div class="nm">LIME</div><div class="var">menthe · données ↑</div></div>
+    </div>
+  </div>
+
+  <!-- TYPO -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">TYPOGRAPHIE</div>
+      <div class="section-bar" style="background:var(--menthe)"></div>
+    </div>
+    <div class="type-card">
+      <div class="accent" style="background:var(--grad-energy)"></div>
+      <div class="display" style="font-size:36px">CLASSEMENT</div>
+      <div class="type-usage" style="color:var(--rose)">DISPLAY · TITRES PUNCHY</div>
+      <div class="type-note">Archivo (fallback Inter 900) · ultra-bold · CAPS · letter-spacing serré. Titres d'écran, scores, gros chiffres.</div>
+      <div class="type-scale">
+        <span><b>Display</b> 36px / 900</span>
+        <span><b>H1</b> 28px / 900</span>
+        <span><b>H2</b> 22px / 800</span>
+        <span><b>Stat</b> 26-60px / 900</span>
+      </div>
+    </div>
+    <div class="type-card">
+      <div class="accent" style="background:var(--grad-lime)"></div>
+      <div style="font-size:18px;font-weight:600">Division 1 · Saison 3 · 12 équipes</div>
+      <div class="type-usage" style="color:var(--menthe)">BODY · UI · DONNÉES</div>
+      <div class="type-note">Inter · 400 regular + 600 semibold · lisible, moderne. Toute l'UI fonctionnelle, navigation, tableaux, labels.</div>
+      <div class="type-scale">
+        <span><b>Body</b> 15px / 400 · lh 1.6</span>
+        <span><b>Label</b> 12px / 600</span>
+        <span><b>Caption</b> 10px / 600 · CAPS</span>
+        <span><b>Mono</b> data chiffrée</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPOSANTS -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">COMPOSANTS</div>
+      <div class="section-bar" style="background:var(--orange)"></div>
+    </div>
+
+    <div class="subsection">BOUTONS</div>
+    <div class="btn-row">
+      <button class="btn btn-primary">SYNCHRONISER MPG</button>
+      <button class="btn btn-violet">VOIR PROFIL</button>
+      <button class="btn btn-outline">PALMARÈS</button>
+      <button class="btn btn-ghost">Annuler</button>
+      <button class="btn btn-danger">Supprimer</button>
+      <button class="btn btn-primary btn-sm">SYNC</button>
+    </div>
+
+    <div class="subsection">BADGES · RÔLES & TITRES</div>
+    <div class="badge-row">
+      <span class="badge badge-champ">⭐ CHAMPION</span>
+      <span class="badge badge-ldc">LDC</span>
+      <span class="badge badge-europa">EUROPA</span>
+      <span class="badge badge-conf">CONFÉRENCE</span>
+      <span class="badge badge-admin">Admin</span>
+      <span class="badge badge-tres">Trésorier</span>
+      <span class="badge badge-member">Membre</span>
+    </div>
+  </div>
+
+  <!-- CARTES -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">CARTES · STYLE BROADCAST</div>
+      <div class="section-bar" style="background:var(--violet)"></div>
+    </div>
+    <div class="cards">
+      <div class="player-card">
+        <div class="pc-top"></div>
+        <div class="pc-body">
+          <div class="avatar">HM</div>
+          <div>
+            <div class="pc-name">HUBERT M.</div>
+            <div class="pc-div">Division 1 · Saison 3</div>
+            <div class="pc-stars">★ ★ ★</div>
+          </div>
+        </div>
+        <div class="pc-stats">
+          <div class="pc-stat"><div class="v" style="color:var(--rose)">3</div><div class="l">TITRES D1</div></div>
+          <div class="pc-stat"><div class="v" style="color:var(--menthe)">67%</div><div class="l">VICTOIRES</div></div>
+          <div class="pc-stat"><div class="v" style="color:var(--orange)">LDC</div><div class="l">COUPE</div></div>
+        </div>
+      </div>
+      <div class="rank-card">
+        <div class="rank-label">RANG ACTUEL · DIVISION 1</div>
+        <div class="rank-big">
+          <div class="rank-num">2<span style="font-size:26px;opacity:.6">e</span></div>
+          <div class="rank-delta">▲ +1</div>
+        </div>
+        <div class="rank-bar"><i></i></div>
+        <div class="rank-meta">38 pts · 4 journées restantes avant la fin de saison</div>
+      </div>
+    </div>
+
+    <div class="score-strip">
+      <div class="score-team">
+        <div class="badge-mini">HM</div>
+        <div>
+          <div style="font-weight:700;font-size:14px">Hubert Mange</div>
+          <div style="font-size:11px;color:var(--menthe);font-weight:600">DERNIÈRE JOURNÉE</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="score-num" style="color:var(--menthe)">3</div>
+        <div class="score-vs">VS</div>
+        <div class="score-num">1</div>
+      </div>
+      <div class="score-team" style="flex-direction:row-reverse;text-align:right">
+        <div class="badge-mini" style="background:var(--grad-energy)">JD</div>
+        <div>
+          <div style="font-weight:700;font-size:14px">J. Dupont</div>
+          <div style="font-size:11px;color:var(--texte-2);font-weight:600">J34 · VICTOIRE</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION : MOBILE vs DESKTOP -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">NAVIGATION · RESPONSIVE</div>
+      <div class="section-bar" style="background:var(--menthe)"></div>
+    </div>
+
+    <div class="subsection">MOBILE · BOTTOM BAR</div>
+    <div class="nav">
+      <div class="nav-item active"><div class="nav-dot"></div>ACCUEIL</div>
+      <div class="nav-item"><div class="nav-dot"></div>Palmarès</div>
+      <div class="nav-item"><div class="nav-dot"></div>Stats</div>
+      <div class="nav-item"><div class="nav-dot"></div>Cagnotte</div>
+      <div class="nav-item"><div class="nav-dot"></div>Profil</div>
+    </div>
+
+    <div class="subsection">DESKTOP · TOP BAR + SIDEBAR</div>
+    <div class="shell-demo">
+      <div class="sidebar">
+        <div class="sb-logo">
+          <div class="lm" style="background:var(--grad-banner);-webkit-background-clip:text;background-clip:text;color:transparent">LHM</div>
+        </div>
+        <div class="sb-item active"><div class="ic"></div>Accueil</div>
+        <div class="sb-item"><div class="ic"></div>Palmarès</div>
+        <div class="sb-item"><div class="ic"></div>Stats</div>
+        <div class="sb-item"><div class="ic"></div>Cagnotte</div>
+        <div class="sb-item"><div class="ic"></div>Profil</div>
+        <div class="sb-item"><div class="ic"></div>Paramètres</div>
+      </div>
+      <div class="shell-main">
+        <div class="shell-topbar">
+          <div class="shell-title">Accueil</div>
+          <div class="shell-actions">
+            <div class="pill-mini">Division 1</div>
+            <div class="av-mini">HM</div>
+          </div>
+        </div>
+        <div class="shell-cards">
+          <div class="mini-card"><div class="mc-l">RANG</div><div class="mc-v" style="color:var(--menthe)">2e</div></div>
+          <div class="mini-card"><div class="mc-l">GAIN SAISON</div><div class="mc-v" style="color:var(--orange)">+45€</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resp-grid" style="margin-top:16px">
+      <div class="resp-card">
+        <h4 style="color:var(--rose)">📱 MOBILE</h4>
+        <ul>
+          <li>Bottom bar fixe : 5 entrées (Accueil, Palmarès, Stats, Cagnotte, Profil)</li>
+          <li>Item actif en dégradé energy, élargi, icône + label</li>
+          <li>Top : header compact avec logo + avatar</li>
+          <li>Contenu en scroll vertical, cartes pleine largeur</li>
+        </ul>
+      </div>
+      <div class="resp-card">
+        <h4 style="color:var(--menthe)">🖥️ DESKTOP</h4>
+        <ul>
+          <li>Sidebar gauche fixe : navigation verticale + Paramètres/Admin</li>
+          <li>Top bar : titre de page + contexte (division) + avatar/menu</li>
+          <li>Contenu en grille multi-colonnes (2-3 cartes par ligne)</li>
+          <li>Item actif sidebar en dégradé energy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- STACK TECHNIQUE -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">STACK & TOKENS</div>
+      <div class="section-bar" style="background:var(--jaune)"></div>
+    </div>
+    <div class="resp-card" style="margin-bottom:16px">
+      <h4 style="color:var(--jaune)">⚙️ IMPLÉMENTATION</h4>
+      <ul>
+        <li>Composants : <b style="color:#fff">shadcn/ui</b> + <b style="color:#fff">Tailwind CSS v4</b></li>
+        <li>Couleurs déclarées en <b style="color:#fff">@theme</b> (tokens CSS Tailwind v4), pas de fichier config JS</li>
+        <li>Polices : Archivo (display) + Inter (UI) via next/font ou @fontsource</li>
+        <li>Dark mode = défaut visuel, light mode prévu (variantes de surfaces)</li>
+      </ul>
+    </div>
+    <div class="tok-grid">
+      <div class="tok-block">
+        <div class="tok-head">COULEURS — @theme</div>
+        <div class="tok-row"><div class="tok-dot" style="background:#6D28D9"></div><span class="tok-name">--color-violet</span><span class="tok-val">#6D28D9</span></div>
+        <div class="tok-row"><div class="tok-dot" style="background:#FF2D78"></div><span class="tok-name">--color-rose</span><span class="tok-val">#FF2D78</span></div>
+        <div class="tok-row"><div class="tok-dot" style="background:#FF6B35"></div><span class="tok-name">--color-orange</span><span class="tok-val">#FF6B35</span></div>
+        <div class="tok-row"><div class="tok-dot" style="background:#00E5A0"></div><span class="tok-name">--color-menthe</span><span class="tok-val">#00E5A0</span></div>
+        <div class="tok-row"><div class="tok-dot" style="background:#0A0E27;border:1px solid #2A3160"></div><span class="tok-name">--color-nuit</span><span class="tok-val">#0A0E27</span></div>
+        <div class="tok-row"><div class="tok-dot" style="background:#141A3D;border:1px solid #2A3160"></div><span class="tok-name">--color-carte</span><span class="tok-val">#141A3D</span></div>
+      </div>
+      <div class="tok-block">
+        <div class="tok-head">RAYONS & TYPO</div>
+        <div class="tok-row"><span class="tok-name">--radius-sm</span><span class="tok-val">10px</span></div>
+        <div class="tok-row"><span class="tok-name">--radius-md</span><span class="tok-val">16px</span></div>
+        <div class="tok-row"><span class="tok-name">--radius-lg</span><span class="tok-val">20px</span></div>
+        <div class="tok-row"><span class="tok-name">--radius-pill</span><span class="tok-val">999px</span></div>
+        <div class="tok-row"><span class="tok-name">--font-display</span><span class="tok-val">Archivo, sans-serif</span></div>
+        <div class="tok-row"><span class="tok-name">--font-ui</span><span class="tok-val">Inter, sans-serif</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <b>Ligue Hubert Mange</b> · Design System Broadcast v1 · shadcn/ui + Tailwind v4 · 2026
+  </div>
+
+</div>
+</body>
+</html>

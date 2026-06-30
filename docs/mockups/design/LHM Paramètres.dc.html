@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Archivo:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<meta name="design_doc_mode" content="canvas">
+<style>
+  @keyframes lhmHalo { 0%,100%{ transform:translate(-5%,-3%) scale(1) } 50%{ transform:translate(5%,3%) scale(1.1) } }
+  .lhm-card{ transition:transform .14s ease, box-shadow .14s ease, border-color .14s ease; }
+  .lhm-nav:hover{ color:#fff !important; }
+  .lhm-btn:hover{ filter:brightness(1.07); transform:translateY(-1px); }
+  .lhm-ghost:hover{ background:#1B2350 !important; border-color:#3A4280 !important; color:#fff !important; }
+  .lhm-ghost-red:hover{ background:rgba(255,59,92,.12) !important; border-color:rgba(255,59,92,.55) !important; color:#FF6B8A !important; }
+  .lhm-input{ transition:border-color .14s ease, background .14s ease; }
+  .lhm-input:focus{ border-color:#FF2D78 !important; background:#0E1336 !important; }
+  .lhm-input::placeholder{ color:#5A6293; }
+  ::-webkit-scrollbar{ width:8px; height:8px; } ::-webkit-scrollbar-thumb{ background:#2A3160; border-radius:8px; } ::-webkit-scrollbar-track{ background:transparent; }
+</style>
+</helmet>
+
+<!-- ===================== MOBILE FRAME ===================== -->
+<div style="position:absolute; left:0px; top:0px; width:430px;">
+  <div data-drags-parent="1" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:2px; color:#8B92C4; margin-bottom:14px; text-transform:uppercase;">Mobile · Paramètres</div>
+  <div data-screen-label="Paramètres Mobile" style="width:430px; height:1000px; background:#0A0E27; border-radius:30px; overflow:hidden; position:relative; box-shadow:0 24px 60px rgba(0,0,0,.45); border:1px solid #1B2350; font-family:'Inter',sans-serif; display:flex; flex-direction:column;">
+
+    <div style="height:5px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); flex-shrink:0;"></div>
+
+    <!-- header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px 10px; flex-shrink:0;">
+      <div style="display:flex; align-items:center; gap:11px;">
+        <span class="lhm-nav" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#8B92C4; cursor:pointer;">←</span>
+        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff;">Paramètres</div>
+      </div>
+      <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff; border:2px solid #2A3160;">HM</div>
+    </div>
+
+    <!-- scroll -->
+    <div style="flex:1; overflow-y:auto; padding:8px 18px 22px;">
+
+      <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:30px; letter-spacing:-1px; color:#fff; text-transform:uppercase; line-height:1;">Mon espace</div>
+      <div style="font-size:13px; color:#8B92C4; margin-top:6px; margin-bottom:18px;">Gère ton profil, ton paiement et tes préférences.</div>
+
+      <!-- ===== MON PROFIL ===== -->
+      <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden; margin-bottom:14px;">
+        <div style="height:4px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35);"></div>
+        <div style="padding:18px 17px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+            <span style="width:4px; height:17px; border-radius:3px; background:linear-gradient(180deg,#6D28D9,#FF2D78);"></span>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#fff; text-transform:uppercase;">Mon profil</span>
+          </div>
+
+          <!-- avatar -->
+          <div style="display:flex; align-items:center; gap:15px; margin-bottom:18px;">
+            <div style="position:relative; width:68px; height:68px; flex-shrink:0;">
+              <div style="position:absolute; inset:-2px; border-radius:50%; background:linear-gradient(135deg,#FFD23F,#FF2D78,#6D28D9);"></div>
+              <div style="position:absolute; inset:0; border-radius:50%; background:linear-gradient(135deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:25px; color:#fff; border:3px solid #141A3D;">HM</div>
+            </div>
+            <div style="flex:1; min-width:0;">
+              <button class="lhm-ghost" style="border:1px solid #2A3160; background:#0A0E27; color:#C7CEEF; border-radius:11px; padding:9px 15px; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; cursor:pointer; transition:background .14s, border-color .14s, color .14s;">Changer la photo</button>
+              <div style="font-size:11px; color:#8B92C4; margin-top:8px;">JPG ou PNG · 2 Mo max</div>
+            </div>
+          </div>
+
+          <!-- display name -->
+          <div style="margin-bottom:15px;">
+            <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:8px;">Nom d'affichage</div>
+            <input class="lhm-input" value="{{ name }}" onChange="{{ onName }}" placeholder="Ton nom de manager" style="width:100%; box-sizing:border-box; background:#0A0E27; border:1px solid #2A3160; border-radius:12px; padding:13px 15px; color:#fff; font-family:'Inter',sans-serif; font-size:15px; font-weight:600; outline:none;">
+            <sc-if value="{{ nameOk }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; font-weight:600; color:#00E5A0;"><span>✓</span>Nom affiché sur ta fiche et le classement</div>
+            </sc-if>
+            <sc-if value="{{ nameBad }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; font-weight:600; color:#FF6B8A;"><span>⚠</span>Minimum 2 caractères</div>
+            </sc-if>
+          </div>
+
+          <!-- phone -->
+          <div style="margin-bottom:18px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Téléphone</div>
+              <span style="font-size:9px; font-weight:700; letter-spacing:.5px; color:#5A6293; text-transform:uppercase; background:#0A0E27; border:1px solid #2A3160; padding:2px 8px; border-radius:999px;">Optionnel</span>
+            </div>
+            <input class="lhm-input" value="{{ phone }}" onChange="{{ onPhone }}" placeholder="06 12 34 56 78" style="width:100%; box-sizing:border-box; background:#0A0E27; border:1px solid #2A3160; border-radius:12px; padding:13px 15px; color:#fff; font-family:'Inter',sans-serif; font-size:15px; font-weight:600; outline:none;">
+            <sc-if value="{{ phoneOk }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; font-weight:600; color:#00E5A0;"><span>✓</span>Numéro valide</div>
+            </sc-if>
+            <sc-if value="{{ phoneBad }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; font-weight:600; color:#FF6B8A;"><span>⚠</span>Format attendu : 10 chiffres</div>
+            </sc-if>
+          </div>
+
+          <button onClick="{{ save }}" class="lhm-btn" style="width:100%; border:none; border-radius:14px; padding:15px; background:linear-gradient(90deg,#FF2D78,#FF6B35); color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; letter-spacing:1.5px; cursor:pointer; box-shadow:0 8px 20px rgba(255,45,120,.3); transition:transform .12s, filter .12s; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <sc-if value="{{ notSaved }}" hint-placeholder-val="{{ true }}">ENREGISTRER</sc-if>
+            <sc-if value="{{ saved }}" hint-placeholder-val="{{ false }}">ENREGISTRÉ ✓</sc-if>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== PAIEMENT ===== -->
+      <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden; margin-bottom:14px;">
+        <div style="height:4px; background:linear-gradient(90deg,#00E5A0,#34D399);"></div>
+        <div style="padding:18px 17px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+            <span style="width:4px; height:17px; border-radius:3px; background:linear-gradient(180deg,#00E5A0,#34D399);"></span>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#fff; text-transform:uppercase;">Paiement</span>
+          </div>
+
+          <!-- IBAN -->
+          <div style="background:#0A0E27; border:1px solid #2A3160; border-radius:15px; padding:15px; margin-bottom:13px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:11px;">
+              <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">IBAN</span>
+              <span style="display:inline-flex; align-items:center; gap:5px; font-size:9px; font-weight:800; letter-spacing:.5px; color:#00E5A0; background:rgba(0,229,160,.12); border:1px solid rgba(0,229,160,.4); padding:3px 9px; border-radius:999px; text-transform:uppercase;">🔒 Chiffré</span>
+            </div>
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:18px; letter-spacing:3px; color:#fff;">•••• •••• •••• 1234</div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:13px;">
+              <span style="font-size:11px; color:#8B92C4; max-width:200px; line-height:1.4;">Jamais affiché en clair.</span>
+              <button class="lhm-ghost" style="border:1px solid #2A3160; background:#141A3D; color:#C7CEEF; border-radius:10px; padding:8px 14px; font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; letter-spacing:.5px; cursor:pointer; transition:background .14s, border-color .14s, color .14s;">Modifier</button>
+            </div>
+          </div>
+
+          <!-- mise courante -->
+          <div style="display:flex; align-items:center; justify-content:space-between; background:#0A0E27; border:1px solid #2A3160; border-radius:15px; padding:15px;">
+            <div>
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:5px;">Mise courante</div>
+              <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:20px; color:#fff;">{{ mise }} <span style="font-size:12px; color:#8B92C4; font-weight:700;">· Edition 3</span></div>
+            </div>
+            <sc-if value="{{ paid }}" hint-placeholder-val="{{ true }}">
+              <span style="display:inline-flex; align-items:center; gap:6px; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; color:#00E5A0; background:rgba(0,229,160,.13); border:1px solid rgba(0,229,160,.45); padding:8px 14px; border-radius:999px; text-transform:uppercase;">✅ Payée</span>
+            </sc-if>
+            <sc-if value="{{ pending }}" hint-placeholder-val="{{ false }}">
+              <span style="display:inline-flex; align-items:center; gap:6px; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; color:#FFD23F; background:rgba(255,210,63,.13); border:1px solid rgba(255,210,63,.45); padding:8px 14px; border-radius:999px; text-transform:uppercase;">⏳ En attente</span>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PRÉFÉRENCES ===== -->
+      <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden; margin-bottom:14px;">
+        <div style="height:4px; background:linear-gradient(90deg,#6D28D9,#A78BFA);"></div>
+        <div style="padding:18px 17px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+            <span style="width:4px; height:17px; border-radius:3px; background:linear-gradient(180deg,#6D28D9,#A78BFA);"></span>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#fff; text-transform:uppercase;">Préférences</span>
+          </div>
+
+          <!-- theme -->
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid #2A3160;">
+            <div>
+              <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:14px; color:#fff;">Thème de l'application</div>
+              <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><div style="font-size:11px; color:#8B92C4; margin-top:3px;">Sombre · par défaut</div></sc-if>
+              <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px; color:#FFD23F; margin-top:3px;">Clair · activé</div></sc-if>
+            </div>
+            <button onClick="{{ toggleTheme }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0;">
+              <dc-import name="LHMSwitch" on="{{ isLight }}" hint-size="52px,30px"></dc-import>
+            </button>
+          </div>
+
+          <!-- notifications -->
+          <sc-if value="{{ notifLocked }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 0;">
+              <div>
+                <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:14px; color:#C7CEEF;">Notifications</div>
+                <div style="font-size:11px; color:#8B92C4; margin-top:3px;">Résultats, mercato, rappels de mise</div>
+              </div>
+              <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:1px; color:#A78BFA; background:rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.4); padding:6px 11px; border-radius:999px; text-transform:uppercase;">Bientôt</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid #2A3160;">
+              <div>
+                <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:14px; color:#fff;">Résultats &amp; journées</div>
+                <div style="font-size:11px; color:#8B92C4; margin-top:3px;">À la fin de chaque match</div>
+              </div>
+              <button onClick="{{ toggleResults }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0;"><dc-import name="LHMSwitch" on="{{ notifResults }}" hint-size="52px,30px"></dc-import></button>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 0;">
+              <div>
+                <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:14px; color:#fff;">Mercato &amp; rappels</div>
+                <div style="font-size:11px; color:#8B92C4; margin-top:3px;">Ouverture, clôture, mise à payer</div>
+              </div>
+              <button onClick="{{ toggleMercato }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0;"><dc-import name="LHMSwitch" on="{{ notifMercato }}" hint-size="52px,30px"></dc-import></button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <!-- ===== DÉCONNEXION ===== -->
+      <div style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden;">
+        <div style="height:4px; background:linear-gradient(90deg,#FF3B5C,#FF6B35);"></div>
+        <div style="padding:18px 17px;">
+          <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:14px; color:#fff;">Se déconnecter</div>
+          <div style="font-size:11px; color:#8B92C4; margin-top:4px; margin-bottom:15px;">Tu seras redirigé vers l'écran de connexion.</div>
+          <button class="lhm-ghost-red" style="width:100%; border:1px solid rgba(255,59,92,.4); background:rgba(255,59,92,.06); color:#FF6B8A; border-radius:13px; padding:14px; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; cursor:pointer; transition:background .14s, border-color .14s, color .14s; text-transform:uppercase;">Déconnexion</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== DESKTOP FRAME ===================== -->
+<div style="position:absolute; left:540px; top:0px; width:1320px;">
+  <div data-drags-parent="1" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:2px; color:#8B92C4; margin-bottom:14px; text-transform:uppercase;">Desktop · Paramètres</div>
+  <div data-screen-label="Paramètres Desktop" style="width:1320px; height:860px; background:#0A0E27; border-radius:20px; overflow:hidden; position:relative; box-shadow:0 30px 80px rgba(0,0,0,.5); border:1px solid #1B2350; font-family:'Inter',sans-serif; display:flex;">
+
+    <!-- SIDEBAR -->
+    <div style="width:230px; flex-shrink:0; background:#141A3D; border-right:1px solid #2A3160; display:flex; flex-direction:column; padding:22px 16px;">
+      <div style="display:flex; align-items:center; gap:11px; padding:0 8px 18px; margin-bottom:14px; border-bottom:1px solid #2A3160;">
+        <svg viewBox="0 0 360 360" width="38" height="38"><defs><linearGradient id="setLogoD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6D28D9"></stop><stop offset="0.55" stop-color="#FF2D78"></stop><stop offset="1" stop-color="#FF6B35"></stop></linearGradient></defs><path d="M180 46 L294 80 L294 210 Q294 298 180 350 Q66 298 66 210 L66 80 Z" fill="url(#setLogoD)"></path><text x="180" y="232" text-anchor="middle" font-family="Archivo,'Arial Black',sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-3">LHM</text></svg>
+        <div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#fff; letter-spacing:.3px;">LHM</div><div style="font-size:9px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Saison 2025/2026</div></div>
+      </div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Accueil</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Palmarès</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Rétro</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Cagnotte</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Profil</div>
+      <div style="flex:1;"></div>
+      <div style="border-top:1px solid #2A3160; padding-top:12px;">
+        <div style="display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px; background:linear-gradient(90deg,#FF2D78,#FF6B35); font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; color:#fff; margin-bottom:4px;"><span style="width:15px; height:15px; border-radius:5px; background:#fff;"></span>Paramètres</div>
+        <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:15px; height:15px; border-radius:5px; border:2px solid currentColor;"></span>Admin</div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+      <!-- topbar -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 30px; border-bottom:1px solid #2A3160; flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:24px; letter-spacing:-.5px; color:#fff; text-transform:uppercase;">Paramètres</div>
+          <span style="font-size:12px; color:#8B92C4;">Ton espace perso</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="text-align:right;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff;">Hubert Mange</div><div style="font-size:10px; color:#8B92C4;">Division 1 · Fondateur</div></div>
+          <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#fff;">HM</div>
+        </div>
+      </div>
+
+      <!-- content -->
+      <div style="flex:1; overflow-y:auto; padding:26px 30px 30px;">
+        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:32px; letter-spacing:-1px; color:#fff; text-transform:uppercase; line-height:1;">Mon espace</div>
+        <div style="font-size:14px; color:#8B92C4; margin-top:7px; margin-bottom:24px;">Gère ton profil, ton paiement et tes préférences. Les outils d'administration sont sur l'écran dédié.</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start;">
+
+          <!-- ===== LEFT COLUMN ===== -->
+          <div style="display:flex; flex-direction:column; gap:22px;">
+
+            <!-- Mon profil -->
+            <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden;">
+              <div style="height:4px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35);"></div>
+              <div style="padding:24px;">
+                <div style="display:flex; align-items:center; gap:11px; margin-bottom:22px;">
+                  <span style="width:5px; height:20px; border-radius:3px; background:linear-gradient(180deg,#6D28D9,#FF2D78);"></span>
+                  <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; letter-spacing:.5px; color:#fff; text-transform:uppercase;">Mon profil</span>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:18px; margin-bottom:22px;">
+                  <div style="position:relative; width:84px; height:84px; flex-shrink:0;">
+                    <div style="position:absolute; inset:-3px; border-radius:50%; background:linear-gradient(135deg,#FFD23F,#FF2D78,#6D28D9);"></div>
+                    <div style="position:absolute; inset:0; border-radius:50%; background:linear-gradient(135deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:31px; color:#fff; border:4px solid #141A3D;">HM</div>
+                  </div>
+                  <div style="flex:1;">
+                    <div style="display:flex; gap:10px;">
+                      <button class="lhm-ghost" style="border:1px solid #2A3160; background:#0A0E27; color:#C7CEEF; border-radius:11px; padding:10px 17px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.5px; cursor:pointer; transition:background .14s, border-color .14s, color .14s;">Changer la photo</button>
+                      <button class="lhm-ghost" style="border:1px solid #2A3160; background:transparent; color:#8B92C4; border-radius:11px; padding:10px 15px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.5px; cursor:pointer; transition:background .14s, border-color .14s, color .14s;">Retirer</button>
+                    </div>
+                    <div style="font-size:12px; color:#8B92C4; margin-top:10px;">JPG ou PNG · 2 Mo max · carré recommandé</div>
+                  </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+                  <div>
+                    <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:9px;">Nom d'affichage</div>
+                    <input class="lhm-input" value="{{ name }}" onChange="{{ onName }}" placeholder="Ton nom de manager" style="width:100%; box-sizing:border-box; background:#0A0E27; border:1px solid #2A3160; border-radius:12px; padding:13px 15px; color:#fff; font-family:'Inter',sans-serif; font-size:15px; font-weight:600; outline:none;">
+                    <sc-if value="{{ nameOk }}" hint-placeholder-val="{{ true }}"><div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; font-weight:600; color:#00E5A0;"><span>✓</span>Affiché sur ta fiche &amp; le classement</div></sc-if>
+                    <sc-if value="{{ nameBad }}" hint-placeholder-val="{{ false }}"><div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; font-weight:600; color:#FF6B8A;"><span>⚠</span>Minimum 2 caractères</div></sc-if>
+                  </div>
+                  <div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:9px;">
+                      <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Téléphone</span>
+                      <span style="font-size:9px; font-weight:700; letter-spacing:.5px; color:#5A6293; text-transform:uppercase; background:#0A0E27; border:1px solid #2A3160; padding:2px 8px; border-radius:999px;">Optionnel</span>
+                    </div>
+                    <input class="lhm-input" value="{{ phone }}" onChange="{{ onPhone }}" placeholder="06 12 34 56 78" style="width:100%; box-sizing:border-box; background:#0A0E27; border:1px solid #2A3160; border-radius:12px; padding:13px 15px; color:#fff; font-family:'Inter',sans-serif; font-size:15px; font-weight:600; outline:none;">
+                    <sc-if value="{{ phoneOk }}" hint-placeholder-val="{{ false }}"><div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; font-weight:600; color:#00E5A0;"><span>✓</span>Numéro valide</div></sc-if>
+                    <sc-if value="{{ phoneBad }}" hint-placeholder-val="{{ false }}"><div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; font-weight:600; color:#FF6B8A;"><span>⚠</span>Format attendu : 10 chiffres</div></sc-if>
+                    <sc-if value="{{ phoneEmpty }}" hint-placeholder-val="{{ true }}"><div style="margin-top:8px; font-size:11px; color:#8B92C4;">Pour les rappels de mise uniquement</div></sc-if>
+                  </div>
+                </div>
+
+                <button onClick="{{ save }}" class="lhm-btn" style="border:none; border-radius:13px; padding:14px 34px; background:linear-gradient(90deg,#FF2D78,#FF6B35); color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1.5px; cursor:pointer; box-shadow:0 8px 20px rgba(255,45,120,.3); transition:transform .12s, filter .12s; display:inline-flex; align-items:center; gap:8px;">
+                  <sc-if value="{{ notSaved }}" hint-placeholder-val="{{ true }}">ENREGISTRER</sc-if>
+                  <sc-if value="{{ saved }}" hint-placeholder-val="{{ false }}">ENREGISTRÉ ✓</sc-if>
+                </button>
+              </div>
+            </div>
+
+            <!-- Paiement -->
+            <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden;">
+              <div style="height:4px; background:linear-gradient(90deg,#00E5A0,#34D399);"></div>
+              <div style="padding:24px;">
+                <div style="display:flex; align-items:center; gap:11px; margin-bottom:22px;">
+                  <span style="width:5px; height:20px; border-radius:3px; background:linear-gradient(180deg,#00E5A0,#34D399);"></span>
+                  <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; letter-spacing:.5px; color:#fff; text-transform:uppercase;">Paiement</span>
+                </div>
+
+                <div style="background:#0A0E27; border:1px solid #2A3160; border-radius:15px; padding:18px; margin-bottom:14px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                    <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">IBAN enregistré</span>
+                    <span style="display:inline-flex; align-items:center; gap:5px; font-size:9px; font-weight:800; letter-spacing:.5px; color:#00E5A0; background:rgba(0,229,160,.12); border:1px solid rgba(0,229,160,.4); padding:4px 10px; border-radius:999px; text-transform:uppercase;">🔒 Chiffré de bout en bout</span>
+                  </div>
+                  <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:22px; letter-spacing:4px; color:#fff;">•••• •••• •••• 1234</span>
+                    <button class="lhm-ghost" style="border:1px solid #2A3160; background:#141A3D; color:#C7CEEF; border-radius:11px; padding:10px 18px; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; cursor:pointer; transition:background .14s, border-color .14s, color .14s;">Modifier l'IBAN</button>
+                  </div>
+                  <div style="font-size:12px; color:#8B92C4; margin-top:12px;">Jamais affiché en clair. Stocké chiffré, utilisé uniquement pour la cagnotte.</div>
+                </div>
+
+                <div style="display:flex; align-items:center; justify-content:space-between; background:#0A0E27; border:1px solid #2A3160; border-radius:15px; padding:18px;">
+                  <div>
+                    <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:6px;">Mise courante · Edition 3</div>
+                    <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:26px; color:#fff;">{{ mise }}</div>
+                  </div>
+                  <sc-if value="{{ paid }}" hint-placeholder-val="{{ true }}">
+                    <span style="display:inline-flex; align-items:center; gap:7px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.5px; color:#00E5A0; background:rgba(0,229,160,.13); border:1px solid rgba(0,229,160,.45); padding:10px 18px; border-radius:999px; text-transform:uppercase;">✅ Payée</span>
+                  </sc-if>
+                  <sc-if value="{{ pending }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                      <span style="display:inline-flex; align-items:center; gap:7px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.5px; color:#FFD23F; background:rgba(255,210,63,.13); border:1px solid rgba(255,210,63,.45); padding:10px 18px; border-radius:999px; text-transform:uppercase;">⏳ En attente</span>
+                      <button class="lhm-btn" style="border:none; border-radius:11px; padding:11px 18px; background:linear-gradient(90deg,#FF2D78,#FF6B35); color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; cursor:pointer; transition:transform .12s, filter .12s;">Payer</button>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== RIGHT COLUMN ===== -->
+          <div style="display:flex; flex-direction:column; gap:22px;">
+
+            <!-- Préférences -->
+            <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden;">
+              <div style="height:4px; background:linear-gradient(90deg,#6D28D9,#A78BFA);"></div>
+              <div style="padding:24px;">
+                <div style="display:flex; align-items:center; gap:11px; margin-bottom:20px;">
+                  <span style="width:5px; height:20px; border-radius:3px; background:linear-gradient(180deg,#6D28D9,#A78BFA);"></span>
+                  <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; letter-spacing:.5px; color:#fff; text-transform:uppercase;">Préférences</span>
+                </div>
+
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:15px 0; border-bottom:1px solid #2A3160;">
+                  <div>
+                    <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:15px; color:#fff;">Thème de l'application</div>
+                    <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px; color:#8B92C4; margin-top:4px;">Sombre · par défaut</div></sc-if>
+                    <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px; color:#FFD23F; margin-top:4px;">Clair · activé</div></sc-if>
+                  </div>
+                  <button onClick="{{ toggleTheme }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0;"><dc-import name="LHMSwitch" on="{{ isLight }}" hint-size="52px,30px"></dc-import></button>
+                </div>
+
+                <sc-if value="{{ notifLocked }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:15px 0;">
+                    <div>
+                      <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:15px; color:#C7CEEF;">Notifications</div>
+                      <div style="font-size:12px; color:#8B92C4; margin-top:4px;">Résultats, mercato, rappels de mise</div>
+                    </div>
+                    <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; letter-spacing:1px; color:#A78BFA; background:rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.4); padding:7px 13px; border-radius:999px; text-transform:uppercase;">Bientôt</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:15px 0; border-bottom:1px solid #2A3160;">
+                    <div>
+                      <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:15px; color:#fff;">Résultats &amp; journées</div>
+                      <div style="font-size:12px; color:#8B92C4; margin-top:4px;">À la fin de chaque match</div>
+                    </div>
+                    <button onClick="{{ toggleResults }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0;"><dc-import name="LHMSwitch" on="{{ notifResults }}" hint-size="52px,30px"></dc-import></button>
+                  </div>
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:15px 0;">
+                    <div>
+                      <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:15px; color:#fff;">Mercato &amp; rappels</div>
+                      <div style="font-size:12px; color:#8B92C4; margin-top:4px;">Ouverture, clôture, mise à payer</div>
+                    </div>
+                    <button onClick="{{ toggleMercato }}" style="border:none; background:transparent; padding:0; cursor:pointer; line-height:0;"><dc-import name="LHMSwitch" on="{{ notifMercato }}" hint-size="52px,30px"></dc-import></button>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+
+            <!-- Déconnexion -->
+            <div style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden;">
+              <div style="height:4px; background:linear-gradient(90deg,#FF3B5C,#FF6B35);"></div>
+              <div style="padding:24px;">
+                <div style="display:flex; align-items:center; gap:11px; margin-bottom:18px;">
+                  <span style="width:5px; height:20px; border-radius:3px; background:linear-gradient(180deg,#FF3B5C,#FF6B35);"></span>
+                  <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; letter-spacing:.5px; color:#fff; text-transform:uppercase;">Déconnexion</span>
+                </div>
+                <div style="font-size:13px; color:#8B92C4; line-height:1.5; margin-bottom:18px;">Tu fermeras ta session sur cet appareil et seras redirigé vers l'écran de connexion. Tes données restent sauvegardées.</div>
+                <button class="lhm-ghost-red" style="border:1px solid rgba(255,59,92,.4); background:rgba(255,59,92,.06); color:#FF6B8A; border-radius:13px; padding:13px 30px; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; cursor:pointer; transition:background .14s, border-color .14s, color .14s; text-transform:uppercase;">Se déconnecter</button>
+              </div>
+            </div>
+
+            <!-- compte info strip -->
+            <div style="display:flex; align-items:center; gap:14px; background:linear-gradient(135deg,#1B2350,#141A3D); border:1px dashed #2A3160; border-radius:18px; padding:18px 20px;">
+              <div style="width:42px; height:42px; border-radius:12px; background:rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.35); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">🛡️</div>
+              <div style="flex:1;">
+                <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#fff; letter-spacing:.3px;">Compte vérifié</div>
+                <div style="font-size:11px; color:#8B92C4; margin-top:3px; line-height:1.4;">Membre fondateur depuis 2021 · Division 1. Les réglages d'administration sont sur l'écran Admin.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{},&quot;paymentStatus&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Payée&quot;,&quot;En attente&quot;],&quot;default&quot;:&quot;Payée&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Paiement&quot;},&quot;miseAmount&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;5 €&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Paiement&quot;},&quot;showNotifications&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Préférences&quot;}}">
+class Component extends DCLogic {
+  state = {
+    name: "Hubert Mange",
+    phone: "",
+    isLight: false,
+    saved: false,
+    notifResults: true,
+    notifMercato: false,
+  };
+
+  onName = (e) => this.setState({ name: e.target.value });
+  onPhone = (e) => this.setState({ phone: e.target.value });
+  toggleTheme = () => this.setState((s) => ({ isLight: !s.isLight }));
+  toggleResults = () => this.setState((s) => ({ notifResults: !s.notifResults }));
+  toggleMercato = () => this.setState((s) => ({ notifMercato: !s.notifMercato }));
+  save = () => {
+    this.setState({ saved: true });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ saved: false }), 1800);
+  };
+
+  componentWillUnmount() { clearTimeout(this._t); }
+
+  renderVals() {
+    const name = this.state.name;
+    const nameOk = name.trim().length >= 2;
+
+    const phone = this.state.phone;
+    const digits = phone.replace(/\D/g, "");
+    const phoneEmpty = digits.length === 0;
+    const phoneOk = digits.length === 10;
+    const phoneBad = !phoneEmpty && !phoneOk;
+
+    const status = this.props.paymentStatus ?? "Payée";
+    const paid = status === "Payée";
+
+    const notifOpen = !!this.props.showNotifications;
+
+    return {
+      name, onName: this.onName, nameOk, nameBad: !nameOk,
+      phone, onPhone: this.onPhone, phoneOk, phoneBad, phoneEmpty,
+      isLight: this.state.isLight, isDark: !this.state.isLight, toggleTheme: this.toggleTheme,
+      saved: this.state.saved, notSaved: !this.state.saved, save: this.save,
+      paid, pending: !paid,
+      mise: this.props.miseAmount ?? "5 €",
+      notifOpen, notifLocked: !notifOpen,
+      notifResults: this.state.notifResults, toggleResults: this.toggleResults,
+      notifMercato: this.state.notifMercato, toggleMercato: this.toggleMercato,
+    };
+  }
+}
+</script>
+</body>
+</html>

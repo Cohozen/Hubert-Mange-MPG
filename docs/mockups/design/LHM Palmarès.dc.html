@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Archivo:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<meta name="design_doc_mode" content="canvas">
+<style>
+  @keyframes lhmHalo { 0%,100%{ transform:translate(-5%,-3%) scale(1) } 50%{ transform:translate(5%,3%) scale(1.1) } }
+  @keyframes lhmPulse { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
+  .lhm-card{ transition:transform .14s ease, box-shadow .14s ease, border-color .14s ease; }
+  .lhm-row{ transition:transform .12s ease, border-color .12s ease, background .12s ease; }
+  .lhm-row:hover{ transform:translateY(-1px); }
+  .lhm-name{ transition:color .12s ease, opacity .12s ease; }
+  .lhm-name:hover{ opacity:.78; text-decoration:underline; text-underline-offset:3px; }
+  .lhm-nav:hover{ color:#fff !important; }
+  .lhm-tab:hover{ filter:brightness(1.08); }
+  .lhm-trow{ transition:background .12s ease; }
+  .lhm-trow:hover{ background:rgba(43,49,96,.32) !important; }
+  .lhm-opt:hover{ background:#1B2350 !important; }
+  .lhm-sel:hover{ border-color:#3A4280 !important; }
+  .lhm-link2:hover{ opacity:.7; }
+  ::-webkit-scrollbar{ width:8px; height:8px; } ::-webkit-scrollbar-thumb{ background:#2A3160; border-radius:8px; } ::-webkit-scrollbar-track{ background:transparent; }
+</style>
+</helmet>
+
+<!-- ===================== MOBILE FRAME ===================== -->
+<div style="position:absolute; left:0px; top:0px; width:430px;">
+  <div data-drags-parent="1" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:2px; color:#8B92C4; margin-bottom:14px; text-transform:uppercase;">Mobile · Palmarès</div>
+  <div data-screen-label="Palmarès Mobile" style="width:430px; height:980px; background:#0A0E27; border-radius:30px; overflow:hidden; position:relative; box-shadow:0 24px 60px rgba(0,0,0,.45); border:1px solid #1B2350; font-family:'Inter',sans-serif; display:flex; flex-direction:column;">
+
+    <div style="height:5px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); flex-shrink:0;"></div>
+
+    <!-- header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px 12px; flex-shrink:0;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <svg viewBox="0 0 360 360" width="34" height="34"><defs><linearGradient id="palmLogoM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6D28D9"></stop><stop offset="0.55" stop-color="#FF2D78"></stop><stop offset="1" stop-color="#FF6B35"></stop></linearGradient></defs><path d="M180 46 L294 80 L294 210 Q294 298 180 350 Q66 298 66 210 L66 80 Z" fill="url(#palmLogoM)"></path><text x="180" y="232" text-anchor="middle" font-family="Archivo,'Arial Black',sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-3">LHM</text></svg>
+        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; letter-spacing:.3px; color:#fff;">LHM</div>
+      </div>
+      <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff; border:2px solid #2A3160;">HM</div>
+    </div>
+
+    <!-- title + tabs -->
+    <div style="padding:2px 20px 14px; flex-shrink:0;">
+      <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:34px; letter-spacing:-1.2px; color:#fff; text-transform:uppercase; line-height:.95;">Palmarès</div>
+      <div style="font-size:12px; color:#8B92C4; margin-top:6px; margin-bottom:14px;">Le mur des trophées de la ligue depuis 2023.</div>
+      <div style="display:inline-flex; background:#141A3D; border:1px solid #2A3160; border-radius:999px; padding:5px; gap:3px;">
+        <button class="lhm-tab" onClick="{{ setMCoupes }}" style="display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border:none; border-radius:999px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.5px; cursor:pointer; text-transform:uppercase; background:{{ mCoupesBg }}; color:{{ mCoupesColor }}; box-shadow:{{ mCoupesShadow }};">🏆 Coupes</button>
+        <button class="lhm-tab" onClick="{{ setMSaisons }}" style="display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border:none; border-radius:999px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.5px; cursor:pointer; text-transform:uppercase; background:{{ mSaisonsBg }}; color:{{ mSaisonsColor }}; box-shadow:{{ mSaisonsShadow }};">📅 Saisons</button>
+      </div>
+    </div>
+
+    <!-- scroll area -->
+    <div style="flex:1; overflow-y:auto; padding:4px 20px 24px;">
+
+      <!-- ===== COUPES ===== -->
+      <sc-if value="{{ isMCoupes }}" hint-placeholder-val="{{ true }}">
+
+      <!-- Classement des vainqueurs (JO) -->
+      <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; overflow:hidden; margin-bottom:16px;">
+        <div style="height:4px; background:linear-gradient(90deg,#00E5A0,#FFD23F,#A78BFA);"></div>
+        <div style="padding:15px 15px 9px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:17px;">🏅</span>
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#fff; letter-spacing:.2px;">Classement des vainqueurs</div>
+          </div>
+          <div style="font-size:11px; color:#8B92C4; margin-top:3px;">Façon JO · la C1 prime, puis la C3, puis la C4.</div>
+        </div>
+        <div style="display:grid; grid-template-columns:26px 1fr 28px 28px 28px 32px; gap:5px; align-items:center; padding:8px 15px; border-top:1px solid #2A3160; border-bottom:1px solid #2A3160; background:#0A0E27;">
+          <div style="font-size:9px; font-weight:700; color:#8B92C4;">#</div>
+          <div style="font-size:9px; font-weight:700; letter-spacing:.5px; color:#8B92C4; text-transform:uppercase;">Joueur</div>
+          <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; color:#00E5A0;">C1</div>
+          <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; color:#FFD23F;">C3</div>
+          <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; color:#A78BFA;">C4</div>
+          <div style="text-align:center; font-size:9px; font-weight:700; color:#8B92C4;">TOT</div>
+        </div>
+        <sc-for list="{{ medalRows }}" as="row" hint-placeholder-count="8">
+          <div class="lhm-trow" style="display:grid; grid-template-columns:26px 1fr 28px 28px 28px 32px; gap:5px; align-items:center; padding:9px 15px; border-bottom:1px solid #1B2350;">
+            <div style="display:flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:7px; background:{{ row.rankBg }}; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; color:{{ row.rankColor }};">{{ row.rank }}</div>
+            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+              <div style="width:26px; height:26px; border-radius:8px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; color:#9aa3d4; flex-shrink:0;">{{ row.initials }}</div>
+              <a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:800; font-size:12px; color:#fff; text-decoration:none; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ row.name }}</a>
+            </div>
+            <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#00E5A0; opacity:{{ row.c1Op }};">{{ row.c1 }}</div>
+            <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#FFD23F; opacity:{{ row.c3Op }};">{{ row.c3 }}</div>
+            <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#A78BFA; opacity:{{ row.c4Op }};">{{ row.c4 }}</div>
+            <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff;">{{ row.total }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- LDC -->
+      <div class="lhm-card" style="background:#141A3D; border:1px solid rgba(0,229,160,.35); border-radius:18px; overflow:hidden; position:relative; margin-bottom:14px;">
+        <div style="height:4px; background:#00E5A0;"></div>
+        <div style="padding:16px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+            <div style="width:46px; height:46px; border-radius:14px; background:radial-gradient(circle at 50% 35%, rgba(0,229,160,.35), rgba(0,229,160,.05)); border:1px solid rgba(0,229,160,.4); display:flex; align-items:center; justify-content:center; font-size:22px;">⭐</div>
+            <div style="flex:1;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#fff; letter-spacing:.2px; line-height:1.05;">Ligue des Crampons</div><div style="font-size:11px; color:#00E5A0; font-weight:600; margin-top:2px;">LDC · la C1 de la ligue</div></div>
+            <div style="text-align:center;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:20px; color:#00E5A0; line-height:1;">3</div><div style="font-size:8px; font-weight:700; letter-spacing:.5px; color:#8B92C4; text-transform:uppercase;">Sacres</div></div>
+          </div>
+          <div class="lhm-row" style="display:flex; align-items:center; gap:12px; background:linear-gradient(100deg, rgba(0,229,160,.16), rgba(0,229,160,.02)); border:1px solid rgba(0,229,160,.45); border-radius:13px; padding:12px 13px; margin-bottom:8px; box-shadow:{{ glowLDC }};">
+            <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,#00E5A0,#34D399); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#06251A;">HM</div>
+            <div style="flex:1;"><a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff; text-decoration:none; cursor:pointer;">Hubert Mange</a><div style="font-size:10px; font-weight:700; letter-spacing:1px; color:#00E5A0; text-transform:uppercase; margin-top:2px;">Tenant du titre</div></div>
+            <div style="text-align:right;"><div style="font-size:18px; line-height:1;">🏆</div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff; margin-top:2px;">2025</div></div>
+          </div>
+          <div class="lhm-row" style="display:flex; align-items:center; gap:11px; background:#0A0E27; border:1px solid #2A3160; border-radius:12px; padding:9px 12px; margin-bottom:7px;">
+            <div style="width:34px; height:34px; border-radius:10px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#9aa3d4;">KB</div>
+            <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; color:#fff; text-decoration:none; cursor:pointer;">Karim Benali</a>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#8B92C4;">2024</span>
+          </div>
+          <div class="lhm-row" style="display:flex; align-items:center; gap:11px; background:#0A0E27; border:1px solid #2A3160; border-radius:12px; padding:9px 12px;">
+            <div style="width:34px; height:34px; border-radius:10px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#9aa3d4;">SB</div>
+            <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; color:#fff; text-decoration:none; cursor:pointer;">Sophie Bernard</a>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#8B92C4;">2023</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Europa -->
+      <div class="lhm-card" style="background:#141A3D; border:1px solid rgba(255,210,63,.35); border-radius:18px; overflow:hidden; position:relative; margin-bottom:14px;">
+        <div style="height:4px; background:#FFD23F;"></div>
+        <div style="padding:16px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+            <div style="width:46px; height:46px; border-radius:14px; background:radial-gradient(circle at 50% 35%, rgba(255,210,63,.35), rgba(255,210,63,.05)); border:1px solid rgba(255,210,63,.4); display:flex; align-items:center; justify-content:center; font-size:22px;">🎖️</div>
+            <div style="flex:1;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#fff; letter-spacing:.2px; line-height:1.05;">Heureux papa's League</div><div style="font-size:11px; color:#FFD23F; font-weight:600; margin-top:2px;">Europa · la C3</div></div>
+            <div style="text-align:center;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:20px; color:#FFD23F; line-height:1;">3</div><div style="font-size:8px; font-weight:700; letter-spacing:.5px; color:#8B92C4; text-transform:uppercase;">Sacres</div></div>
+          </div>
+          <div class="lhm-row" style="display:flex; align-items:center; gap:12px; background:linear-gradient(100deg, rgba(255,210,63,.16), rgba(255,210,63,.02)); border:1px solid rgba(255,210,63,.45); border-radius:13px; padding:12px 13px; margin-bottom:8px; box-shadow:{{ glowEuropa }};">
+            <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,#FFD23F,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#3D2E00;">TP</div>
+            <div style="flex:1;"><a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff; text-decoration:none; cursor:pointer;">Thomas Petit</a><div style="font-size:10px; font-weight:700; letter-spacing:1px; color:#FFD23F; text-transform:uppercase; margin-top:2px;">Tenant du titre</div></div>
+            <div style="text-align:right;"><div style="font-size:18px; line-height:1;">🏆</div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff; margin-top:2px;">2025</div></div>
+          </div>
+          <div class="lhm-row" style="display:flex; align-items:center; gap:11px; background:#0A0E27; border:1px solid #2A3160; border-radius:12px; padding:9px 12px; margin-bottom:7px;">
+            <div style="width:34px; height:34px; border-radius:10px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#9aa3d4;">HM</div>
+            <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; color:#fff; text-decoration:none; cursor:pointer;">Hubert Mange</a>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#8B92C4;">2024</span>
+          </div>
+          <div class="lhm-row" style="display:flex; align-items:center; gap:11px; background:#0A0E27; border:1px solid #2A3160; border-radius:12px; padding:9px 12px;">
+            <div style="width:34px; height:34px; border-radius:10px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#9aa3d4;">LM</div>
+            <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; color:#fff; text-decoration:none; cursor:pointer;">Lucas Moreau</a>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#8B92C4;">2023</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conference -->
+      <div class="lhm-card" style="background:#141A3D; border:1px solid rgba(167,139,250,.35); border-radius:18px; overflow:hidden; position:relative; margin-bottom:4px;">
+        <div style="height:4px; background:#A78BFA;"></div>
+        <div style="padding:16px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+            <div style="width:46px; height:46px; border-radius:14px; background:radial-gradient(circle at 50% 35%, rgba(167,139,250,.35), rgba(167,139,250,.05)); border:1px solid rgba(167,139,250,.4); display:flex; align-items:center; justify-content:center; font-size:22px;">🍐</div>
+            <div style="flex:1;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#fff; letter-spacing:.2px; line-height:1.05;">Heureux papa's Conférence</div><div style="font-size:11px; color:#A78BFA; font-weight:600; margin-top:2px;">Conférence · la C4</div></div>
+            <div style="text-align:center;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:20px; color:#A78BFA; line-height:1;">3</div><div style="font-size:8px; font-weight:700; letter-spacing:.5px; color:#8B92C4; text-transform:uppercase;">Sacres</div></div>
+          </div>
+          <div class="lhm-row" style="display:flex; align-items:center; gap:12px; background:linear-gradient(100deg, rgba(167,139,250,.16), rgba(167,139,250,.02)); border:1px solid rgba(167,139,250,.45); border-radius:13px; padding:12px 13px; margin-bottom:8px; box-shadow:{{ glowConf }};">
+            <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,#6D28D9,#A78BFA); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff;">ER</div>
+            <div style="flex:1;"><a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff; text-decoration:none; cursor:pointer;">Émilie Roux</a><div style="font-size:10px; font-weight:700; letter-spacing:1px; color:#A78BFA; text-transform:uppercase; margin-top:2px;">Tenant du titre</div></div>
+            <div style="text-align:right;"><div style="font-size:18px; line-height:1;">🏆</div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#fff; margin-top:2px;">2025</div></div>
+          </div>
+          <div class="lhm-row" style="display:flex; align-items:center; gap:11px; background:#0A0E27; border:1px solid #2A3160; border-radius:12px; padding:9px 12px; margin-bottom:7px;">
+            <div style="width:34px; height:34px; border-radius:10px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#9aa3d4;">ML</div>
+            <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; color:#fff; text-decoration:none; cursor:pointer;">Marc Leroy</a>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#8B92C4;">2024</span>
+          </div>
+          <div class="lhm-row" style="display:flex; align-items:center; gap:11px; background:#0A0E27; border:1px solid #2A3160; border-radius:12px; padding:9px 12px;">
+            <div style="width:34px; height:34px; border-radius:10px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#9aa3d4;">JD</div>
+            <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; color:#fff; text-decoration:none; cursor:pointer;">Jean Dupont</a>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#8B92C4;">2023</span>
+          </div>
+        </div>
+      </div>
+
+      </sc-if>
+
+      <!-- ===== SAISONS ===== -->
+      <sc-if value="{{ isMSaisons }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; gap:9px; margin-bottom:12px;">
+        <div style="position:relative; flex:1;">
+          <button class="lhm-sel" onClick="{{ toggleMSaison }}" style="display:flex; align-items:center; gap:8px; width:100%; height:42px; padding:0 13px; background:#141A3D; border:1px solid #2A3160; border-radius:12px; cursor:pointer; transition:border-color .12s;">
+            <span style="flex:1; text-align:left; font-family:'Archivo',sans-serif; font-weight:800; font-size:12px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ saisonLabel }}</span>
+            <span style="color:#8B92C4; font-size:9px;">▼</span>
+          </button>
+          <sc-if value="{{ openMSaison }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; top:48px; left:0; right:0; background:#141A3D; border:1px solid #2A3160; border-radius:12px; padding:5px; z-index:40; box-shadow:0 18px 40px rgba(0,0,0,.55);">
+              <div class="lhm-opt" onClick="{{ pickSaisonAll }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Toutes les saisons</div>
+              <div class="lhm-opt" onClick="{{ pickSaison25 }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Saison 2025/26</div>
+              <div class="lhm-opt" onClick="{{ pickSaison24 }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Saison 2024/25</div>
+              <div class="lhm-opt" onClick="{{ pickSaison23 }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Saison 2023/24</div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="position:relative; flex:1;">
+          <button class="lhm-sel" onClick="{{ toggleMDiv }}" style="display:flex; align-items:center; gap:8px; width:100%; height:42px; padding:0 13px; background:#141A3D; border:1px solid #2A3160; border-radius:12px; cursor:pointer; transition:border-color .12s;">
+            <span style="flex:1; text-align:left; font-family:'Archivo',sans-serif; font-weight:800; font-size:12px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ divLabelText }}</span>
+            <span style="color:#8B92C4; font-size:9px;">▼</span>
+          </button>
+          <sc-if value="{{ openMDiv }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; top:48px; left:0; right:0; background:#141A3D; border:1px solid #2A3160; border-radius:12px; padding:5px; z-index:40; box-shadow:0 18px 40px rgba(0,0,0,.55);">
+              <div class="lhm-opt" onClick="{{ pickDivAll }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Toutes divisions</div>
+              <div class="lhm-opt" onClick="{{ pickDivD1 }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Division 1</div>
+              <div class="lhm-opt" onClick="{{ pickDivD2 }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Division 2</div>
+              <div class="lhm-opt" onClick="{{ pickDivD3 }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Division 3</div>
+              <div class="lhm-opt" onClick="{{ pickDivD4 }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Division 4</div>
+              <div class="lhm-opt" onClick="{{ pickDivD5 }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Division 5</div>
+              <div class="lhm-opt" onClick="{{ pickDivD6 }}" style="padding:9px 11px; border-radius:8px; font-size:13px; color:#fff; cursor:pointer;">Division 6</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+      <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:11px;">{{ resultCount }} champions · du + récent au + ancien</div>
+      <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <sc-for list="{{ champRows }}" as="row" hint-placeholder-count="6">
+          <div class="lhm-row" style="display:flex; align-items:center; gap:11px; background:#141A3D; border:1px solid #2A3160; border-radius:13px; padding:10px 12px; position:relative; overflow:hidden;">
+            <span style="position:absolute; left:0; top:0; bottom:0; width:4px; background:{{ row.divColor }};"></span>
+            <div style="width:38px; height:38px; border-radius:11px; background:{{ row.divGrad }}; color:{{ row.divTxt }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; flex-shrink:0;">{{ row.initials }}</div>
+            <div style="flex:1; min-width:0;">
+              <a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff; text-decoration:none; cursor:pointer;">{{ row.name }}</a>
+              <div style="display:flex; align-items:center; gap:7px; margin-top:3px;"><span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:.5px; color:{{ row.divColor }};">{{ row.dCode }}</span><span style="font-size:11px; color:#8B92C4;">· {{ row.divLabel }}</span></div>
+            </div>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#8B92C4; flex-shrink:0;">{{ row.season }}</span>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+      <sc-if value="{{ noRows }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center; padding:40px 20px; color:#8B92C4;"><div style="font-size:32px; margin-bottom:10px;">🏟️</div><div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff;">Aucun champion</div><div style="font-size:12px; margin-top:5px;">Ajuste tes filtres pour voir d'autres sacres.</div></div>
+      </sc-if>
+      </sc-if>
+
+    </div>
+
+    <!-- bottom nav -->
+    <div style="flex-shrink:0; background:#141A3D; border-top:1px solid #2A3160; padding:10px 14px 12px; display:flex; align-items:center; gap:6px;">
+      <div class="lhm-nav" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; font-size:10px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:14px; height:14px; border-radius:50%; border:2px solid currentColor;"></span>Accueil</div>
+      <div style="flex:1.5; display:flex; flex-direction:row; align-items:center; justify-content:center; gap:7px; padding:11px 4px; border-radius:14px; background:linear-gradient(90deg,#FF2D78,#FF6B35); font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#fff;"><span style="width:14px; height:14px; border-radius:50%; background:#fff;"></span>PALMARÈS</div>
+      <div class="lhm-nav" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; font-size:10px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:14px; height:14px; border-radius:50%; border:2px solid currentColor;"></span>Rétro</div>
+      <div class="lhm-nav" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; font-size:10px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:14px; height:14px; border-radius:50%; border:2px solid currentColor;"></span>Cagnotte</div>
+      <div class="lhm-nav" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; font-size:10px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:14px; height:14px; border-radius:50%; border:2px solid currentColor;"></span>Profil</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DESKTOP FRAME ===================== -->
+<div style="position:absolute; left:540px; top:0px; width:1320px;">
+  <div data-drags-parent="1" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:2px; color:#8B92C4; margin-bottom:14px; text-transform:uppercase;">Desktop · Palmarès</div>
+  <div data-screen-label="Palmarès Desktop" style="width:1320px; height:880px; background:#0A0E27; border-radius:20px; overflow:hidden; position:relative; box-shadow:0 30px 80px rgba(0,0,0,.5); border:1px solid #1B2350; font-family:'Inter',sans-serif; display:flex;">
+
+    <!-- SIDEBAR -->
+    <div style="width:230px; flex-shrink:0; background:#141A3D; border-right:1px solid #2A3160; display:flex; flex-direction:column; padding:22px 16px;">
+      <div style="display:flex; align-items:center; gap:11px; padding:0 8px 18px; margin-bottom:14px; border-bottom:1px solid #2A3160;">
+        <svg viewBox="0 0 360 360" width="38" height="38"><defs><linearGradient id="palmLogoD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6D28D9"></stop><stop offset="0.55" stop-color="#FF2D78"></stop><stop offset="1" stop-color="#FF6B35"></stop></linearGradient></defs><path d="M180 46 L294 80 L294 210 Q294 298 180 350 Q66 298 66 210 L66 80 Z" fill="url(#palmLogoD)"></path><text x="180" y="232" text-anchor="middle" font-family="Archivo,'Arial Black',sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-3">LHM</text></svg>
+        <div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#fff; letter-spacing:.3px;">LHM</div><div style="font-size:9px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Saison 2025/2026</div></div>
+      </div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Accueil</div>
+      <div style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; background:linear-gradient(90deg,#FF2D78,#FF6B35); font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; background:#fff;"></span>Palmarès</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Rétro</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Cagnotte</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Profil</div>
+      <div style="flex:1;"></div>
+      <div style="border-top:1px solid #2A3160; padding-top:12px;">
+        <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:15px; height:15px; border-radius:5px; border:2px solid currentColor;"></span>Paramètres</div>
+        <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:15px; height:15px; border-radius:5px; border:2px solid currentColor;"></span>Admin</div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+      <!-- topbar -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 30px; border-bottom:1px solid #2A3160; flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:26px; letter-spacing:-.5px; color:#fff; text-transform:uppercase;">Palmarès</div>
+          <div style="display:inline-flex; background:#0A0E27; border:1px solid #2A3160; border-radius:999px; padding:5px; gap:3px;">
+            <button class="lhm-tab" onClick="{{ setDCoupes }}" style="display:inline-flex; align-items:center; gap:7px; padding:9px 20px; border:none; border-radius:999px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.5px; cursor:pointer; text-transform:uppercase; background:{{ dCoupesBg }}; color:{{ dCoupesColor }}; box-shadow:{{ dCoupesShadow }};">🏆 Coupes</button>
+            <button class="lhm-tab" onClick="{{ setDSaisons }}" style="display:inline-flex; align-items:center; gap:7px; padding:9px 20px; border:none; border-radius:999px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; letter-spacing:.5px; cursor:pointer; text-transform:uppercase; background:{{ dSaisonsBg }}; color:{{ dSaisonsColor }}; box-shadow:{{ dSaisonsShadow }};">📅 Saisons</button>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="display:flex; align-items:center; gap:6px; padding:7px 14px; border-radius:999px; background:#141A3D; border:1px solid #2A3160; font-size:11px; font-weight:700; color:#FFD23F; text-transform:uppercase; letter-spacing:.5px;">🏆 9 trophées attribués</span>
+          <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#fff;">HM</div>
+        </div>
+      </div>
+
+      <!-- content scroll -->
+      <div style="flex:1; overflow-y:auto; padding:26px 30px;">
+
+        <!-- ===== COUPES ===== -->
+        <sc-if value="{{ isDCoupes }}" hint-placeholder-val="{{ true }}">
+
+        <!-- Classement des vainqueurs (JO) -->
+        <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; overflow:hidden; margin-bottom:24px;">
+          <div style="height:5px; background:linear-gradient(90deg,#00E5A0,#FFD23F,#A78BFA);"></div>
+          <div style="padding:20px 26px 16px; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+            <div style="display:flex; align-items:center; gap:13px;">
+              <span style="font-size:26px;">🏅</span>
+              <div>
+                <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:21px; color:#fff; letter-spacing:-.3px;">Classement des vainqueurs</div>
+                <div style="font-size:13px; color:#8B92C4; margin-top:3px;">Tableau façon JO — la C1 prime, puis la C3, puis la C4.</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:16px; flex-shrink:0;">
+              <span style="display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:#8B92C4;"><span style="width:9px; height:9px; border-radius:50%; background:#00E5A0;"></span>C1 · LDC</span>
+              <span style="display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:#8B92C4;"><span style="width:9px; height:9px; border-radius:50%; background:#FFD23F;"></span>C3 · Europa</span>
+              <span style="display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:#8B92C4;"><span style="width:9px; height:9px; border-radius:50%; background:#A78BFA;"></span>C4 · Conf.</span>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:64px 1fr 88px 88px 88px 88px; gap:14px; align-items:center; padding:12px 26px; background:#0A0E27; border-top:1px solid #2A3160; border-bottom:1px solid #2A3160;">
+            <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Rang</div>
+            <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Joueur</div>
+            <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#00E5A0;">⭐ C1</div>
+            <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#FFD23F;">🎖️ C3</div>
+            <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#A78BFA;">🍐 C4</div>
+            <div style="text-align:center; font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Total</div>
+          </div>
+          <sc-for list="{{ medalRows }}" as="row" hint-placeholder-count="8">
+            <div class="lhm-trow" style="display:grid; grid-template-columns:64px 1fr 88px 88px 88px 88px; gap:14px; align-items:center; padding:14px 26px; border-bottom:1px solid #1B2350;">
+              <div style="width:36px; height:36px; border-radius:11px; background:{{ row.rankBg }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:{{ row.rankColor }};">{{ row.rank }}</div>
+              <div style="display:flex; align-items:center; gap:13px; min-width:0;">
+                <div style="width:42px; height:42px; border-radius:12px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#9aa3d4; flex-shrink:0;">{{ row.initials }}</div>
+                <a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:800; font-size:16px; color:#fff; text-decoration:none; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ row.name }}</a>
+              </div>
+              <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:19px; color:#00E5A0; opacity:{{ row.c1Op }};">{{ row.c1 }}</div>
+              <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:19px; color:#FFD23F; opacity:{{ row.c3Op }};">{{ row.c3 }}</div>
+              <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:19px; color:#A78BFA; opacity:{{ row.c4Op }};">{{ row.c4 }}</div>
+              <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:19px; color:#fff;">{{ row.total }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:18px;">
+          <div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:22px; color:#fff; letter-spacing:-.5px;">Les Coupes d'Europe</div><div style="font-size:13px; color:#8B92C4; margin-top:4px;">Trois trophées, une légende par édition. Qui gravera son nom cette saison&nbsp;?</div></div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px;">
+
+          <!-- LDC column -->
+          <div class="lhm-card" style="background:#141A3D; border:1px solid rgba(0,229,160,.35); border-radius:20px; overflow:hidden; position:relative;">
+            <div style="height:5px; background:#00E5A0;"></div>
+            <div style="padding:22px;">
+              <div style="display:flex; align-items:center; gap:13px; margin-bottom:18px;">
+                <div style="width:56px; height:56px; border-radius:16px; background:radial-gradient(circle at 50% 35%, rgba(0,229,160,.35), rgba(0,229,160,.05)); border:1px solid rgba(0,229,160,.4); display:flex; align-items:center; justify-content:center; font-size:28px;">⭐</div>
+                <div style="flex:1;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:19px; color:#fff; letter-spacing:.2px; line-height:1.05;">Ligue des Crampons</div><div style="font-size:12px; color:#00E5A0; font-weight:600; margin-top:3px;">LDC · la C1 de la ligue</div></div>
+              </div>
+              <div class="lhm-row" style="display:flex; align-items:center; gap:13px; background:linear-gradient(100deg, rgba(0,229,160,.16), rgba(0,229,160,.02)); border:1px solid rgba(0,229,160,.45); border-radius:14px; padding:15px; margin-bottom:10px; box-shadow:{{ glowLDC }};">
+                <div style="width:48px; height:48px; border-radius:13px; background:linear-gradient(135deg,#00E5A0,#34D399); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; color:#06251A;">HM</div>
+                <div style="flex:1;"><a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; color:#fff; text-decoration:none; cursor:pointer;">Hubert Mange</a><div style="font-size:10px; font-weight:700; letter-spacing:1px; color:#00E5A0; text-transform:uppercase; margin-top:3px;">Tenant du titre · 2025</div></div>
+                <div style="font-size:24px;">🏆</div>
+              </div>
+              <div class="lhm-row" style="display:flex; align-items:center; gap:12px; background:#0A0E27; border:1px solid #2A3160; border-radius:13px; padding:12px 14px; margin-bottom:9px;">
+                <div style="width:40px; height:40px; border-radius:11px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#9aa3d4;">KB</div>
+                <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff; text-decoration:none; cursor:pointer;">Karim Benali</a>
+                <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#8B92C4;">2024</span>
+              </div>
+              <div class="lhm-row" style="display:flex; align-items:center; gap:12px; background:#0A0E27; border:1px solid #2A3160; border-radius:13px; padding:12px 14px;">
+                <div style="width:40px; height:40px; border-radius:11px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#9aa3d4;">SB</div>
+                <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff; text-decoration:none; cursor:pointer;">Sophie Bernard</a>
+                <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#8B92C4;">2023</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Europa column -->
+          <div class="lhm-card" style="background:#141A3D; border:1px solid rgba(255,210,63,.35); border-radius:20px; overflow:hidden; position:relative;">
+            <div style="height:5px; background:#FFD23F;"></div>
+            <div style="padding:22px;">
+              <div style="display:flex; align-items:center; gap:13px; margin-bottom:18px;">
+                <div style="width:56px; height:56px; border-radius:16px; background:radial-gradient(circle at 50% 35%, rgba(255,210,63,.35), rgba(255,210,63,.05)); border:1px solid rgba(255,210,63,.4); display:flex; align-items:center; justify-content:center; font-size:28px;">🎖️</div>
+                <div style="flex:1;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:19px; color:#fff; letter-spacing:.2px; line-height:1.05;">Heureux papa's League</div><div style="font-size:12px; color:#FFD23F; font-weight:600; margin-top:3px;">Europa · la C3</div></div>
+              </div>
+              <div class="lhm-row" style="display:flex; align-items:center; gap:13px; background:linear-gradient(100deg, rgba(255,210,63,.16), rgba(255,210,63,.02)); border:1px solid rgba(255,210,63,.45); border-radius:14px; padding:15px; margin-bottom:10px; box-shadow:{{ glowEuropa }};">
+                <div style="width:48px; height:48px; border-radius:13px; background:linear-gradient(135deg,#FFD23F,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; color:#3D2E00;">TP</div>
+                <div style="flex:1;"><a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; color:#fff; text-decoration:none; cursor:pointer;">Thomas Petit</a><div style="font-size:10px; font-weight:700; letter-spacing:1px; color:#FFD23F; text-transform:uppercase; margin-top:3px;">Tenant du titre · 2025</div></div>
+                <div style="font-size:24px;">🏆</div>
+              </div>
+              <div class="lhm-row" style="display:flex; align-items:center; gap:12px; background:#0A0E27; border:1px solid #2A3160; border-radius:13px; padding:12px 14px; margin-bottom:9px;">
+                <div style="width:40px; height:40px; border-radius:11px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#9aa3d4;">HM</div>
+                <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff; text-decoration:none; cursor:pointer;">Hubert Mange</a>
+                <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#8B92C4;">2024</span>
+              </div>
+              <div class="lhm-row" style="display:flex; align-items:center; gap:12px; background:#0A0E27; border:1px solid #2A3160; border-radius:13px; padding:12px 14px;">
+                <div style="width:40px; height:40px; border-radius:11px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#9aa3d4;">LM</div>
+                <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff; text-decoration:none; cursor:pointer;">Lucas Moreau</a>
+                <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#8B92C4;">2023</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conference column -->
+          <div class="lhm-card" style="background:#141A3D; border:1px solid rgba(167,139,250,.35); border-radius:20px; overflow:hidden; position:relative;">
+            <div style="height:5px; background:#A78BFA;"></div>
+            <div style="padding:22px;">
+              <div style="display:flex; align-items:center; gap:13px; margin-bottom:18px;">
+                <div style="width:56px; height:56px; border-radius:16px; background:radial-gradient(circle at 50% 35%, rgba(167,139,250,.35), rgba(167,139,250,.05)); border:1px solid rgba(167,139,250,.4); display:flex; align-items:center; justify-content:center; font-size:28px;">🍐</div>
+                <div style="flex:1;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:19px; color:#fff; letter-spacing:.2px; line-height:1.05;">Heureux papa's Conférence</div><div style="font-size:12px; color:#A78BFA; font-weight:600; margin-top:3px;">Conférence · la C4</div></div>
+              </div>
+              <div class="lhm-row" style="display:flex; align-items:center; gap:13px; background:linear-gradient(100deg, rgba(167,139,250,.16), rgba(167,139,250,.02)); border:1px solid rgba(167,139,250,.45); border-radius:14px; padding:15px; margin-bottom:10px; box-shadow:{{ glowConf }};">
+                <div style="width:48px; height:48px; border-radius:13px; background:linear-gradient(135deg,#6D28D9,#A78BFA); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; color:#fff;">ER</div>
+                <div style="flex:1;"><a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; color:#fff; text-decoration:none; cursor:pointer;">Émilie Roux</a><div style="font-size:10px; font-weight:700; letter-spacing:1px; color:#A78BFA; text-transform:uppercase; margin-top:3px;">Tenant du titre · 2025</div></div>
+                <div style="font-size:24px;">🏆</div>
+              </div>
+              <div class="lhm-row" style="display:flex; align-items:center; gap:12px; background:#0A0E27; border:1px solid #2A3160; border-radius:13px; padding:12px 14px; margin-bottom:9px;">
+                <div style="width:40px; height:40px; border-radius:11px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#9aa3d4;">ML</div>
+                <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff; text-decoration:none; cursor:pointer;">Marc Leroy</a>
+                <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#8B92C4;">2024</span>
+              </div>
+              <div class="lhm-row" style="display:flex; align-items:center; gap:12px; background:#0A0E27; border:1px solid #2A3160; border-radius:13px; padding:12px 14px;">
+                <div style="width:40px; height:40px; border-radius:11px; background:#1B2350; border:1px solid #2A3160; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:#9aa3d4;">JD</div>
+                <a class="lhm-name" style="flex:1; font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff; text-decoration:none; cursor:pointer;">Jean Dupont</a>
+                <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#8B92C4;">2023</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        </sc-if>
+
+        <!-- ===== SAISONS ===== -->
+        <sc-if value="{{ isDSaisons }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:20px;">
+          <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:22px; color:#fff; letter-spacing:-.5px; margin-right:6px;">Les Champions</div>
+          <div style="position:relative;">
+            <button class="lhm-sel" onClick="{{ toggleDSaison }}" style="display:flex; align-items:center; gap:12px; height:46px; padding:0 18px; background:#141A3D; border:1px solid #2A3160; border-radius:13px; cursor:pointer; min-width:210px; transition:border-color .12s;">
+              <span style="font-size:9px; font-weight:700; letter-spacing:1px; color:#8B92C4; text-transform:uppercase;">Saison</span>
+              <span style="flex:1; text-align:left; font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff;">{{ saisonLabel }}</span>
+              <span style="color:#8B92C4; font-size:10px;">▼</span>
+            </button>
+            <sc-if value="{{ openDSaison }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute; top:52px; left:0; right:0; background:#141A3D; border:1px solid #2A3160; border-radius:13px; padding:6px; z-index:40; box-shadow:0 20px 48px rgba(0,0,0,.55);">
+                <div class="lhm-opt" onClick="{{ pickSaisonAll }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Toutes les saisons</div>
+                <div class="lhm-opt" onClick="{{ pickSaison25 }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Saison 2025/26</div>
+                <div class="lhm-opt" onClick="{{ pickSaison24 }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Saison 2024/25</div>
+                <div class="lhm-opt" onClick="{{ pickSaison23 }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Saison 2023/24</div>
+              </div>
+            </sc-if>
+          </div>
+          <div style="position:relative;">
+            <button class="lhm-sel" onClick="{{ toggleDDiv }}" style="display:flex; align-items:center; gap:12px; height:46px; padding:0 18px; background:#141A3D; border:1px solid #2A3160; border-radius:13px; cursor:pointer; min-width:200px; transition:border-color .12s;">
+              <span style="font-size:9px; font-weight:700; letter-spacing:1px; color:#8B92C4; text-transform:uppercase;">Division</span>
+              <span style="flex:1; text-align:left; font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff;">{{ divLabelText }}</span>
+              <span style="color:#8B92C4; font-size:10px;">▼</span>
+            </button>
+            <sc-if value="{{ openDDiv }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute; top:52px; left:0; right:0; background:#141A3D; border:1px solid #2A3160; border-radius:13px; padding:6px; z-index:40; box-shadow:0 20px 48px rgba(0,0,0,.55);">
+                <div class="lhm-opt" onClick="{{ pickDivAll }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Toutes divisions</div>
+                <div class="lhm-opt" onClick="{{ pickDivD1 }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Division 1</div>
+                <div class="lhm-opt" onClick="{{ pickDivD2 }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Division 2</div>
+                <div class="lhm-opt" onClick="{{ pickDivD3 }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Division 3</div>
+                <div class="lhm-opt" onClick="{{ pickDivD4 }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Division 4</div>
+                <div class="lhm-opt" onClick="{{ pickDivD5 }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Division 5</div>
+                <div class="lhm-opt" onClick="{{ pickDivD6 }}" style="padding:10px 13px; border-radius:9px; font-size:14px; color:#fff; cursor:pointer;">Division 6</div>
+              </div>
+            </sc-if>
+          </div>
+          <div style="flex:1;"></div>
+          <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:11px; letter-spacing:1px; color:#8B92C4; text-transform:uppercase;">{{ resultCount }} champions</div>
+        </div>
+
+        <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; overflow:hidden;">
+          <div style="display:grid; grid-template-columns:150px 250px 1fr 120px; gap:16px; padding:14px 24px; background:#0A0E27; border-bottom:1px solid #2A3160;">
+            <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Saison</div>
+            <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Division</div>
+            <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Champion</div>
+            <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; text-align:right;">Profil</div>
+          </div>
+          <sc-for list="{{ champRows }}" as="row" hint-placeholder-count="8">
+            <div class="lhm-trow" style="display:grid; grid-template-columns:150px 250px 1fr 120px; gap:16px; align-items:center; padding:14px 24px; border-bottom:1px solid #1B2350;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; color:#fff;">{{ row.season }}</div>
+              <div style="display:flex; align-items:center; gap:11px;">
+                <span style="display:inline-flex; align-items:center; justify-content:center; min-width:36px; height:30px; padding:0 11px; border-radius:9px; background:{{ row.divGrad }}; color:{{ row.divTxt }}; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px;">{{ row.dCode }}</span>
+                <span style="font-size:13px; color:#C7CEEF; font-weight:600;">{{ row.divLabel }}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:13px;">
+                <div style="width:42px; height:42px; border-radius:12px; background:{{ row.divGrad }}; color:{{ row.divTxt }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:15px;">{{ row.initials }}</div>
+                <a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:800; font-size:16px; color:#fff; text-decoration:none; cursor:pointer;">{{ row.name }}</a>
+              </div>
+              <a class="lhm-link2" style="justify-self:end; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#FF6B35; text-decoration:none; cursor:pointer; text-transform:uppercase; transition:opacity .12s;">Voir →</a>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ noRows }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center; padding:70px 20px; color:#8B92C4; background:#141A3D; border:1px solid #2A3160; border-radius:18px;"><div style="font-size:40px; margin-bottom:12px;">🏟️</div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:18px; color:#fff;">Aucun champion</div><div style="font-size:13px; margin-top:6px;">Ajuste tes filtres pour explorer d'autres sacres.</div></div>
+        </sc-if>
+        </sc-if>
+
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{},&quot;defaultTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;coupes&quot;,&quot;saisons&quot;],&quot;default&quot;:&quot;coupes&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;highlightTenant&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Affichage&quot;}}">
+class Component extends DCLogic {
+  state = { mTab: null, dTab: null, saison: "Toutes", division: "Toutes", openMenu: null };
+
+  renderVals() {
+    const def = (this.props.defaultTab === "saisons") ? "saisons" : "coupes";
+    const mTab = this.state.mTab || def;
+    const dTab = this.state.dTab || def;
+    const glowOn = this.props.highlightTenant ?? true;
+    const g = (rgb) => glowOn
+      ? "0 0 0 1px rgba(" + rgb + ",.55), 0 12px 34px rgba(" + rgb + ",.28)"
+      : "0 4px 14px rgba(0,0,0,.3)";
+
+    const pillBg = (a) => a ? "linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35)" : "transparent";
+    const pillColor = (a) => a ? "#ffffff" : "#8B92C4";
+    const pillSh = (a) => a ? "0 6px 18px rgba(255,45,120,.35)" : "none";
+
+    const divisions = [
+      { d: "D1", label: "Division 1 · Élite", color: "#FFD23F", grad: "linear-gradient(135deg,#FFD23F,#FF6B35)", txt: "#3D2E00" },
+      { d: "D2", label: "Division 2", color: "#A78BFA", grad: "linear-gradient(135deg,#6D28D9,#A78BFA)", txt: "#ffffff" },
+      { d: "D3", label: "Division 3", color: "#FF2D78", grad: "linear-gradient(135deg,#FF2D78,#FF6B35)", txt: "#ffffff" },
+      { d: "D4", label: "Division 4", color: "#FF6B35", grad: "linear-gradient(135deg,#FF6B35,#FFD23F)", txt: "#3D2E00" },
+      { d: "D5", label: "Division 5", color: "#00E5A0", grad: "linear-gradient(135deg,#00E5A0,#34D399)", txt: "#06251A" },
+      { d: "D6", label: "Division 6", color: "#8B92C4", grad: "linear-gradient(135deg,#3A4280,#8B92C4)", txt: "#0A0E27" },
+    ];
+    const seasons = ["2025/26", "2024/25", "2023/24"];
+    const champByDiv = {
+      D1: [["Karim Benali", "KB"], ["Hubert Mange", "HM"], ["Sophie Bernard", "SB"]],
+      D2: [["Thomas Petit", "TP"], ["Hubert Mange", "HM"], ["Lucas Moreau", "LM"]],
+      D3: [["Antoine Girard", "AG"], ["Marc Leroy", "ML"], ["Chloé Fontaine", "CF"]],
+      D4: [["Émilie Roux", "ER"], ["Nicolas Vidal", "NV"], ["Paul Renard", "PR"]],
+      D5: [["Jean Dupont", "JD"], ["Sophie Bernard", "SB"], ["Hubert Mange", "HM"]],
+      D6: [["Chloé Fontaine", "CF"], ["Paul Renard", "PR"], ["Nicolas Vidal", "NV"]],
+    };
+    const rows = [];
+    seasons.forEach((s, si) => divisions.forEach((dv) => {
+      const c = champByDiv[dv.d][si];
+      rows.push({ id: s + "-" + dv.d, season: s, dCode: dv.d, divLabel: dv.label, divColor: dv.color, divGrad: dv.grad, divTxt: dv.txt, name: c[0], initials: c[1] });
+    }));
+    const champRows = rows.filter((r) =>
+      (this.state.saison === "Toutes" || r.season === this.state.saison) &&
+      (this.state.division === "Toutes" || r.dCode === this.state.division));
+
+    const divLabelMap = { Toutes: "Toutes divisions", D1: "Division 1", D2: "Division 2", D3: "Division 3", D4: "Division 4", D5: "Division 5", D6: "Division 6" };
+    const saisonLabel = this.state.saison === "Toutes" ? "Toutes les saisons" : "Saison " + this.state.saison;
+
+    const setOpen = (id) => () => this.setState((s) => ({ openMenu: s.openMenu === id ? null : id }));
+    const pickS = (v) => () => this.setState({ saison: v, openMenu: null });
+    const pickD = (v) => () => this.setState({ division: v, openMenu: null });
+
+    // ===== Classement des vainqueurs de coupe (façon JO : C1 > C3 > C4) =====
+    const cups = {
+      c1: [["Hubert Mange", "HM"], ["Karim Benali", "KB"], ["Sophie Bernard", "SB"]],
+      c3: [["Thomas Petit", "TP"], ["Hubert Mange", "HM"], ["Lucas Moreau", "LM"]],
+      c4: [["Émilie Roux", "ER"], ["Marc Leroy", "ML"], ["Jean Dupont", "JD"]],
+    };
+    const tally = {};
+    ["c1", "c3", "c4"].forEach((k) => cups[k].forEach(([name, ini]) => {
+      if (!tally[name]) tally[name] = { name, ini, c1: 0, c3: 0, c4: 0 };
+      tally[name][k] += 1;
+    }));
+    const rankStyle = [
+      { bg: "linear-gradient(135deg,#FFE48A,#FFD23F)", color: "#3D2E00" },
+      { bg: "linear-gradient(135deg,#E2E8F8,#A9B2D8)", color: "#1B2350" },
+      { bg: "linear-gradient(135deg,#E59866,#B4631F)", color: "#ffffff" },
+    ];
+    const medalRows = Object.values(tally)
+      .sort((a, b) => (b.c1 - a.c1) || (b.c3 - a.c3) || (b.c4 - a.c4) || a.name.localeCompare(b.name))
+      .map((r, i) => ({
+        id: r.name, rank: i + 1, name: r.name, initials: r.ini,
+        c1: r.c1, c3: r.c3, c4: r.c4, total: r.c1 + r.c3 + r.c4,
+        c1Op: r.c1 ? 1 : 0.22, c3Op: r.c3 ? 1 : 0.22, c4Op: r.c4 ? 1 : 0.22,
+        rankBg: (rankStyle[i] || { bg: "#1B2350" }).bg,
+        rankColor: (rankStyle[i] || { color: "#8B92C4" }).color,
+      }));
+
+    const mc = mTab === "coupes", ms = mTab === "saisons", dc = dTab === "coupes", ds = dTab === "saisons";
+
+    return {
+      isMCoupes: mc, isMSaisons: ms, isDCoupes: dc, isDSaisons: ds,
+      setMCoupes: () => this.setState({ mTab: "coupes" }),
+      setMSaisons: () => this.setState({ mTab: "saisons" }),
+      setDCoupes: () => this.setState({ dTab: "coupes" }),
+      setDSaisons: () => this.setState({ dTab: "saisons" }),
+      mCoupesBg: pillBg(mc), mCoupesColor: pillColor(mc), mCoupesShadow: pillSh(mc),
+      mSaisonsBg: pillBg(ms), mSaisonsColor: pillColor(ms), mSaisonsShadow: pillSh(ms),
+      dCoupesBg: pillBg(dc), dCoupesColor: pillColor(dc), dCoupesShadow: pillSh(dc),
+      dSaisonsBg: pillBg(ds), dSaisonsColor: pillColor(ds), dSaisonsShadow: pillSh(ds),
+      champRows, medalRows,
+      hasRows: champRows.length > 0,
+      noRows: champRows.length === 0,
+      resultCount: champRows.length,
+      saisonLabel,
+      divLabelText: divLabelMap[this.state.division],
+      openDSaison: this.state.openMenu === "d-saison",
+      openDDiv: this.state.openMenu === "d-div",
+      openMSaison: this.state.openMenu === "m-saison",
+      openMDiv: this.state.openMenu === "m-div",
+      toggleDSaison: setOpen("d-saison"),
+      toggleDDiv: setOpen("d-div"),
+      toggleMSaison: setOpen("m-saison"),
+      toggleMDiv: setOpen("m-div"),
+      pickSaisonAll: pickS("Toutes"), pickSaison25: pickS("2025/26"), pickSaison24: pickS("2024/25"), pickSaison23: pickS("2023/24"),
+      pickDivAll: pickD("Toutes"), pickDivD1: pickD("D1"), pickDivD2: pickD("D2"), pickDivD3: pickD("D3"), pickDivD4: pickD("D4"), pickDivD5: pickD("D5"), pickDivD6: pickD("D6"),
+      glowLDC: g("0,229,160"), glowEuropa: g("255,210,63"), glowConf: g("167,139,250"),
+    };
+  }
+}
+</script>
+</body>
+</html>

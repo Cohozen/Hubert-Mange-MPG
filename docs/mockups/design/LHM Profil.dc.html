@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Archivo:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<meta name="design_doc_mode" content="canvas">
+<style>
+  @keyframes lhmHalo { 0%,100%{ transform:translate(-5%,-3%) scale(1) } 50%{ transform:translate(5%,3%) scale(1.1) } }
+  @keyframes lhmPulse { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
+  @keyframes lhmShine { 0%{ transform:translateX(-130%) rotate(8deg) } 60%,100%{ transform:translateX(230%) rotate(8deg) } }
+  .lhm-card{ transition:transform .14s ease, box-shadow .14s ease, border-color .14s ease; }
+  .lhm-card:hover{ transform:translateY(-3px); border-color:#3A4280 !important; box-shadow:0 18px 40px rgba(0,0,0,.45); }
+  .lhm-nav:hover{ color:#fff !important; }
+  .lhm-tab:hover{ filter:brightness(1.08); }
+  .lhm-name{ transition:opacity .12s ease; }
+  .lhm-name:hover{ opacity:.78; text-decoration:underline; text-underline-offset:3px; }
+  .lhm-trow{ transition:background .12s ease; }
+  .lhm-trow:hover{ background:rgba(43,49,96,.32) !important; }
+  .lhm-pills{ scrollbar-width:none; -ms-overflow-style:none; }
+  .lhm-pills::-webkit-scrollbar{ display:none; }
+  .lhm-btn:hover{ filter:brightness(1.07); transform:translateY(-1px); }
+  ::-webkit-scrollbar{ width:8px; height:8px; } ::-webkit-scrollbar-thumb{ background:#2A3160; border-radius:8px; } ::-webkit-scrollbar-track{ background:transparent; }
+</style>
+</helmet>
+
+<!-- ===================== MOBILE FRAME ===================== -->
+<div style="position:absolute; left:0px; top:0px; width:430px;">
+  <div data-drags-parent="1" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:2px; color:#8B92C4; margin-bottom:14px; text-transform:uppercase;">Mobile · Profil</div>
+  <div data-screen-label="Profil Mobile" style="width:430px; height:1000px; background:#0A0E27; border-radius:30px; overflow:hidden; position:relative; box-shadow:0 24px 60px rgba(0,0,0,.45); border:1px solid #1B2350; font-family:'Inter',sans-serif; display:flex; flex-direction:column;">
+
+    <div style="height:5px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); flex-shrink:0;"></div>
+
+    <!-- app header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px 10px; flex-shrink:0;">
+      <sc-if value="{{ isOwn }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <svg viewBox="0 0 360 360" width="32" height="32"><defs><linearGradient id="proLogoM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6D28D9"></stop><stop offset="0.55" stop-color="#FF2D78"></stop><stop offset="1" stop-color="#FF6B35"></stop></linearGradient></defs><path d="M180 46 L294 80 L294 210 Q294 298 180 350 Q66 298 66 210 L66 80 Z" fill="url(#proLogoM)"></path><text x="180" y="232" text-anchor="middle" font-family="Archivo,'Arial Black',sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-3">LHM</text></svg>
+          <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#fff;">Mon profil</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ showFollow }}" hint-placeholder-val="{{ false }}">
+        <div class="lhm-name" style="display:flex; align-items:center; gap:8px; font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#8B92C4; cursor:pointer;">← Retour</div>
+      </sc-if>
+      <div style="display:flex; align-items:center; gap:9px;">
+        <sc-if value="{{ isOwn }}" hint-placeholder-val="{{ true }}">
+          <button class="lhm-btn" style="border:1px solid #2A3160; background:#141A3D; color:#C7CEEF; border-radius:999px; padding:7px 13px; font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; cursor:pointer; transition:transform .12s, filter .12s;">Modifier</button>
+        </sc-if>
+        <sc-if value="{{ showFollow }}" hint-placeholder-val="{{ false }}">
+          <button class="lhm-btn" style="border:none; background:linear-gradient(90deg,#FF2D78,#FF6B35); color:#fff; border-radius:999px; padding:7px 15px; font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; cursor:pointer; transition:transform .12s, filter .12s;">+ Suivre</button>
+        </sc-if>
+      </div>
+    </div>
+
+    <!-- scroll area -->
+    <div style="flex:1; overflow-y:auto; padding:6px 18px 22px;">
+
+      <!-- ===== HERO CARD (collectible) ===== -->
+      <div style="position:relative; overflow:hidden; border-radius:22px; background:linear-gradient(150deg,#2D1B69,#6D28D9 78%); padding:20px 18px 18px; box-shadow:0 18px 46px rgba(109,40,217,.4); border:1px solid rgba(167,139,250,.35);">
+        <div style="position:absolute; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle,rgba(255,45,120,.5),transparent 70%); right:-90px; top:-110px; animation:lhmHalo 9s ease-in-out infinite; pointer-events:none;"></div>
+        <div style="position:absolute; inset:0; opacity:.1; background:repeating-linear-gradient(118deg,#fff 0 2px, transparent 2px 22px); pointer-events:none;"></div>
+        <div style="position:relative; display:flex; gap:16px; align-items:center;">
+          <!-- rating column -->
+          <div style="flex-shrink:0; display:flex; flex-direction:column; align-items:center; background:rgba(10,14,39,.34); border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:11px 13px; min-width:62px;">
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:38px; line-height:.8; color:#FFD23F;">{{ rating }}</div>
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; letter-spacing:1.5px; color:#fff; margin-top:3px;">MNG</div>
+            <div style="height:1px; width:26px; background:rgba(255,255,255,.25); margin:7px 0;"></div>
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#FFD23F; line-height:1;">D1</div>
+            <div style="font-size:13px; margin-top:4px;">⭐</div>
+          </div>
+          <!-- avatar + identity -->
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; align-items:center; gap:13px;">
+              <div style="position:relative; width:64px; height:64px; flex-shrink:0;">
+                <div style="position:absolute; inset:-3px; border-radius:50%; background:linear-gradient(135deg,#FFD23F,#FF2D78,#6D28D9);"></div>
+                <div style="position:absolute; inset:0; border-radius:50%; background:linear-gradient(135deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:24px; color:#fff; border:3px solid #2D1B69;">HM</div>
+              </div>
+              <div style="min-width:0;">
+                <div style="font-size:9px; font-weight:700; letter-spacing:2px; color:#C9B8F5; text-transform:uppercase;">Fiche manager · LHM</div>
+                <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:26px; line-height:.92; letter-spacing:-.8px; color:#fff; text-transform:uppercase; margin-top:3px;">Hubert<br>Mange</div>
+              </div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:13px;">
+              <span style="background:linear-gradient(135deg,#FFD23F,#FF6B35); color:#3D2E00; font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:.5px; padding:4px 10px; border-radius:999px;">DIVISION 1</span>
+              <span style="background:rgba(10,14,39,.4); border:1px solid rgba(255,255,255,.2); color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:.5px; padding:4px 10px; border-radius:999px;">FONDATEUR</span>
+              <span style="background:rgba(0,229,160,.16); border:1px solid rgba(0,229,160,.5); color:#00E5A0; font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; padding:4px 10px; border-radius:999px;">{{ ldcLabel }} LDC</span>
+            </div>
+          </div>
+        </div>
+        <div style="position:relative; display:flex; align-items:center; gap:8px; margin-top:14px; padding-top:13px; border-top:1px solid rgba(255,255,255,.14);">
+          <div style="height:4px; flex:1; border-radius:3px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35);"></div>
+          <div style="font-size:11px; color:#C9B8F5;">Division 1 · Élite · membre depuis <b style="color:#fff;">2021</b></div>
+        </div>
+      </div>
+
+      <!-- ===== PILLS ===== -->
+      <div class="lhm-pills" style="display:flex; gap:8px; overflow-x:auto; padding:16px 2px 14px; margin:0 -2px;">
+        <sc-for list="{{ mPills }}" as="p" hint-placeholder-count="4">
+          <button class="lhm-tab" onClick="{{ p.onClick }}" style="flex-shrink:0; white-space:nowrap; border:none; border-radius:999px; padding:10px 16px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; cursor:pointer; background:{{ p.bg }}; color:{{ p.color }}; box-shadow:{{ p.sh }};">{{ p.label }}</button>
+        </sc-for>
+      </div>
+
+      <!-- ===== RÉSUMÉ ===== -->
+      <sc-if value="{{ isMResume }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:11px;">
+          <sc-for list="{{ resumeCards }}" as="c" hint-placeholder-count="4">
+            <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; overflow:hidden; position:relative;">
+              <div style="height:4px; background:{{ c.accent }};"></div>
+              <div style="padding:15px 16px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                  <span style="font-size:15px; line-height:1;">{{ c.icon }}</span>
+                  <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:{{ c.tagColor }}; text-transform:uppercase;">{{ c.tag }}</span>
+                </div>
+                <sc-if value="{{ c.isRival }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:46px; height:46px; border-radius:13px; background:{{ c.grad }}; color:{{ c.txt }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; flex-shrink:0;">{{ c.init }}</div>
+                    <div style="flex:1; min-width:0;">
+                      <a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:18px; color:#fff; text-decoration:none; cursor:pointer; letter-spacing:-.3px;">{{ c.name }}</a>
+                      <div style="font-size:11px; color:#8B92C4; margin-top:2px;">{{ c.sub }}</div>
+                    </div>
+                    <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:{{ c.accent }}; white-space:nowrap; flex-shrink:0;">{{ c.stat }}</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ c.isMetric }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:36px; line-height:1; color:{{ c.accent }};">{{ c.value }}</div>
+                  <div style="font-size:12px; color:#8B92C4; margin-top:7px;">{{ c.sub }}</div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+          <!-- win-rate donut -->
+          <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; padding:16px; display:flex; align-items:center; gap:18px;">
+            <div style="width:124px; height:124px; flex-shrink:0;">{{ winDonut }}</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:12px;">Taux de victoire</div>
+              <sc-for list="{{ winLegend }}" as="w" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; gap:9px; margin-bottom:9px;">
+                  <span style="width:9px; height:9px; border-radius:50%; background:{{ w.dot }}; flex-shrink:0;"></span>
+                  <span style="flex:1; font-size:12px; color:#C7CEEF;">{{ w.label }}</span>
+                  <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:{{ w.dot }};">{{ w.val }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <!-- form strip -->
+          <div style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; padding:15px 16px;">
+            <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:11px;">5 derniers matchs</div>
+            <div style="display:flex; gap:6px;">
+              <span style="flex:1; height:30px; border-radius:8px; background:rgba(0,229,160,.18); color:#00E5A0; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center;">V</span>
+              <span style="flex:1; height:30px; border-radius:8px; background:rgba(0,229,160,.18); color:#00E5A0; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center;">V</span>
+              <span style="flex:1; height:30px; border-radius:8px; background:rgba(139,146,196,.18); color:#8B92C4; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center;">N</span>
+              <span style="flex:1; height:30px; border-radius:8px; background:rgba(0,229,160,.18); color:#00E5A0; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center;">V</span>
+              <span style="flex:1; height:30px; border-radius:8px; background:rgba(255,59,92,.18); color:#FF6B8A; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center;">D</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== TROPHÉES ===== -->
+      <sc-if value="{{ isMTroph }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:13px;">
+          <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#8B92C4; text-transform:uppercase;">Salle des trophées</div>
+          <div style="display:flex; align-items:baseline; gap:5px;"><span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:22px; color:#FFD23F; line-height:1;">{{ trophyCount }}</span><span style="font-size:9px; font-weight:700; color:#8B92C4; text-transform:uppercase; letter-spacing:1px;">Titres</span></div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <sc-for list="{{ trophies }}" as="t" hint-placeholder-count="7">
+            <div class="lhm-card" style="background:#141A3D; border:1px solid {{ t.tagBd }}; border-radius:16px; padding:0; position:relative; overflow:hidden;">
+              <div style="height:3px; background:{{ t.color }};"></div>
+              <div style="padding:14px 13px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:11px;">
+                  <div style="width:42px; height:42px; border-radius:50%; background:{{ t.grad }}; display:flex; align-items:center; justify-content:center; font-size:21px;">{{ t.icon }}</div>
+                  <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:9px; letter-spacing:.5px; color:{{ t.color }}; background:{{ t.tagBg }}; border:1px solid {{ t.tagBd }}; padding:4px 8px; border-radius:999px;">{{ t.div }}</span>
+                </div>
+                <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff; letter-spacing:-.2px;">{{ t.comp }}</div>
+                <div style="font-size:10px; color:#8B92C4; margin-top:3px; line-height:1.4;">{{ t.sub }}</div>
+                <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; color:{{ t.color }}; margin-top:9px;">{{ t.year }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#141A3D; border:1px solid #2A3160; border-radius:16px; padding:15px 16px; margin-top:11px;">
+          <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:10px;">Faits de carrière</div>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:12px; color:#C7CEEF;">
+            <div style="display:flex; align-items:center; gap:9px;"><span style="font-size:14px;">🚀</span>Parti de <b style="color:#fff;">Division 5</b> en 2021</div>
+            <div style="display:flex; align-items:center; gap:9px;"><span style="font-size:14px;">📈</span>Montée express <b style="color:#fff;">D5 → D1</b> en 3 saisons</div>
+            <div style="display:flex; align-items:center; gap:9px;"><span style="font-size:14px;">🛡️</span><b style="color:#00E5A0;">Aucune relégation</b> en 6 saisons</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== STATS ===== -->
+      <sc-if value="{{ isMStats }}" hint-placeholder-val="{{ false }}">
+        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#8B92C4; text-transform:uppercase; margin-bottom:11px;">Frise de carrière</div>
+        <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; padding:16px 12px 10px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:0 6px 10px;">
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff;">Division par saison</div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="display:flex; align-items:center; gap:5px; font-size:9px; font-weight:700; color:#8B92C4; text-transform:uppercase; letter-spacing:.5px;"><span style="width:8px; height:8px; border-radius:50%; background:#FFD23F;"></span>Titre</span>
+              <span style="display:flex; align-items:center; gap:5px; font-size:9px; font-weight:700; color:#8B92C4; text-transform:uppercase; letter-spacing:.5px;"><span style="width:8px; height:8px; border-radius:50%; background:#FF2D78;"></span>Saison</span>
+            </div>
+          </div>
+          <div style="width:100%; height:210px;">{{ chartM }}</div>
+        </div>
+        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#8B92C4; text-transform:uppercase; margin-bottom:11px;">Records personnels</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <sc-for list="{{ records }}" as="r" hint-placeholder-count="6">
+            <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:16px; padding:15px 14px; position:relative; overflow:hidden;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                <span style="font-size:18px;">{{ r.icon }}</span>
+              </div>
+              <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:30px; line-height:.95; color:{{ r.color }};">{{ r.value }}</div>
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:12px; color:#fff; margin-top:6px;">{{ r.label }}</div>
+              <div style="font-size:10px; color:#8B92C4; margin-top:2px;">{{ r.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#8B92C4; text-transform:uppercase; margin:16px 0 11px;">Bilan par saison</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="lhm-card" style="background:#141A3D; border:1px solid rgba(0,229,160,.4); border-radius:16px; overflow:hidden;">
+            <div style="height:3px; background:#00E5A0;"></div>
+            <div style="padding:15px 14px;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1px; color:#00E5A0; text-transform:uppercase; margin-bottom:9px;">▲ Meilleure saison</div>
+              <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:30px; line-height:.95; color:#00E5A0;">{{ bestPts }}<span style="font-size:14px; opacity:.7; margin-left:3px;">pts</span></div>
+              <div style="font-size:10px; color:#8B92C4; margin-top:6px; line-height:1.4;">{{ bestSub }}</div>
+            </div>
+          </div>
+          <div class="lhm-card" style="background:#141A3D; border:1px solid rgba(255,59,92,.4); border-radius:16px; overflow:hidden;">
+            <div style="height:3px; background:#FF3B5C;"></div>
+            <div style="padding:15px 14px;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1px; color:#FF6B8A; text-transform:uppercase; margin-bottom:9px;">▼ Pire saison</div>
+              <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:30px; line-height:.95; color:#FF6B8A;">{{ worstPts }}<span style="font-size:14px; opacity:.7; margin-left:3px;">pts</span></div>
+              <div style="font-size:10px; color:#8B92C4; margin-top:6px; line-height:1.4;">{{ worstSub }}</div>
+            </div>
+          </div>
+          <div class="lhm-card" style="grid-column:1 / -1; background:#141A3D; border:1px solid #2A3160; border-radius:16px; padding:15px 16px; display:flex; align-items:center; gap:14px;">
+            <span style="font-size:22px;">🥅</span>
+            <div style="flex:1; min-width:0;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:12px; color:#fff;">Buts encaissés</div>
+              <div style="font-size:10px; color:#8B92C4; margin-top:2px;">{{ concededAvg }}</div>
+            </div>
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:30px; color:#A78BFA; line-height:1;">{{ concededTotal }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== CONFRONTATIONS ===== -->
+      <sc-if value="{{ isMConf }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+          <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:1px; color:#8B92C4; text-transform:uppercase;">Confrontations</div>
+          <span style="font-size:11px; font-weight:700; color:#C7CEEF;">{{ sumLine }}</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <sc-for list="{{ opponents }}" as="o" hint-placeholder-count="11">
+            <div class="lhm-trow" style="display:flex; align-items:center; gap:11px; background:#141A3D; border:1px solid #2A3160; border-radius:13px; padding:11px 13px;">
+              <div style="width:40px; height:40px; border-radius:12px; background:{{ o.grad }}; color:{{ o.txt }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; flex-shrink:0;">{{ o.init }}</div>
+              <div style="flex:1; min-width:0;">
+                <a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff; text-decoration:none; cursor:pointer;">{{ o.name }}</a>
+                <span style="display:inline-flex; align-items:center; gap:4px; margin-top:5px; padding:2px 8px; border-radius:999px; background:{{ o.badgeBg }}; border:1px solid {{ o.badgeBd }}; font-size:9px; font-weight:800; color:{{ o.badgeColor }};">{{ o.emoji }} {{ o.badge }}</span>
+              </div>
+              <div style="display:flex; gap:4px; flex-shrink:0;">
+                <div style="text-align:center; width:24px;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#00E5A0; line-height:1;">{{ o.v }}</div><div style="font-size:7px; font-weight:700; color:#8B92C4; margin-top:2px;">V</div></div>
+                <div style="text-align:center; width:24px;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#8B92C4; line-height:1;">{{ o.n }}</div><div style="font-size:7px; font-weight:700; color:#8B92C4; margin-top:2px;">N</div></div>
+                <div style="text-align:center; width:24px;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#FF6B8A; line-height:1;">{{ o.d }}</div><div style="font-size:7px; font-weight:700; color:#8B92C4; margin-top:2px;">D</div></div>
+              </div>
+              <div style="width:46px; text-align:right; flex-shrink:0;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#fff; line-height:1;">{{ o.moy }}</div><div style="font-size:7px; font-weight:700; color:#8B92C4; margin-top:2px; text-transform:uppercase;">Moy</div></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <!-- bottom nav -->
+    <div style="flex-shrink:0; background:#141A3D; border-top:1px solid #2A3160; padding:10px 14px 12px; display:flex; align-items:center; gap:6px;">
+      <div class="lhm-nav" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; font-size:10px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:14px; height:14px; border-radius:50%; border:2px solid currentColor;"></span>Accueil</div>
+      <div class="lhm-nav" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; font-size:10px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:14px; height:14px; border-radius:50%; border:2px solid currentColor;"></span>Palmarès</div>
+      <div class="lhm-nav" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; font-size:10px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:14px; height:14px; border-radius:50%; border:2px solid currentColor;"></span>Rétro</div>
+      <div class="lhm-nav" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; font-size:10px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:14px; height:14px; border-radius:50%; border:2px solid currentColor;"></span>Cagnotte</div>
+      <div style="flex:1.5; display:flex; flex-direction:row; align-items:center; justify-content:center; gap:7px; padding:11px 4px; border-radius:14px; background:linear-gradient(90deg,#FF2D78,#FF6B35); font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; color:#fff;"><span style="width:14px; height:14px; border-radius:50%; background:#fff;"></span>PROFIL</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DESKTOP FRAME ===================== -->
+<div style="position:absolute; left:540px; top:0px; width:1320px;">
+  <div data-drags-parent="1" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:2px; color:#8B92C4; margin-bottom:14px; text-transform:uppercase;">Desktop · Profil</div>
+  <div data-screen-label="Profil Desktop" style="width:1320px; height:980px; background:#0A0E27; border-radius:20px; overflow:hidden; position:relative; box-shadow:0 30px 80px rgba(0,0,0,.5); border:1px solid #1B2350; font-family:'Inter',sans-serif; display:flex;">
+
+    <!-- SIDEBAR -->
+    <div style="width:230px; flex-shrink:0; background:#141A3D; border-right:1px solid #2A3160; display:flex; flex-direction:column; padding:22px 16px;">
+      <div style="display:flex; align-items:center; gap:11px; padding:0 8px 18px; margin-bottom:14px; border-bottom:1px solid #2A3160;">
+        <svg viewBox="0 0 360 360" width="38" height="38"><defs><linearGradient id="proLogoD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6D28D9"></stop><stop offset="0.55" stop-color="#FF2D78"></stop><stop offset="1" stop-color="#FF6B35"></stop></linearGradient></defs><path d="M180 46 L294 80 L294 210 Q294 298 180 350 Q66 298 66 210 L66 80 Z" fill="url(#proLogoD)"></path><text x="180" y="232" text-anchor="middle" font-family="Archivo,'Arial Black',sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-3">LHM</text></svg>
+        <div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#fff; letter-spacing:.3px;">LHM</div><div style="font-size:9px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Saison 2025/2026</div></div>
+      </div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Accueil</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Palmarès</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Rétro</div>
+      <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s; margin-bottom:5px;"><span style="width:16px; height:16px; border-radius:5px; border:2px solid currentColor;"></span>Cagnotte</div>
+      <div style="display:flex; align-items:center; gap:11px; padding:12px 14px; border-radius:12px; background:linear-gradient(90deg,#FF2D78,#FF6B35); font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; color:#fff;"><span style="width:16px; height:16px; border-radius:5px; background:#fff;"></span>Profil</div>
+      <div style="flex:1;"></div>
+      <div style="border-top:1px solid #2A3160; padding-top:12px;">
+        <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:15px; height:15px; border-radius:5px; border:2px solid currentColor;"></span>Paramètres</div>
+        <div class="lhm-nav" style="display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#8B92C4; cursor:pointer; transition:color .14s;"><span style="width:15px; height:15px; border-radius:5px; border:2px solid currentColor;"></span>Admin</div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+      <!-- topbar -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 30px; border-bottom:1px solid #2A3160; flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <sc-if value="{{ showFollow }}" hint-placeholder-val="{{ false }}">
+            <span class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:#8B92C4; cursor:pointer;">← Managers</span>
+          </sc-if>
+          <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:24px; letter-spacing:-.5px; color:#fff; text-transform:uppercase;">{{ profileName }}</div>
+          <span style="font-size:12px; color:#8B92C4;">Fiche manager · all-time</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <sc-if value="{{ isOwn }}" hint-placeholder-val="{{ true }}">
+            <button class="lhm-btn" style="border:1px solid #2A3160; background:#141A3D; color:#C7CEEF; border-radius:999px; padding:9px 18px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; cursor:pointer; transition:transform .12s, filter .12s;">Modifier le profil</button>
+          </sc-if>
+          <sc-if value="{{ showFollow }}" hint-placeholder-val="{{ false }}">
+            <button class="lhm-btn" style="border:none; background:linear-gradient(90deg,#FF2D78,#FF6B35); color:#fff; border-radius:999px; padding:9px 20px; font-family:'Archivo',sans-serif; font-weight:900; font-size:12px; cursor:pointer; transition:transform .12s, filter .12s;">+ Suivre</button>
+          </sc-if>
+          <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; color:#fff;">HM</div>
+        </div>
+      </div>
+
+      <!-- content scroll -->
+      <div style="flex:1; overflow-y:auto; padding:24px 30px 30px;">
+
+        <!-- ===== HERO BANNER (collectible card) ===== -->
+        <div style="position:relative; overflow:hidden; border-radius:24px; background:linear-gradient(120deg,#2D1B69 0%,#6D28D9 60%,#7C3AED 100%); padding:30px 34px; box-shadow:0 24px 60px rgba(109,40,217,.4); border:1px solid rgba(167,139,250,.4); margin-bottom:22px;">
+          <div style="position:absolute; width:420px; height:420px; border-radius:50%; background:radial-gradient(circle,rgba(255,45,120,.45),transparent 70%); right:140px; top:-200px; animation:lhmHalo 10s ease-in-out infinite; pointer-events:none;"></div>
+          <div style="position:absolute; inset:0; opacity:.09; background:repeating-linear-gradient(118deg,#fff 0 2px, transparent 2px 26px); pointer-events:none;"></div>
+          <div style="position:relative; display:flex; align-items:center; gap:28px;">
+            <!-- rating column -->
+            <div style="flex-shrink:0; display:flex; flex-direction:column; align-items:center; background:rgba(10,14,39,.34); border:1px solid rgba(255,255,255,.16); border-radius:20px; padding:18px 20px;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:64px; line-height:.78; color:#FFD23F;">{{ rating }}</div>
+              <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:2px; color:#fff; margin-top:5px;">MNG</div>
+              <div style="height:1px; width:44px; background:rgba(255,255,255,.25); margin:11px 0;"></div>
+              <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:22px; color:#FFD23F; line-height:1;">D1</div>
+              <div style="font-size:18px; margin-top:6px;">⭐</div>
+            </div>
+            <!-- avatar -->
+            <div style="position:relative; width:108px; height:108px; flex-shrink:0;">
+              <div style="position:absolute; inset:-4px; border-radius:50%; background:linear-gradient(135deg,#FFD23F,#FF2D78,#6D28D9);"></div>
+              <div style="position:absolute; inset:0; border-radius:50%; background:linear-gradient(135deg,#6D28D9,#FF2D78,#FF6B35); display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:40px; color:#fff; border:5px solid #2D1B69;">HM</div>
+            </div>
+            <!-- identity -->
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11px; font-weight:700; letter-spacing:2.5px; color:#C9B8F5; text-transform:uppercase;">Fiche manager · Ligue Hubert Mange</div>
+              <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:44px; line-height:.9; letter-spacing:-1.5px; color:#fff; text-transform:uppercase; margin:5px 0 14px;">Hubert<br>Mange</div>
+              <div style="display:flex; flex-wrap:wrap; gap:9px;">
+                <span style="background:linear-gradient(135deg,#FFD23F,#FF6B35); color:#3D2E00; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; padding:7px 15px; border-radius:999px;">DIVISION 1 · ÉLITE</span>
+                <span style="background:rgba(10,14,39,.4); border:1px solid rgba(255,255,255,.22); color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; letter-spacing:.5px; padding:7px 15px; border-radius:999px;">FONDATEUR</span>
+                <span style="background:rgba(0,229,160,.16); border:1px solid rgba(0,229,160,.5); color:#00E5A0; font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; padding:7px 15px; border-radius:999px;">{{ ldcLabel }} LIGUE DES CRAMPONS</span>
+                <span style="background:rgba(10,14,39,.4); border:1px solid rgba(255,255,255,.22); color:#C9B8F5; font-family:'Archivo',sans-serif; font-weight:700; font-size:11px; padding:7px 15px; border-radius:999px;">Membre depuis 2021</span>
+              </div>
+            </div>
+            <!-- headline stats -->
+            <div style="flex-shrink:0; display:flex; gap:10px;">
+              <div style="width:64px; background:rgba(10,14,39,.34); border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:16px 11px; text-align:center;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:26px; color:#fff; line-height:1;">2<span style="font-size:14px; opacity:.6;">e</span></div><div style="font-size:8px; font-weight:700; letter-spacing:.5px; color:#C9B8F5; text-transform:uppercase; margin-top:6px;">Rang D1</div></div>
+              <div style="width:64px; background:rgba(10,14,39,.34); border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:16px 11px; text-align:center;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:26px; color:#FFD23F; line-height:1;">{{ trophyCount }}</div><div style="font-size:8px; font-weight:700; letter-spacing:.5px; color:#C9B8F5; text-transform:uppercase; margin-top:6px;">Trophées</div></div>
+              <div style="width:64px; background:rgba(10,14,39,.34); border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:16px 11px; text-align:center;"><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:26px; color:#00E5A0; line-height:1;">{{ winrate }}</div><div style="font-size:8px; font-weight:700; letter-spacing:.5px; color:#C9B8F5; text-transform:uppercase; margin-top:6px;">Réussite</div></div>
+            </div>
+          </div>
+          <div style="position:relative; height:5px; border-radius:3px; background:linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35,#FFD23F); margin-top:22px;"></div>
+        </div>
+
+        <!-- ===== PILLS ===== -->
+        <div style="display:inline-flex; background:#141A3D; border:1px solid #2A3160; border-radius:999px; padding:5px; gap:4px; margin-bottom:22px;">
+          <sc-for list="{{ dPills }}" as="p" hint-placeholder-count="4">
+            <button class="lhm-tab" onClick="{{ p.onClick }}" style="border:none; border-radius:999px; padding:11px 22px; font-family:'Archivo',sans-serif; font-weight:900; font-size:13px; letter-spacing:.3px; cursor:pointer; background:{{ p.bg }}; color:{{ p.color }}; box-shadow:{{ p.sh }};">{{ p.label }}</button>
+          </sc-for>
+        </div>
+
+        <!-- ===== RÉSUMÉ ===== -->
+        <sc-if value="{{ isDResume }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:18px;">
+            <sc-for list="{{ resumeCards }}" as="c" hint-placeholder-count="4">
+              <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; overflow:hidden; position:relative;">
+                <div style="height:4px; background:{{ c.accent }};"></div>
+                <div style="padding:20px;">
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+                    <span style="font-size:17px; line-height:1;">{{ c.icon }}</span>
+                    <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:{{ c.tagColor }}; text-transform:uppercase;">{{ c.tag }}</span>
+                  </div>
+                  <sc-if value="{{ c.isRival }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+                      <div style="width:50px; height:50px; border-radius:14px; background:{{ c.grad }}; color:{{ c.txt }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; flex-shrink:0;">{{ c.init }}</div>
+                      <a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:900; font-size:19px; color:#fff; text-decoration:none; cursor:pointer; letter-spacing:-.3px;">{{ c.name }}</a>
+                    </div>
+                    <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:22px; color:{{ c.accent }};">{{ c.stat }}</div>
+                    <div style="font-size:11px; color:#8B92C4; margin-top:5px;">{{ c.sub }}</div>
+                  </sc-if>
+                  <sc-if value="{{ c.isMetric }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:46px; line-height:1; color:{{ c.accent }};">{{ c.value }}</div>
+                    <div style="font-size:12px; color:#8B92C4; margin-top:12px;">{{ c.sub }}</div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid; grid-template-columns:0.9fr 1.3fr 1fr; gap:18px;">
+            <div style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; padding:22px; display:flex; flex-direction:column;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:11px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:14px;">Taux de victoire</div>
+              <div style="display:flex; align-items:center; gap:18px; flex:1;">
+                <div style="width:148px; height:148px; flex-shrink:0;">{{ winDonut }}</div>
+                <div style="flex:1; min-width:0;">
+                  <sc-for list="{{ winLegend }}" as="w" hint-placeholder-count="3">
+                    <div style="display:flex; align-items:center; gap:9px; margin-bottom:13px;">
+                      <span style="width:10px; height:10px; border-radius:50%; background:{{ w.dot }}; flex-shrink:0;"></span>
+                      <span style="flex:1; min-width:0;"><span style="display:block; font-size:13px; color:#C7CEEF;">{{ w.label }}</span><span style="font-size:10px; color:#8B92C4;">{{ w.n }} matchs</span></span>
+                      <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:{{ w.dot }};">{{ w.val }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; padding:22px;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:11px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:16px;">5 derniers matchs · forme actuelle</div>
+              <div style="display:flex; gap:10px;">
+                <span style="flex:1; height:54px; border-radius:12px; background:rgba(0,229,160,.16); color:#00E5A0; font-family:'Archivo',sans-serif; font-weight:900; font-size:20px; display:flex; align-items:center; justify-content:center;">V</span>
+                <span style="flex:1; height:54px; border-radius:12px; background:rgba(0,229,160,.16); color:#00E5A0; font-family:'Archivo',sans-serif; font-weight:900; font-size:20px; display:flex; align-items:center; justify-content:center;">V</span>
+                <span style="flex:1; height:54px; border-radius:12px; background:rgba(139,146,196,.16); color:#8B92C4; font-family:'Archivo',sans-serif; font-weight:900; font-size:20px; display:flex; align-items:center; justify-content:center;">N</span>
+                <span style="flex:1; height:54px; border-radius:12px; background:rgba(0,229,160,.16); color:#00E5A0; font-family:'Archivo',sans-serif; font-weight:900; font-size:20px; display:flex; align-items:center; justify-content:center;">V</span>
+                <span style="flex:1; height:54px; border-radius:12px; background:rgba(255,59,92,.16); color:#FF6B8A; font-family:'Archivo',sans-serif; font-weight:900; font-size:20px; display:flex; align-items:center; justify-content:center;">D</span>
+              </div>
+            </div>
+            <div style="background:linear-gradient(135deg,#1B2350,#141A3D); border:1px solid #2A3160; border-radius:18px; padding:22px; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:11px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:8px;">Le mot de la ligue</div>
+              <div style="font-size:14px; color:#C7CEEF; line-height:1.55;">Fondateur intouchable, <b style="color:#fff;">jamais relégué</b> et double tenant du titre. Une seule ombre au tableau : <b style="color:#FF6B8A;">Marc Leroy</b>.</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== TROPHÉES ===== -->
+        <sc-if value="{{ isDTroph }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:16px;">
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:20px; color:#fff; letter-spacing:-.3px;">La salle des trophées</div>
+            <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:11px; color:#8B92C4; text-transform:uppercase; letter-spacing:1px;">{{ trophyCount }} trophées homologués</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:18px;">
+            <sc-for list="{{ trophies }}" as="t" hint-placeholder-count="7">
+              <div class="lhm-card" style="background:#141A3D; border:1px solid {{ t.tagBd }}; border-radius:18px; padding:0; position:relative; overflow:hidden;">
+                <div style="height:4px; background:{{ t.color }};"></div>
+                <div style="padding:20px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+                    <div style="width:54px; height:54px; border-radius:50%; background:{{ t.grad }}; display:flex; align-items:center; justify-content:center; font-size:27px;">{{ t.icon }}</div>
+                    <span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:10px; letter-spacing:.5px; color:{{ t.color }}; background:{{ t.tagBg }}; border:1px solid {{ t.tagBd }}; padding:5px 11px; border-radius:999px;">{{ t.div }}</span>
+                  </div>
+                  <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:18px; color:#fff; letter-spacing:-.3px;">{{ t.comp }}</div>
+                  <div style="font-size:11px; color:#8B92C4; margin-top:4px; line-height:1.4;">{{ t.sub }}</div>
+                  <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:{{ t.color }}; margin-top:13px;">{{ t.year }}</div>
+                </div>
+              </div>
+            </sc-for>
+            <!-- carrière strip card -->
+            <div style="background:linear-gradient(135deg,#1B2350,#141A3D); border:1px dashed #2A3160; border-radius:18px; padding:20px; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:10px; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; margin-bottom:13px;">Faits de carrière</div>
+              <div style="display:flex; flex-direction:column; gap:10px; font-size:12px; color:#C7CEEF;">
+                <div style="display:flex; align-items:center; gap:9px;"><span style="font-size:15px;">🚀</span>Parti de <b style="color:#fff;">D5</b> en 2021</div>
+                <div style="display:flex; align-items:center; gap:9px;"><span style="font-size:15px;">📈</span>Montée <b style="color:#fff;">D5 → D1</b> en 3 saisons</div>
+                <div style="display:flex; align-items:center; gap:9px;"><span style="font-size:15px;">🛡️</span><b style="color:#00E5A0;">0 relégation</b> en 6 saisons</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== STATS ===== -->
+        <sc-if value="{{ isDStats }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:18px; align-items:stretch;">
+            <!-- frise -->
+            <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:20px; padding:22px 20px 14px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                <div><div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:18px; color:#fff;">Frise de carrière</div><div style="font-size:12px; color:#8B92C4; margin-top:3px;">Division par saison · montées &amp; descentes</div></div>
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <span style="display:flex; align-items:center; gap:6px; font-size:10px; font-weight:700; color:#8B92C4; text-transform:uppercase; letter-spacing:.5px;"><span style="width:9px; height:9px; border-radius:50%; background:#FFD23F;"></span>Titre remporté</span>
+                  <span style="display:flex; align-items:center; gap:6px; font-size:10px; font-weight:700; color:#8B92C4; text-transform:uppercase; letter-spacing:.5px;"><span style="width:9px; height:9px; border-radius:50%; background:#FF2D78;"></span>Saison</span>
+                </div>
+              </div>
+              <div style="width:100%; height:340px;">{{ chartD }}</div>
+            </div>
+            <!-- records -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; align-content:start;">
+              <sc-for list="{{ records }}" as="r" hint-placeholder-count="6">
+                <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:16px; padding:18px 16px; position:relative; overflow:hidden;">
+                  <div style="font-size:20px; margin-bottom:10px;">{{ r.icon }}</div>
+                  <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:36px; line-height:.95; color:{{ r.color }};">{{ r.value }}</div>
+                  <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; color:#fff; margin-top:8px;">{{ r.label }}</div>
+                  <div style="font-size:10px; color:#8B92C4; margin-top:2px;">{{ r.sub }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="margin-top:18px;">
+            <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:14px; letter-spacing:.5px; color:#fff; margin-bottom:14px;">Bilan par saison</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+              <div class="lhm-card" style="background:#141A3D; border:1px solid rgba(0,229,160,.4); border-radius:18px; overflow:hidden;">
+                <div style="height:4px; background:#00E5A0;"></div>
+                <div style="padding:20px;">
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;"><span style="font-size:18px;">📈</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:11px; letter-spacing:1.5px; color:#00E5A0; text-transform:uppercase;">Meilleure saison</span></div>
+                  <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:46px; line-height:1; color:#00E5A0;">{{ bestPts }}<span style="font-size:20px; opacity:.7; margin-left:5px;">pts</span></div>
+                  <div style="font-size:12px; color:#8B92C4; margin-top:12px;">{{ bestSub }}</div>
+                </div>
+              </div>
+              <div class="lhm-card" style="background:#141A3D; border:1px solid rgba(255,59,92,.4); border-radius:18px; overflow:hidden;">
+                <div style="height:4px; background:#FF3B5C;"></div>
+                <div style="padding:20px;">
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;"><span style="font-size:18px;">📉</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:11px; letter-spacing:1.5px; color:#FF6B8A; text-transform:uppercase;">Pire saison</span></div>
+                  <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:46px; line-height:1; color:#FF6B8A;">{{ worstPts }}<span style="font-size:20px; opacity:.7; margin-left:5px;">pts</span></div>
+                  <div style="font-size:12px; color:#8B92C4; margin-top:12px;">{{ worstSub }}</div>
+                </div>
+              </div>
+              <div class="lhm-card" style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; overflow:hidden;">
+                <div style="height:4px; background:#A78BFA;"></div>
+                <div style="padding:20px;">
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;"><span style="font-size:18px;">🥅</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:11px; letter-spacing:1.5px; color:#A78BFA; text-transform:uppercase;">Buts encaissés</span></div>
+                  <div style="font-family:'Archivo',sans-serif; font-weight:900; font-size:46px; line-height:1; color:#A78BFA;">{{ concededTotal }}</div>
+                  <div style="font-size:12px; color:#8B92C4; margin-top:12px;">{{ concededAvg }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== CONFRONTATIONS ===== -->
+        <sc-if value="{{ isDConf }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#141A3D; border:1px solid #2A3160; border-radius:18px; overflow:hidden;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid #2A3160;">
+              <div style="display:flex; align-items:center; gap:11px;"><span style="width:5px; height:20px; border-radius:3px; background:linear-gradient(180deg,#FF2D78,#FF6B35);"></span><span style="font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; color:#fff; letter-spacing:.3px; text-transform:uppercase;">Confrontations</span></div>
+              <span style="font-size:12px; font-weight:700; color:#8B92C4;">Bilan global · <b style="color:#fff;">{{ sumLine }}</b> · moy. {{ moyGlobal }} pts</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1.6fr 70px 64px 64px 64px 90px 100px 170px; gap:14px; align-items:center; padding:13px 24px; background:#0A0E27; border-bottom:1px solid #2A3160;">
+              <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Adversaire</div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; text-align:center;">Joués</div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; text-align:center;">V</div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; text-align:center;">N</div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; text-align:center;">D</div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; text-align:center;">Diff.</div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase; text-align:center;">Moy. pts</div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#8B92C4; text-transform:uppercase;">Bilan</div>
+            </div>
+            <sc-for list="{{ opponents }}" as="o" hint-placeholder-count="11">
+              <div class="lhm-trow" style="display:grid; grid-template-columns:1.6fr 70px 64px 64px 64px 90px 100px 170px; gap:14px; align-items:center; padding:13px 24px; border-bottom:1px solid #1B2350;">
+                <div style="display:flex; align-items:center; gap:13px; min-width:0;">
+                  <div style="width:42px; height:42px; border-radius:12px; background:{{ o.grad }}; color:{{ o.txt }}; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; flex-shrink:0;">{{ o.init }}</div>
+                  <a class="lhm-name" style="font-family:'Archivo',sans-serif; font-weight:800; font-size:16px; color:#fff; text-decoration:none; cursor:pointer;">{{ o.name }}</a>
+                </div>
+                <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:800; font-size:15px; color:#C7CEEF;">{{ o.j }}</div>
+                <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#00E5A0;">{{ o.v }}</div>
+                <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#8B92C4;">{{ o.n }}</div>
+                <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:16px; color:#FF6B8A;">{{ o.d }}</div>
+                <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:15px; color:{{ o.gdColor }};">{{ o.gd }}</div>
+                <div style="text-align:center; font-family:'Archivo',sans-serif; font-weight:900; font-size:18px; color:#fff;">{{ o.moy }}</div>
+                <div><span style="display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border-radius:999px; background:{{ o.badgeBg }}; border:1px solid {{ o.badgeBd }}; font-size:11px; font-weight:800; color:{{ o.badgeColor }};">{{ o.emoji }} {{ o.badge }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{},&quot;defaultTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;resume&quot;,&quot;trophees&quot;,&quot;stats&quot;,&quot;confrontations&quot;],&quot;default&quot;:&quot;resume&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;profileView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Mon profil&quot;,&quot;Autre manager&quot;],&quot;default&quot;:&quot;Mon profil&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;cardRating&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:89,&quot;min&quot;:40,&quot;max&quot;:99,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Carte&quot;}}">
+class Component extends DCLogic {
+  state = { mTab: null, dTab: null };
+
+  career = [
+    { season: "2021", div: 5, note: "Départ · Division 5" },
+    { season: "2022", div: 2, note: "▲ Montée express" },
+    { season: "2023", div: 1, note: "🏆 Champion D1" },
+    { season: "2024", div: 1, note: "🏆 Champion · ⭐ LDC" },
+    { season: "2025", div: 1, note: "🏆 Champion en titre" },
+    { season: "2026", div: 1, note: "En cours · 2e" },
+  ];
+
+  buildChart() {
+    const h = React.createElement;
+    const data = this.career;
+    const titleYears = ["2023", "2024", "2025"];
+    const W = 600, H = 340;
+    const padL = 46, padR = 22, padT = 26, padB = 40;
+    const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+    const n = data.length;
+    const px = (i) => x0 + i * (x1 - x0) / (n - 1);
+    const py = (div) => y0 + (div - 1) / 4 * (y1 - y0);
+    const pts = data.map((d, i) => ({ ...d, x: px(i), y: py(d.div), won: titleYears.includes(d.season) }));
+
+    const linePath = pts.map((p, i) => (i ? "L" : "M") + p.x.toFixed(1) + " " + p.y.toFixed(1)).join(" ");
+    const areaPath = linePath + " L" + x1 + " " + y1 + " L" + x0 + " " + y1 + " Z";
+
+    const gridLines = [1, 2, 3, 4, 5].map((dv) => {
+      const y = py(dv);
+      return h("g", { key: "g" + dv },
+        h("line", { x1: x0, x2: x1, y1: y, y2: y, stroke: "#1F2750", strokeWidth: 1, strokeDasharray: "3 5" }),
+        h("text", { x: x0 - 12, y: y + 4, textAnchor: "end", fill: dv === 1 ? "#FFD23F" : "#8B92C4", fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: 13 }, "D" + dv)
+      );
+    });
+
+    const xLabels = pts.map((p) => h("text", {
+      key: "x" + p.season, x: p.x, y: y1 + 26, textAnchor: "middle",
+      fill: p.won ? "#C7CEEF" : "#8B92C4", fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 13
+    }, p.season));
+
+    const dots = pts.map((p) => h("g", { key: "d" + p.season },
+      h("title", null, "Saison " + p.season + " · Division " + p.div + (p.note ? " · " + p.note : "")),
+      p.won ? h("circle", { cx: p.x, cy: p.y, r: 11, fill: "rgba(255,210,63,.16)" }) : null,
+      h("circle", { cx: p.x, cy: p.y, r: p.won ? 7 : 5, fill: p.won ? "#FFD23F" : "#FF2D78", stroke: "#0A0E27", strokeWidth: 3 }),
+      p.won ? h("text", { x: p.x, y: p.y - 16, textAnchor: "middle", fontSize: 14 }, "🏆") : null
+    ));
+
+    return h("svg", { viewBox: "0 0 " + W + " " + H, width: "100%", height: "100%", preserveAspectRatio: "xMidYMid meet", style: { display: "block", overflow: "visible" } },
+      h("defs", null,
+        h("linearGradient", { id: "careerFill", x1: "0", y1: "0", x2: "0", y2: "1" },
+          h("stop", { offset: "0%", stopColor: "#FF2D78", stopOpacity: 0.4 }),
+          h("stop", { offset: "100%", stopColor: "#FF2D78", stopOpacity: 0.02 })
+        ),
+        h("linearGradient", { id: "careerLine", x1: "0", y1: "0", x2: "1", y2: "0" },
+          h("stop", { offset: "0%", stopColor: "#6D28D9" }),
+          h("stop", { offset: "55%", stopColor: "#FF2D78" }),
+          h("stop", { offset: "100%", stopColor: "#FF6B35" })
+        )
+      ),
+      gridLines,
+      h("path", { d: areaPath, fill: "url(#careerFill)" }),
+      h("path", { d: linePath, fill: "none", stroke: "url(#careerLine)", strokeWidth: 4, strokeLinejoin: "round", strokeLinecap: "round" }),
+      xLabels,
+      dots
+    );
+  }
+
+  buildWinDonut() {
+    const h = React.createElement;
+    const segs = [
+      { frac: 0.58, color: "#00E5A0" },
+      { frac: 0.17, color: "#8B92C4" },
+      { frac: 0.25, color: "#FF3B5C" },
+    ];
+    const cx = 80, cy = 80, r = 60, sw = 20;
+    const C = 2 * Math.PI * r;
+    let acc = 0;
+    const rings = segs.map((s, i) => {
+      const el = h("circle", {
+        key: i, cx, cy, r, fill: "none", stroke: s.color, strokeWidth: sw,
+        strokeDasharray: (C * s.frac).toFixed(2) + " " + (C * (1 - s.frac)).toFixed(2),
+        strokeDashoffset: (-C * acc).toFixed(2),
+        transform: "rotate(-90 " + cx + " " + cy + ")", strokeLinecap: "butt",
+      });
+      acc += s.frac;
+      return el;
+    });
+    return h("svg", { viewBox: "0 0 160 160", width: "100%", height: "100%", preserveAspectRatio: "xMidYMid meet", style: { display: "block" } },
+      h("circle", { cx, cy, r, fill: "none", stroke: "#0A0E27", strokeWidth: sw }),
+      rings,
+      h("text", { x: cx, y: cy - 1, textAnchor: "middle", fill: "#fff", fontFamily: "Archivo, sans-serif", fontWeight: 900, fontSize: 40 }, "58%"),
+      h("text", { x: cx, y: cy + 21, textAnchor: "middle", fill: "#8B92C4", fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.5 }, "VICTOIRES")
+    );
+  }
+
+  renderVals() {
+    const def = ["trophees", "stats", "confrontations"].includes(this.props.defaultTab) ? this.props.defaultTab : "resume";
+    const mTab = this.state.mTab || def;
+    const dTab = this.state.dTab || def;
+    const rating = this.props.cardRating ?? 89;
+    const isOwn = (this.props.profileView ?? "Mon profil") === "Mon profil";
+
+    const pill = (active) => ({
+      bg: active ? "linear-gradient(90deg,#FF2D78,#FF6B35)" : "#141A3D",
+      bgFlat: active ? "linear-gradient(90deg,#FF2D78,#FF6B35)" : "transparent",
+      color: active ? "#ffffff" : "#8B92C4",
+      sh: active ? "0 6px 16px rgba(255,45,120,.32)" : "none",
+    });
+    const tabs = [
+      ["resume", "Résumé", "Résumé"],
+      ["trophees", "🏆 Trophées", "🏆 Salle des trophées"],
+      ["stats", "📈 Stats", "📈 Stats & carrière"],
+      ["confrontations", "⚔️ Duels", "⚔️ Confrontations"],
+    ];
+    const setM = (k) => this.setState({ mTab: k });
+    const setD = (k) => this.setState({ dTab: k });
+    const mPills = tabs.map(([k, ml]) => { const p = pill(k === mTab); return { key: k, label: ml, bg: p.bg, color: p.color, sh: p.sh, onClick: () => setM(k) }; });
+    const dPills = tabs.map(([k, , dl]) => { const p = pill(k === dTab); return { key: k, label: dl, bg: p.bgFlat, color: p.color, sh: p.sh, onClick: () => setD(k) }; });
+
+    // ---- Résumé cards ----
+    const resumeCards = [
+      { isRival: true, isMetric: false, accent: "#FF3B5C", tag: "Bête noire", tagColor: "#FF3B5C", icon: "🐐", name: "Marc Leroy", init: "ML", grad: "linear-gradient(135deg,#FF6B35,#FFD23F)", txt: "#3D2E00", stat: "1V · 2N · 4D", sub: "Ton cauchemar récurrent · bilan négatif" },
+      { isRival: true, isMetric: false, accent: "#00E5A0", tag: "Victime préférée", tagColor: "#00E5A0", icon: "💚", name: "Jean Dupont", init: "JD", grad: "linear-gradient(135deg,#A78BFA,#FF2D78)", txt: "#fff", stat: "8V · 1N · 0D", sub: "100% de victoires contre lui" },
+      { isRival: false, isMetric: true, accent: "#FF6B35", tag: "Série en cours", tagColor: "#FF6B35", icon: "🔥", value: "4 V", sub: "Invaincu depuis 6 matchs" },
+      { isRival: false, isMetric: true, accent: "#FFD23F", tag: "Dernière saison", tagColor: "#FFD23F", icon: "🏆", value: "Champion", sub: "1er de Division 1 · 2024/25" },
+    ];
+
+    // ---- Trophées ----
+    const T = {
+      champ: { color: "#FFD23F", grad: "linear-gradient(135deg,#FFD23F,#FF6B35)", txt: "#3D2E00", tagBg: "rgba(255,210,63,.13)", tagBd: "rgba(255,210,63,.45)" },
+      ldc: { color: "#00E5A0", grad: "linear-gradient(135deg,#00E5A0,#34D399)", txt: "#06251A", tagBg: "rgba(0,229,160,.13)", tagBd: "rgba(0,229,160,.45)" },
+      eur: { color: "#FF6B35", grad: "linear-gradient(135deg,#FF6B35,#FFD23F)", txt: "#3D2E00", tagBg: "rgba(255,107,53,.13)", tagBd: "rgba(255,107,53,.45)" },
+      conf: { color: "#A78BFA", grad: "linear-gradient(135deg,#6D28D9,#A78BFA)", txt: "#fff", tagBg: "rgba(167,139,250,.13)", tagBd: "rgba(167,139,250,.45)" },
+    };
+    const trophies = [
+      ["🏆", "Champion D1", "Champion en titre", "2024/25", "Division 1", "champ"],
+      ["🏆", "Champion D1", "Doublé consécutif", "2023/24", "Division 1", "champ"],
+      ["🏆", "Champion D1", "Premier sacre en élite", "2022/23", "Division 1", "champ"],
+      ["⭐", "Ligue des Crampons", "C1 · le Graal européen", "2023/24", "Division 1", "ldc"],
+      ["🎖️", "Europa", "Heureux papa's League · C3", "2024/25", "Division 1", "eur"],
+      ["🎖️", "Europa", "Heureux papa's League · C3", "2022/23", "Division 1", "eur"],
+      ["🍐", "Conférence", "La C4 de la ligue", "2021/22", "Division 2", "conf"],
+    ].map(([icon, comp, sub, year, div, k]) => ({ icon, comp, sub, year, div, color: T[k].color, grad: T[k].grad, txt: T[k].txt, tagBg: T[k].tagBg, tagBd: T[k].tagBd }));
+
+    // ---- Records perso ----
+    const records = [
+      ["⚽", "198", "Matchs joués", "depuis la saison 2021", "#fff"],
+      ["🏆", "121", "Victoires", "58% de réussite", "#00E5A0"],
+      ["🥅", "412", "Buts marqués", "2,08 par match", "#FFD23F"],
+      ["🔥", "9", "Meilleure série", "victoires d'affilée", "#FF6B35"],
+      ["🏅", "7", "Trophées", "dont 3 titres de D1", "#FF2D78"],
+      ["🛡️", "0", "Relégation", "jamais redescendu", "#A78BFA"],
+    ].map(([icon, value, label, sub, color]) => ({ icon, value, label, sub, color }));
+
+    // ---- Confrontations ----
+    const C = {
+      green: { c: "#00E5A0", bg: "rgba(0,229,160,.12)", bd: "rgba(0,229,160,.4)" },
+      teal: { c: "#34D399", bg: "rgba(52,211,153,.1)", bd: "rgba(52,211,153,.35)" },
+      gray: { c: "#8B92C4", bg: "rgba(139,146,196,.1)", bd: "#2A3160" },
+      orange: { c: "#FF6B35", bg: "rgba(255,107,53,.12)", bd: "rgba(255,107,53,.4)" },
+      red: { c: "#FF3B5C", bg: "rgba(255,59,92,.12)", bd: "rgba(255,59,92,.4)" },
+      gold: { c: "#FFD23F", bg: "rgba(255,210,63,.12)", bd: "rgba(255,210,63,.4)" },
+    };
+    const oppData = [
+      ["Jean Dupont", "JD", "linear-gradient(135deg,#A78BFA,#FF2D78)", "#fff", 8, 1, 0, 21, "Victime préférée", "gold"],
+      ["Nicolas Vidal", "NV", "linear-gradient(135deg,#3A4280,#8B92C4)", "#0A0E27", 7, 1, 0, 18, "Domination", "green"],
+      ["Paul Renard", "PR", "linear-gradient(135deg,#3A4280,#8B92C4)", "#0A0E27", 6, 0, 1, 12, "Domination", "green"],
+      ["Chloé Fontaine", "CF", "linear-gradient(135deg,#00E5A0,#6D28D9)", "#fff", 6, 1, 1, 10, "Domination", "green"],
+      ["Thomas Petit", "TP", "linear-gradient(135deg,#FFD23F,#FF6B35)", "#3D2E00", 6, 2, 1, 9, "Favorable", "teal"],
+      ["Antoine Girard", "AG", "linear-gradient(135deg,#FF2D78,#6D28D9)", "#fff", 5, 1, 1, 8, "Favorable", "teal"],
+      ["Émilie Roux", "ER", "linear-gradient(135deg,#6D28D9,#A78BFA)", "#fff", 4, 2, 2, 5, "Équilibré", "gray"],
+      ["Karim Benali", "KB", "linear-gradient(135deg,#6D28D9,#A78BFA)", "#fff", 4, 2, 4, 1, "Le rival", "gray"],
+      ["Sophie Bernard", "SB", "linear-gradient(135deg,#FF2D78,#FF6B35)", "#fff", 3, 3, 3, 0, "Équilibré", "gray"],
+      ["Lucas Moreau", "LM", "linear-gradient(135deg,#00E5A0,#34D399)", "#06251A", 2, 2, 3, -2, "Difficile", "orange"],
+      ["Marc Leroy", "ML", "linear-gradient(135deg,#FF6B35,#FFD23F)", "#3D2E00", 1, 2, 4, -6, "Bête noire", "red"],
+    ];
+    const fmt2 = (n) => n.toFixed(2).replace(".", ",");
+    const opponents = oppData.map(([name, init, grad, txt, v, n, d, gd, badge, col]) => {
+      const j = v + n + d; const moy = (v * 3 + n) / j; const cc = C[col];
+      return {
+        name, init, grad, txt, j: String(j), v: String(v), n: String(n), d: String(d),
+        gd: (gd > 0 ? "+" : "") + gd, gdColor: gd > 0 ? "#00E5A0" : (gd < 0 ? "#FF3B5C" : "#8B92C4"),
+        moy: fmt2(moy), badge, badgeColor: cc.c, badgeBg: cc.bg, badgeBd: cc.bd,
+        emoji: badge === "Bête noire" ? "🐐" : (badge === "Victime préférée" ? "💚" : (badge === "Le rival" ? "🔥" : "")),
+      };
+    });
+
+    return {
+      isOwn, showFollow: !isOwn, profileName: isOwn ? "Hubert Mange" : "Karim Benali",
+      rating: String(rating),
+      ldcLabel: "⭐ ×1", trophyCount: "7",
+      mPills, dPills,
+      isMResume: mTab === "resume", isMTroph: mTab === "trophees", isMStats: mTab === "stats", isMConf: mTab === "confrontations",
+      isDResume: dTab === "resume", isDTroph: dTab === "trophees", isDStats: dTab === "stats", isDConf: dTab === "confrontations",
+      resumeCards, trophies, records, opponents,
+      sumLine: "52V · 17N · 20D", winrate: "58%", moyGlobal: "1,94",
+      chartM: this.buildChart(), chartD: this.buildChart(),
+      winDonut: this.buildWinDonut(),
+      winLegend: [
+        { dot: "#00E5A0", label: "Victoires", val: "58%", n: "115" },
+        { dot: "#8B92C4", label: "Nuls", val: "17%", n: "34" },
+        { dot: "#FF3B5C", label: "Défaites", val: "25%", n: "49" },
+      ],
+      bestPts: "98", bestSub: "Division 1 · 2024/25 · 🏆 Champion",
+      worstPts: "41", worstSub: "Division 5 · 2021/22 · 1re saison",
+      concededTotal: "237", concededAvg: "1,20 / match · +175 de diff.",
+    };
+  }
+}
+</script>
+</body>
+</html>
