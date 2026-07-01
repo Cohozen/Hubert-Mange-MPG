@@ -9,8 +9,8 @@ qu'une source qu'on synchronise ; la cagnotte est 100 % maison.
 ## Stack
 
 - **backend/** — API Node + TypeScript (Express), Prisma, SQLite en local (portable Postgres).
-- **frontend/** — React + Vite + TypeScript, React Router, TanStack Query, Tailwind v4 + DaisyUI,
-  Recharts (graphiques).
+- **frontend/** — React + Vite + TypeScript, React Router, TanStack Query, Tailwind v4 + shadcn/ui
+  (design system « Broadcast », dark-only), Recharts (graphiques).
 - Seul `backend/src/connector/` parle à MPG (flow OAuth Ligue1, voir le gist de référence).
 
 ## Démarrage
@@ -48,8 +48,13 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
 - `npx tsx src/db/seed.ts` — données de démonstration.
 - `npx tsx src/db/verify.ts` — vérif end-to-end des endpoints (forge une session admin).
 
-## État actuel (v1)
+## État actuel
 
+- ✅ **Refonte UI V2 « Broadcast »** (design system dark-first : shadcn/ui + Tailwind v4, polices
+  Archivo/Inter, palette violet/rose/orange/menthe, dégradés & halos ; maquettes dans
+  `docs/mockups/`). Coquille responsive **sidebar desktop / bottom nav mobile** + nouveau
+  **dashboard Accueil** (`/`, données factices à brancher côté backend) ; Palmarès sur `/palmares`,
+  page Stats relabellée **« Rétro »**.
 - ✅ Connecteur MPG (flow OAuth), auth applicative "Sign in with MPG", sessions JWT.
 - ✅ Modèle de données complet (Manager / RealSeason / GameSeason / Division / Participation /
   Match / Tournament / DivisionAward / PrizePool / Contribution / Payout / TrackedLeague·Tournament).
@@ -92,10 +97,10 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
 - ✅ **Classement all-time « façon JO »** : tableau des médailles par division — on compte les
   titres (1re place) et on classe sur les titres de D1 d'abord, puis D2, etc. (les podiums ont leur
   propre classement dans les stats fun).
-- ✅ **Thème maison « Or & Nuit »** (or sur base nuit-stade, cohérent avec la bannière) en clair
-  (`hubert`) + sombre (`hubert-dark`), toggle dans le header. UI responsive mobile-first (DaisyUI,
-  nav bas mobile, classements en cartes sur petit écran, montées/descentes/yo-yo). Bannière
-  promotionnelle en tête de la page Stats.
+- ✅ **Design system « Broadcast »** (shadcn/ui + Tailwind v4) : **dark-only** au départ (tokens de
+  marque en `@theme`, plus de toggle clair/sombre — le light mode viendra plus tard). UI responsive
+  mobile-first (sidebar desktop / bottom nav mobile, classements en cartes sur petit écran).
+  Bannière promotionnelle en tête de la page « Rétro ».
 
 ## Idées de features (v2/v3)
 
