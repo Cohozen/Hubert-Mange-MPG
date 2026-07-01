@@ -1,7 +1,3 @@
-export function Empty() {
-    return (
-        <div className="card bg-base-100 shadow">
-            <div className="card-body text-sm opacity-60">Pas encore de données.</div>
-        </div>
-    );
+export function Empty({ children = "Pas encore de données." }: { children?: React.ReactNode }) {
+    return <div className="rounded-2xl border border-bord bg-carte p-6 text-sm text-texte-2">{children}</div>;
 }
