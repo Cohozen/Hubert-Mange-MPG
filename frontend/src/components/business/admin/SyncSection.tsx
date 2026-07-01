@@ -1,6 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "@/api/client";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface SyncRun {
     trigger: string;
@@ -44,43 +46,43 @@ export function SyncSection() {
     const run = last.data;
 
     return (
-        <section className="bg-base-100 rounded-box shadow p-6 space-y-3">
-            <h2 className="text-lg font-bold text-base-content">Synchronisation MPG</h2>
-            <p className="text-sm opacity-60 text-justify">
+        <section className="space-y-3 rounded-2xl border border-bord bg-carte p-6">
+            <h2 className="font-display text-lg font-black text-white">Synchronisation MPG</h2>
+            <p className="text-sm text-texte-2">
                 Synchro automatique chaque lundi matin. Tu peux aussi la déclencher manuellement.
             </p>
-            <button onClick={runSync} disabled={loading} className="btn btn-primary">
-                {loading && <span className="loading loading-spinner loading-sm" />}
+            <Button onClick={runSync} disabled={loading} variant="energy">
                 {loading ? "Sync en cours…" : "Lancer le sync maintenant"}
-            </button>
-            {error && <p className="text-sm text-error">{error}</p>}
+            </Button>
+            {error && <p className="text-sm text-rouge">{error}</p>}
 
             {run && (
-                <div className="border-t pt-3 text-sm">
+                <div className="border-t border-bord pt-3 text-sm">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span
-                            className={`inline-block w-2 h-2 rounded-full shrink-0 ${
+                            className={cn(
+                                "inline-block size-2 shrink-0 rounded-full",
                                 run.status === "success"
-                                    ? "bg-success"
+                                    ? "bg-menthe"
                                     : run.status === "error"
-                                      ? "bg-error"
-                                      : "bg-warning"
-                            }`}
+                                      ? "bg-rouge"
+                                      : "bg-jaune",
+                            )}
                         />
-                        <span className="font-medium text-base-content">
+                        <span className="font-medium text-white">
                             Dernière synchro : {run.status} ({run.trigger})
                         </span>
-                        <span className="opacity-50 w-full sm:w-auto pl-4 sm:pl-0">
+                        <span className="w-full pl-4 text-texte-2 sm:w-auto sm:pl-0">
                             {new Date(run.startedAt).toLocaleString("fr-FR")}
                         </span>
                     </div>
                     {run.summary && (
-                        <p className="opacity-60 mt-1">
+                        <p className="mt-1 text-texte-2">
                             {run.summary.leagues} ligues · {run.summary.gameSeasons} saisons · {run.summary.divisions}{" "}
                             divisions · {run.summary.managers} managers
                         </p>
                     )}
-                    {run.error && <p className="text-error mt-1">{run.error}</p>}
+                    {run.error && <p className="mt-1 text-rouge">{run.error}</p>}
                 </div>
             )}
         </section>

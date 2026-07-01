@@ -119,38 +119,40 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
     }
 
     return (
-        <section className="bg-base-100 rounded-box shadow p-6">
-            <h2 className="text-lg font-bold text-base-content mb-1">Tournois suivis (coupes)</h2>
-            <p className="text-sm opacity-60 mb-3 text-justify">
+        <section className="rounded-2xl border border-bord bg-carte p-6">
+            <h2 className="mb-1 font-display text-lg font-black text-white">Tournois suivis (coupes)</h2>
+            <p className="mb-3 text-sm text-texte-2">
                 Coche un tournoi pour le synchroniser. Décocher met le sync en pause. Le type de coupe est déduit du
                 nom. Force-le via le menu si la détection se trompe.
             </p>
 
             {available.isError && (
-                <p className="text-sm text-warning mb-2">
+                <p className="mb-2 text-sm text-jaune">
                     Tes tournois MPG n'ont pas pu être lus ({(available.error as Error).message}). Tu vois quand même
                     les tournois déjà suivis ci-dessous.
                 </p>
             )}
 
-            <div className="divide-y">
+            <div className="divide-y divide-bord">
                 {rows.map((t) => (
-                    <div key={t.mpgTournamentId} className="flex flex-col sm:flex-row sm:items-center gap-2 py-2">
-                        <label className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer">
+                    <div key={t.mpgTournamentId} className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center">
+                        <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
                             <input
                                 type="checkbox"
-                                className="checkbox checkbox-sm checkbox-success shrink-0"
+                                className="size-4 shrink-0 accent-menthe"
                                 checked={!!t.trackedId && t.active}
                                 onChange={() => toggle(t)}
                             />
-                            <span className=" flex flex-col gap-1 text-sm min-w-0 flex-1">
-                                <span className="font-medium text-base-content flex flex-wrap items-center gap-1">
+                            <span className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+                                <span className="flex flex-wrap items-center gap-1 font-medium text-white">
                                     <span className="break-words">{t.name}</span>
                                     {t.trackedId && !t.active && (
-                                        <span className="badge badge-ghost badge-sm shrink-0">en pause</span>
+                                        <span className="shrink-0 rounded-full bg-carte-2 px-2 py-0.5 text-xs text-texte-2">
+                                            en pause
+                                        </span>
                                     )}
                                 </span>
-                                <span className="opacity-50 text-xs block">
+                                <span className="block text-xs text-texte-2">
                                     {t.winner
                                         ? `🏆 ${t.winner}`
                                         : t.trackedId && !t.inMyDashboard
@@ -160,21 +162,22 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                             </span>
                             {t.trackedId && canDelete && (
                                 <button
+                                    type="button"
                                     onClick={() => remove(t)}
                                     title="Supprimer le tournoi et ses données"
-                                    className="text-xs rounded-full p-2 border border-base-300 text-error hover:border-error"
+                                    className="rounded-full border border-bord p-2 text-rouge transition hover:border-rouge"
                                 >
                                     <Trash2 size={14} />
                                 </button>
                             )}
                         </label>
-                        <div className="flex items-center gap-2 shrink-0 sm:self-auto pl-8 sm:pl-0">
+                        <div className="flex shrink-0 items-center gap-2 pl-8 sm:self-auto sm:pl-0">
                             {t.trackedId && (
                                 <select
                                     value={t.competitionOverride ?? ""}
                                     onChange={(e) => setCompetition(t, e.target.value)}
                                     title="Type de coupe (auto par défaut, déduit du nom)"
-                                    className="select select-bordered select-xs sm:select-sm max-w-[10rem]"
+                                    className="h-8 max-w-[10rem] rounded-lg border border-bord bg-nuit px-2 text-xs text-white outline-none focus:border-rose"
                                 >
                                     {COMPETITION_OPTIONS.map((o) => (
                                         <option key={o.value} value={o.value}>
@@ -187,13 +190,13 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                     </div>
                 ))}
                 {rows.length === 0 && (
-                    <p className="text-sm opacity-50 py-2">
+                    <p className="py-2 text-sm text-texte-2">
                         {available.isLoading ? "Lecture de MPG…" : "Aucun tournoi."}
                     </p>
                 )}
             </div>
             {available.isLoading && rows.length > 0 && (
-                <p className="text-xs opacity-40 mt-2">Lecture de tes tournois MPG…</p>
+                <p className="mt-2 text-xs text-texte-2">Lecture de tes tournois MPG…</p>
             )}
         </section>
     );

@@ -117,38 +117,40 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
     }
 
     return (
-        <section className="bg-base-100 rounded-box shadow p-6">
-            <h2 className="text-lg font-bold text-base-content mb-1">Ligues suivies</h2>
-            <p className="text-sm opacity-60 mb-3 text-justify">
+        <section className="rounded-2xl border border-bord bg-carte p-6">
+            <h2 className="mb-1 font-display text-lg font-black text-white">Ligues suivies</h2>
+            <p className="mb-3 text-sm text-texte-2">
                 Coche une ligue pour la synchroniser. Décocher met le sync en pause (les données déjà synchronisées
                 restent dans le classement). « Supprimer » efface la ligue et ses données.
             </p>
 
             {available.isError && (
-                <p className="text-sm text-warning mb-2">
+                <p className="mb-2 text-sm text-jaune">
                     Tes ligues MPG n'ont pas pu être lues ({(available.error as Error).message}). Tu vois quand même les
                     ligues déjà suivies ci-dessous.
                 </p>
             )}
 
-            <div className="divide-y">
+            <div className="divide-y divide-bord">
                 {rows.map((l) => (
                     <div key={l.mpgLeagueId} className="flex items-center justify-between gap-2 py-2">
-                        <label className="flex items-center gap-3 min-w-0 cursor-pointer">
+                        <label className="flex min-w-0 cursor-pointer items-center gap-3">
                             <input
                                 type="checkbox"
-                                className="checkbox checkbox-sm checkbox-success shrink-0"
+                                className="size-4 shrink-0 accent-menthe"
                                 checked={!!l.trackedId && l.active}
                                 onChange={() => toggle(l)}
                             />
-                            <span className="text-sm min-w-0">
-                                <span className="font-medium text-base-content flex items-center gap-2">
+                            <span className="min-w-0 text-sm">
+                                <span className="flex items-center gap-2 font-medium text-white">
                                     <span className="truncate">{l.name}</span>
                                     {l.trackedId && !l.active && (
-                                        <span className="badge badge-ghost badge-sm shrink-0">en pause</span>
+                                        <span className="shrink-0 rounded-full bg-carte-2 px-2 py-0.5 text-xs text-texte-2">
+                                            en pause
+                                        </span>
                                     )}
                                 </span>
-                                <span className="opacity-50 text-xs block">
+                                <span className="block text-xs text-texte-2">
                                     {l.totalUsers != null
                                         ? `${l.totalUsers} joueurs · ${l.totalDivisions} divisions · saison ${l.season}`
                                         : l.trackedId && !l.inMyDashboard
@@ -159,9 +161,10 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
                         </label>
                         {l.trackedId && canDelete && (
                             <button
+                                type="button"
                                 onClick={() => remove(l)}
                                 title="Supprimer la ligue et ses données"
-                                className="text-xs rounded-full p-2 border border-base-300 text-error hover:border-error"
+                                className="rounded-full border border-bord p-2 text-rouge transition hover:border-rouge"
                             >
                                 <Trash2 size={14} />
                             </button>
@@ -169,13 +172,13 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
                     </div>
                 ))}
                 {rows.length === 0 && (
-                    <p className="text-sm opacity-50 py-2">
+                    <p className="py-2 text-sm text-texte-2">
                         {available.isLoading ? "Lecture de MPG…" : "Aucune ligue."}
                     </p>
                 )}
             </div>
             {available.isLoading && rows.length > 0 && (
-                <p className="text-xs opacity-40 mt-2">Lecture de tes ligues MPG…</p>
+                <p className="mt-2 text-xs text-texte-2">Lecture de tes ligues MPG…</p>
             )}
         </section>
     );

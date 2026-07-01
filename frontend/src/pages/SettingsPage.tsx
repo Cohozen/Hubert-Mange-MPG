@@ -5,17 +5,27 @@ import { SyncSection } from "@/components/business/admin/SyncSection";
 import { TournamentsSection } from "@/components/business/admin/TournamentsSection";
 import { ProfileForm } from "@/components/business/settings/ProfileForm";
 
+function Divider({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="mb-4 flex items-center gap-3">
+            <span className="h-px flex-1 bg-bord" />
+            <span className="font-display text-sm font-black uppercase tracking-wide text-texte-2">{children}</span>
+            <span className="h-px flex-1 bg-bord" />
+        </div>
+    );
+}
+
 export default function SettingsPage() {
     const { data: me } = useAuth();
 
     return (
-        <div className="max-w-5xl mx-auto space-y-8">
+        <div className="mx-auto max-w-5xl space-y-8">
             <ProfileForm />
 
             {isLeagueAdmin(me) && (
                 <section>
-                    <div className="divider text-sm font-semibold uppercase opacity-60">Administration</div>
-                    <div className="columns-1 lg:columns-2 gap-6 [&>*]:mb-6 [&>*]:break-inside-avoid">
+                    <Divider>Administration</Divider>
+                    <div className="columns-1 gap-6 lg:columns-2 [&>*]:mb-6 [&>*]:break-inside-avoid">
                         <SyncSection />
                         <LeaguesSection canDelete={isSuperadmin(me)} />
                         <TournamentsSection canDelete={isSuperadmin(me)} />
@@ -25,7 +35,7 @@ export default function SettingsPage() {
 
             {isSuperadmin(me) && (
                 <section>
-                    <div className="divider text-sm font-semibold uppercase opacity-60">Superadmin</div>
+                    <Divider>Superadmin</Divider>
                     <RolesSection />
                 </section>
             )}

@@ -1,7 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { api } from "@/api/client";
+import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/Field";
+import { Input } from "@/components/ui/input";
 
 interface Profile {
     displayName: string;
@@ -72,70 +74,69 @@ export function ProfileForm() {
 
     return (
         <div>
-            <h2 className="text-xl font-bold text-base-content mb-1">Mon profil</h2>
-            <p className="text-sm opacity-60 mb-4 text-justify">
+            <h2 className="mb-1 font-display text-xl font-black uppercase tracking-tight text-white">Mon profil</h2>
+            <p className="mb-4 text-sm text-texte-2">
                 Ces coordonnées servent au banquier pour te verser tes gains. Elles ne sont visibles que par toi et le
                 banquier.
             </p>
 
-            <form onSubmit={onSubmit} className="bg-base-100 rounded-box shadow p-6 space-y-4">
-                <div className="grid sm:grid-cols-2 gap-4">
+            <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-bord bg-carte p-6">
+                <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="Téléphone (Wero)">
-                        <input
+                        <Input
                             type="tel"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             placeholder="+33 6 12 34 56 78"
-                            className="input input-bordered w-full"
+                            className="bg-nuit"
                         />
                     </Field>
 
                     <Field label="Titulaire du compte (pour le virement)">
-                        <input
+                        <Input
                             value={ibanHolder}
                             onChange={(e) => setIbanHolder(e.target.value)}
                             placeholder="Prénom Nom"
-                            className="input input-bordered w-full"
+                            className="bg-nuit"
                         />
                     </Field>
                 </div>
 
                 <Field label="Lien Wero (Mon QR code → Partager)">
-                    <input
+                    <Input
                         value={weroUrl}
                         onChange={(e) => setWeroUrl(e.target.value)}
                         placeholder="https://share.weropay.eu/p/..."
-                        className="input input-bordered w-full"
+                        className="bg-nuit"
                     />
-                    <span className="text-xs opacity-50">
+                    <span className="mt-1 block text-xs text-texte-2">
                         Dans l'appli Wero : « Mon QR code » → Partager → copie le lien et colle-le ici.
                     </span>
                 </Field>
 
                 <Field label="IBAN">
                     {data?.hasIban && (
-                        <p className="text-sm opacity-60 mb-1">
-                            Actuel : <span className="font-mono">{data.ibanMasked}</span>{" "}
-                            <button type="button" onClick={removeIban} className="text-error hover:underline ml-2">
+                        <p className="mb-1 text-sm text-texte-2">
+                            Actuel : <span className="font-mono text-white">{data.ibanMasked}</span>{" "}
+                            <button type="button" onClick={removeIban} className="ml-2 text-rouge hover:underline">
                                 supprimer
                             </button>
                         </p>
                     )}
-                    <input
+                    <Input
                         value={iban}
                         onChange={(e) => setIban(e.target.value)}
                         placeholder={data?.hasIban ? "Laisser vide pour conserver l'IBAN actuel" : "FR76 ..."}
-                        className="input input-bordered w-full font-mono"
+                        className="bg-nuit font-mono"
                     />
-                    <span className="text-xs opacity-50">🔒 Ton IBAN est chiffré.</span>
+                    <span className="mt-1 block text-xs text-texte-2">🔒 Ton IBAN est chiffré.</span>
                 </Field>
 
-                {msg && <p className="text-sm text-success">{msg}</p>}
-                {err && <p className="text-sm text-error">{err}</p>}
-                <button type="submit" disabled={saving} className="btn btn-primary">
-                    {saving && <span className="loading loading-spinner loading-sm" />}
+                {msg && <p className="text-sm text-menthe">{msg}</p>}
+                {err && <p className="text-sm text-rouge">{err}</p>}
+                <Button type="submit" disabled={saving} variant="energy">
                     {saving ? "Enregistrement…" : "Enregistrer"}
-                </button>
+                </Button>
             </form>
         </div>
     );
