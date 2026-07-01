@@ -1,13 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
+import { Info } from "lucide-react";
 import { api } from "@/api/client";
 import { useAuth } from "@/auth/useAuth";
 import { RankCard } from "@/components/business/stats/RankCard";
-import { AllTimeRow, CupCount, FunStats, Movement, RankRow } from "@/components/business/stats/types";
+import type { AllTimeRow, CupCount, FunStats, Movement, RankRow } from "@/components/business/stats/types";
+import { Empty } from "@/components/ui/Empty";
 import { ManagerLabel } from "@/components/ui/ManagerLabel";
+import { SectionTitle } from "@/components/ui/SectionTitle";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 // Médaille pour le top 3 (uniquement si le manager a au moins un titre), sinon le rang.
 const rankLabel = (rank: number, hasTitles: boolean) =>
     hasTitles && rank <= 3 ? ["🥇", "🥈", "🥉"][rank - 1] : `${rank}.`;
+
+const chip = "rounded-full px-2 py-0.5 text-xs font-semibold";
 
 export default function StatsPage() {
     const { data: me } = useAuth();
@@ -40,7 +47,6 @@ export default function StatsPage() {
 
     // Coupes par manager : comptées dans le total de titres affiché, mais hors calcul du classement.
     const cupsByManager = new Map((cups.data?.ranking ?? []).map((c) => [c.managerId, c]));
-    // Total de titres affiché = titres de division + coupes (n'influe pas sur l'ordre, géré par `rank`).
     const totalWithCups = (r: AllTimeRow) => r.totalTitles + (cupsByManager.get(r.managerId)?.total ?? 0);
 
     return (
@@ -48,49 +54,50 @@ export default function StatsPage() {
             <img
                 src="/stats-banner.jpg"
                 alt="Mega Ligue — Hubert mange"
-                className="w-full rounded-lg shadow object-cover"
+                className="w-full rounded-2xl border border-bord object-cover"
                 loading="lazy"
             />
-            <section>
-                <div className="flex items-center justify-between gap-2 mb-3">
-                    <h2 className="text-xl font-bold">Classement all-time</h2>
-                    <div className="dropdown dropdown-end">
-                        <div
-                            tabIndex={0}
-                            role="button"
-                            className="btn btn-ghost btn-circle btn-xs"
-                            aria-label="À propos du classement"
-                        >
-                            ℹ️
+
+            <section className="space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                    <SectionTitle>Classement all-time</SectionTitle>
+                    <details className="relative">
+                        <summary className="grid size-8 cursor-pointer list-none place-items-center rounded-full text-texte-2 transition hover:bg-carte hover:text-white [&::-webkit-details-marker]:hidden">
+                            <Info size={16} />
+                        </summary>
+                        <div className="absolute right-0 z-20 mt-2 w-72 rounded-2xl border border-bord bg-carte p-4 text-xs leading-relaxed text-texte-2 shadow-xl sm:w-80">
+                            Façon Jeux Olympiques : on compte les titres (1re place) par division. On départage d'abord
+                            sur les titres de D1, puis de D2, et ainsi de suite, puis sur le nombre de coupes. Les
+                            coupes (⭐ Crampons · 🎖️ Europa · 🍐 Conference) comptent dans le total de titres et
+                            départagent après les championnats.
                         </div>
-                        <div
-                            tabIndex={-1}
-                            className="dropdown-content card card-sm bg-base-100 shadow-lg z-10 w-72 sm:w-80"
-                        >
-                            <div className="card-body text-xs opacity-80 text-justify">
-                                Façon Jeux Olympiques : on compte les titres (1re place) par division. On départage
-                                d'abord sur les titres de D1, puis de D2, et ainsi de suite, puis sur le nombre de
-                                coupes. Les coupes (⭐ Crampons · 🎖️ Europa · 🍐 Conference) comptent dans le total de
-                                titres et départagent après les championnats.
-                            </div>
-                        </div>
-                    </div>
+                    </details>
                 </div>
+
                 {allTime.data?.ranking.length ? (
                     <>
-                        <div className="sm:hidden space-y-2">
-                            {allTime.data.ranking.map((r) => (
-                                <div
-                                    key={r.managerId}
-                                    className={`card bg-base-100 shadow ${
-                                        r.managerId === me?.id ? "border border-primary" : ""
-                                    }`}
-                                >
-                                    <div className="card-body p-3 flex-row items-center gap-3">
-                                        <div className={`w-8 text-center ${r.rank > 3 ? "text-lg" : "text-3xl"}`}>
+                        {/* Mobile : cartes */}
+                        <div className="space-y-2 sm:hidden">
+                            {allTime.data.ranking.map((r) => {
+                                const c = cupsByManager.get(r.managerId);
+                                const isMe = r.managerId === me?.id;
+                                return (
+                                    <div
+                                        key={r.managerId}
+                                        className={cn(
+                                            "flex items-center gap-3 rounded-2xl border bg-carte p-3",
+                                            isMe ? "border-rose" : "border-bord",
+                                        )}
+                                    >
+                                        <div
+                                            className={cn(
+                                                "w-8 shrink-0 text-center font-display font-black",
+                                                r.rank > 3 ? "text-base text-texte-2" : "text-2xl",
+                                            )}
+                                        >
                                             {rankLabel(r.rank, r.totalTitles > 0)}
                                         </div>
-                                        <div className="flex-1 min-w-0">
+                                        <div className="min-w-0 flex-1 text-white">
                                             <ManagerLabel
                                                 managerId={r.managerId}
                                                 name={r.manager}
@@ -98,92 +105,121 @@ export default function StatsPage() {
                                                 avatarUrl={r.avatarUrl}
                                                 size={26}
                                             />
-                                            <div className="flex flex-wrap gap-2 mt-1">
-                                                {r.titles.map((c, lvl) =>
-                                                    c > 0 ? (
+                                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                                {r.titles.map((cnt, lvl) =>
+                                                    cnt > 0 ? (
                                                         <span
                                                             key={lvl}
-                                                            className={`badge badge-sm ${lvl === 0 ? "badge-primary" : "badge-ghost"}`}
+                                                            className={cn(
+                                                                chip,
+                                                                lvl === 0
+                                                                    ? "bg-rose/15 text-rose"
+                                                                    : "bg-carte-2 text-texte-2",
+                                                            )}
                                                         >
-                                                            D{lvl + 1} ×{c}
+                                                            D{lvl + 1} ×{cnt}
                                                         </span>
                                                     ) : null,
                                                 )}
                                                 {r.totalTitles === 0 && (
-                                                    <span className="badge badge-sm badge-ghost opacity-60">
+                                                    <span className={cn(chip, "bg-carte-2 text-texte-2")}>
                                                         aucun titre
                                                     </span>
                                                 )}
-                                                {(() => {
-                                                    const c = cupsByManager.get(r.managerId);
-                                                    return c ? (
-                                                        <>
-                                                            {c.ldc > 0 && (
-                                                                <span className="badge badge-sm badge-warning font-semibold">
-                                                                    ⭐ ×{c.ldc}
-                                                                </span>
-                                                            )}
-                                                            {c.uefa > 0 && (
-                                                                <span className="badge badge-sm badge-ghost">
-                                                                    🎖️ ×{c.uefa}
-                                                                </span>
-                                                            )}
-                                                            {c.conference > 0 && (
-                                                                <span className="badge badge-sm badge-ghost">
-                                                                    🍐 ×{c.conference}
-                                                                </span>
-                                                            )}
-                                                        </>
-                                                    ) : null;
-                                                })()}
-                                                <span className="badge badge-sm badge-secondary badge-outline">
+                                                {c?.ldc ? (
+                                                    <span className={cn(chip, "bg-jaune/15 text-jaune")}>
+                                                        ⭐ ×{c.ldc}
+                                                    </span>
+                                                ) : null}
+                                                {c?.uefa ? (
+                                                    <span className={cn(chip, "bg-carte-2 text-texte-2")}>
+                                                        🎖️ ×{c.uefa}
+                                                    </span>
+                                                ) : null}
+                                                {c?.conference ? (
+                                                    <span className={cn(chip, "bg-carte-2 text-texte-2")}>
+                                                        🍐 ×{c.conference}
+                                                    </span>
+                                                ) : null}
+                                                <span
+                                                    className={cn(
+                                                        chip,
+                                                        "border border-bord bg-transparent text-texte-2",
+                                                    )}
+                                                >
                                                     {r.seasonsPlayed} saisons
                                                 </span>
                                             </div>
                                         </div>
                                         <div className="flex flex-col items-center">
-                                            <div className="text-lg font-bold text-primary">{totalWithCups(r)}</div>
-                                            <div className="text-[10px] opacity-60">
+                                            <div className="font-display text-lg font-black text-rose">
+                                                {totalWithCups(r)}
+                                            </div>
+                                            <div className="text-[10px] text-texte-2">
                                                 titre{totalWithCups(r) > 1 ? "s" : ""}
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
-                        <div className="hidden sm:block card bg-base-100 shadow overflow-x-auto">
-                            <table className="table table-md">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Manager</th>
+
+                        {/* Desktop : tableau */}
+                        <div className="hidden overflow-x-auto rounded-2xl border border-bord bg-carte sm:block">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="border-bord hover:bg-transparent">
+                                        <TableHead className="text-texte-2">#</TableHead>
+                                        <TableHead className="text-texte-2">Manager</TableHead>
                                         {Array.from({ length: allTime.data.maxLevel }, (_, lvl) => (
-                                            <th key={lvl} className="text-center">
+                                            <TableHead key={lvl} className="text-center text-texte-2">
                                                 {lvl === 0 ? "🥇 D1" : `D${lvl + 1}`}
-                                            </th>
+                                            </TableHead>
                                         ))}
-                                        <th className="text-center">Total</th>
-                                        <th className="text-center" title="Ligue des Crampons">
+                                        <TableHead className="text-center text-texte-2">Total</TableHead>
+                                        <TableHead className="text-center text-texte-2" title="Ligue des Crampons">
                                             ⭐
-                                        </th>
-                                        <th className="text-center" title="Europa (Heureux papa's)">
+                                        </TableHead>
+                                        <TableHead className="text-center text-texte-2" title="Europa">
                                             🎖️
-                                        </th>
-                                        <th className="text-center" title="Conference">
+                                        </TableHead>
+                                        <TableHead className="text-center text-texte-2" title="Conference">
                                             🍐
-                                        </th>
-                                        <th className="text-center">Saisons</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                                        </TableHead>
+                                        <TableHead className="text-center text-texte-2">Saisons</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
                                     {allTime.data.ranking.map((r) => {
                                         const isMe = r.managerId === me?.id;
+                                        const c = cupsByManager.get(r.managerId);
+                                        const cupCell = (n: number) => (
+                                            <TableCell
+                                                className={cn(
+                                                    "text-center",
+                                                    n > 0 ? "font-semibold text-white" : "text-texte-2/40",
+                                                )}
+                                            >
+                                                {n || "—"}
+                                            </TableCell>
+                                        );
                                         return (
-                                            <tr key={r.managerId} className={isMe ? "bg-primary/5" : ""}>
-                                                <td className={isMe ? "border-l-4 border-l-primary" : ""}>
+                                            <TableRow
+                                                key={r.managerId}
+                                                className={cn(
+                                                    "border-bord",
+                                                    isMe ? "bg-rose/5" : "hover:bg-carte-2/40",
+                                                )}
+                                            >
+                                                <TableCell
+                                                    className={cn(
+                                                        "font-display font-black text-white",
+                                                        isMe && "border-l-2 border-l-rose",
+                                                    )}
+                                                >
                                                     {rankLabel(r.rank, r.totalTitles > 0)}
-                                                </td>
-                                                <td>
+                                                </TableCell>
+                                                <TableCell className="text-white">
                                                     <ManagerLabel
                                                         managerId={r.managerId}
                                                         name={r.manager}
@@ -191,150 +227,139 @@ export default function StatsPage() {
                                                         avatarUrl={r.avatarUrl}
                                                         size={26}
                                                     />
-                                                </td>
-                                                {r.titles.map((c, lvl) => (
-                                                    <td
+                                                </TableCell>
+                                                {r.titles.map((cnt, lvl) => (
+                                                    <TableCell
                                                         key={lvl}
-                                                        className={`text-center ${c > 0 ? "font-semibold" : "opacity-30"}`}
+                                                        className={cn(
+                                                            "text-center",
+                                                            cnt > 0 ? "font-semibold text-white" : "text-texte-2/40",
+                                                        )}
                                                     >
-                                                        {c || "—"}
-                                                    </td>
+                                                        {cnt || "—"}
+                                                    </TableCell>
                                                 ))}
-                                                <td className="text-center font-bold text-primary">
+                                                <TableCell className="text-center font-display font-black text-rose">
                                                     {totalWithCups(r)}
-                                                </td>
-                                                {(() => {
-                                                    const c = cupsByManager.get(r.managerId);
-                                                    const cell = (n: number) => (
-                                                        <td
-                                                            className={`text-center ${n > 0 ? "font-semibold" : "opacity-30"}`}
-                                                        >
-                                                            {n || "—"}
-                                                        </td>
-                                                    );
-                                                    return (
-                                                        <>
-                                                            {cell(c?.ldc ?? 0)}
-                                                            {cell(c?.uefa ?? 0)}
-                                                            {cell(c?.conference ?? 0)}
-                                                        </>
-                                                    );
-                                                })()}
-                                                <td className="text-center">{r.seasonsPlayed}</td>
-                                            </tr>
+                                                </TableCell>
+                                                {cupCell(c?.ldc ?? 0)}
+                                                {cupCell(c?.uefa ?? 0)}
+                                                {cupCell(c?.conference ?? 0)}
+                                                <TableCell className="text-center text-texte-2">
+                                                    {r.seasonsPlayed}
+                                                </TableCell>
+                                            </TableRow>
                                         );
                                     })}
-                                </tbody>
-                            </table>
+                                </TableBody>
+                            </Table>
                         </div>
                     </>
                 ) : (
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body text-sm opacity-60">Pas encore de données.</div>
-                    </div>
+                    <Empty />
                 )}
             </section>
 
-            <section>
-                <h2 className="text-xl font-bold mb-3">Stats fun</h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <section className="space-y-4">
+                <SectionTitle>Stats fun</SectionTitle>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <RankCard
                         title="🐐 Bouc émissaire"
                         subtitle="le plus de malus subis"
                         rows={fun.data?.scapeGoat}
                         unit=" malus"
-                        accent="text-warning"
+                        accent="text-jaune"
                     />
                     <RankCard
                         title="🥅 La passoire"
                         subtitle="le plus de buts encaissés"
                         rows={fun.data?.worstDefense}
                         unit=" BC"
-                        accent="text-error"
+                        accent="text-rouge"
                     />
                     <RankCard
                         title="⚽ Meilleure attaque"
                         subtitle="le plus de buts marqués"
                         rows={fun.data?.bestAttack}
                         unit=" BP"
-                        accent="text-success"
+                        accent="text-menthe"
                     />
                     <RankCard
                         title="🎯 Machine à points"
                         subtitle="le plus de points cumulés"
                         rows={fun.data?.mostPoints}
                         unit=" pts"
-                        accent="text-primary"
+                        accent="text-rose"
                     />
                     <RankCard
                         title="🏅 Rotaldo d'Or"
                         subtitle="a possédé le meilleur joueur"
                         rows={fun.data?.rotaldo}
                         unit="×"
-                        accent="text-primary"
+                        accent="text-rose"
                     />
                     <RankCard
                         title="🌟 La révélation"
                         subtitle="a possédé la plus grosse hausse de cote"
                         rows={fun.data?.raisingStar}
                         unit="×"
-                        accent="text-primary"
+                        accent="text-rose"
                     />
                     <RankCard
                         title="🏆 Roi des podiums"
                         subtitle="le plus de podiums (top 3)"
                         rows={fun.data?.podiums}
                         unit=""
-                        accent="text-warning"
+                        accent="text-jaune"
                     />
                     <RankCard
                         title="🔥 Série de titres"
                         subtitle="titres consécutifs"
                         rows={fun.data?.titleStreak}
                         unit=""
-                        accent="text-primary"
+                        accent="text-rose"
                     />
                     <RankCard
                         title="🍸 Le Jean-Claude Duss"
                         subtitle="le plus de 2es places (du mal à conclure)"
                         rows={fun.data?.jeanClaudeDuss}
                         unit="×"
-                        accent="text-secondary"
+                        accent="text-violet-clair"
                     />
                     <RankCard
                         title="🏛️ Pilier de l'élite"
                         subtitle="le plus de saisons en D1"
                         rows={fun.data?.d1Seasons}
                         unit=""
-                        accent="text-primary"
+                        accent="text-rose"
                     />
                     <RankCard
                         title="🔒 Indéboulonnable"
                         subtitle="saisons consécutives en D1"
                         rows={fun.data?.d1Streak}
                         unit=""
-                        accent="text-primary"
+                        accent="text-rose"
                     />
                     <RankCard
                         title="📈 Montées"
                         subtitle="le plus de promotions"
                         rows={moveRows(movements.data?.promotions)}
                         unit=""
-                        accent="text-success"
+                        accent="text-menthe"
                     />
                     <RankCard
                         title="📉 Descentes"
                         subtitle="le plus de relégations"
                         rows={moveRows(movements.data?.relegations)}
                         unit=""
-                        accent="text-error"
+                        accent="text-rouge"
                     />
                     <RankCard
                         title="🎢 Yo-yo"
                         subtitle="le plus de montées + descentes"
                         rows={moveRows(movements.data?.yoyo)}
                         unit=""
-                        accent="text-secondary"
+                        accent="text-violet-clair"
                     />
                 </div>
             </section>
