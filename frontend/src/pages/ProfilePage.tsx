@@ -33,8 +33,8 @@ export default function ProfilePage() {
 
     if (!targetId) {
         return (
-            <div className="min-h-[40vh] grid place-items-center">
-                <span className="loading loading-spinner loading-lg text-primary" />
+            <div className="grid min-h-[40vh] place-items-center">
+                <div className="size-10 animate-spin rounded-full border-4 border-bord border-t-rose" />
             </div>
         );
     }
@@ -49,12 +49,13 @@ export default function ProfilePage() {
                     return (
                         <button
                             key={t.key}
+                            type="button"
                             ref={active ? activeRef : undefined}
                             onClick={() => setTab(t.key)}
-                            className={`shrink-0 cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition whitespace-nowrap ${
+                            className={`shrink-0 cursor-pointer whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold transition ${
                                 active
-                                    ? "bg-primary text-primary-content shadow"
-                                    : "bg-base-100 border border-base-300 hover:bg-base-200"
+                                    ? "grad-energy font-display text-white"
+                                    : "border border-bord bg-carte text-texte-2 hover:text-white"
                             }`}
                         >
                             {t.label}

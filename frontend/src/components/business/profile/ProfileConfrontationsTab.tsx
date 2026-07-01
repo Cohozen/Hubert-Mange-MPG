@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
-import { H2H } from "@/components/business/stats/types";
+import type { H2H } from "@/components/business/stats/types";
+import { Empty } from "@/components/ui/Empty";
 import { ManagerLabel } from "@/components/ui/ManagerLabel";
 
 export function ProfileConfrontationsTab({ managerId }: { managerId: string }) {
@@ -12,18 +13,14 @@ export function ProfileConfrontationsTab({ managerId }: { managerId: string }) {
     if (!h) return null;
 
     if (h.opponents.length === 0) {
-        return (
-            <div className="card bg-base-100 shadow">
-                <div className="card-body text-sm opacity-60">Aucune confrontation enregistrée.</div>
-            </div>
-        );
+        return <Empty>Aucune confrontation enregistrée.</Empty>;
     }
 
     return (
-        <ul className="list bg-base-100 rounded-box shadow">
+        <ul className="divide-y divide-bord overflow-hidden rounded-2xl border border-bord bg-carte">
             {h.opponents.map((o) => (
-                <li key={o.opponentId} className="list-row items-center text-sm">
-                    <span className="list-col-grow min-w-0">
+                <li key={o.opponentId} className="flex items-center gap-3 p-3 text-sm">
+                    <span className="min-w-0 flex-1 text-white">
                         <ManagerLabel
                             managerId={o.opponentId}
                             name={o.manager}
@@ -33,13 +30,13 @@ export function ProfileConfrontationsTab({ managerId }: { managerId: string }) {
                         />
                     </span>
                     <span className="shrink-0 tabular-nums">
-                        <span className="text-success">{o.w}</span>
-                        <span className="opacity-40">–</span>
-                        <span>{o.d}</span>
-                        <span className="opacity-40">–</span>
-                        <span className="text-error">{o.l}</span>
+                        <span className="text-menthe">{o.w}</span>
+                        <span className="text-texte-2/50">–</span>
+                        <span className="text-white">{o.d}</span>
+                        <span className="text-texte-2/50">–</span>
+                        <span className="text-rouge">{o.l}</span>
                     </span>
-                    <span className="shrink-0 opacity-50 text-xs w-16 text-right">
+                    <span className="w-16 shrink-0 text-right text-xs text-texte-2">
                         {o.gf}:{o.ga}
                     </span>
                 </li>

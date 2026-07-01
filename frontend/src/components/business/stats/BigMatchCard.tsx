@@ -1,21 +1,19 @@
-import { BigMatch } from "@/components/business/stats/types";
+import type { BigMatch } from "@/components/business/stats/types";
 import { ManagerLabel } from "@/components/ui/ManagerLabel";
 
 export function BigMatchCard({ title, m }: { title: string; m: BigMatch | null }) {
     return (
-        <div className="card bg-base-100 shadow">
-            <div className="card-body p-4">
-                <h3 className="font-semibold mb-1">{title}</h3>
-                {m ? (
-                    <div className="space-y-1">
-                        <div className="text-2xl font-bold">{m.score}</div>
-                        <ManagerLabel name={m.opponent} username={m.username} avatarUrl={m.avatarUrl} size={24} />
-                        <div className="text-xs opacity-60">{m.context}</div>
-                    </div>
-                ) : (
-                    <p className="text-sm opacity-60">—</p>
-                )}
-            </div>
+        <div className="lhm-card rounded-2xl border border-bord bg-carte p-4">
+            <h3 className="mb-1 font-display text-sm font-black text-white">{title}</h3>
+            {m ? (
+                <div className="space-y-1">
+                    <div className="font-display text-2xl font-black text-white">{m.score}</div>
+                    <ManagerLabel name={m.opponent} username={m.username} avatarUrl={m.avatarUrl} size={24} />
+                    <div className="text-xs text-texte-2">{m.context}</div>
+                </div>
+            ) : (
+                <p className="text-sm text-texte-2">—</p>
+            )}
         </div>
     );
 }

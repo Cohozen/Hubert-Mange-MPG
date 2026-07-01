@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import { CareerChart } from "@/components/business/profile/CareerChart";
-import { TimelineSeason } from "@/components/business/profile/types";
+import type { TimelineSeason } from "@/components/business/profile/types";
 import { MiniStat } from "@/components/business/stats/MiniStat";
+import { Empty } from "@/components/ui/Empty";
 
 const sum = (xs: (number | null)[]): number => xs.reduce<number>((a, b) => a + (b ?? 0), 0);
 
@@ -45,10 +46,10 @@ function derive(seasons: TimelineSeason[]) {
 function SeasonHighlight({ title, season }: { title: string; season: TimelineSeason | null }) {
     if (!season) return null;
     return (
-        <div className="bg-base-100 rounded-box shadow p-3">
-            <div className="text-xs opacity-60">{title}</div>
-            <div className="font-semibold">{season.points ?? 0} pts</div>
-            <div className="text-xs opacity-70">
+        <div className="rounded-2xl border border-bord bg-carte p-3">
+            <div className="text-xs text-texte-2">{title}</div>
+            <div className="font-display font-black text-white">{season.points ?? 0} pts</div>
+            <div className="text-xs text-texte-2">
                 {season.division} · {season.realSeason} — {season.gameSeason}
             </div>
         </div>
@@ -65,11 +66,7 @@ export function ProfileStatsTab({ managerId }: { managerId: string }) {
     const { seasons } = data;
 
     if (seasons.length === 0) {
-        return (
-            <div className="card bg-base-100 shadow">
-                <div className="card-body text-sm opacity-60">Pas encore de saison jouée.</div>
-            </div>
-        );
+        return <Empty>Pas encore de saison jouée.</Empty>;
     }
 
     const s = derive(seasons);
@@ -77,33 +74,35 @@ export function ProfileStatsTab({ managerId }: { managerId: string }) {
     return (
         <div className="space-y-6">
             <section>
-                <h3 className="font-semibold mb-2">📈 Historique</h3>
+                <h3 className="mb-2 font-display text-sm font-black uppercase tracking-wide text-white">
+                    📈 Historique
+                </h3>
                 <CareerChart seasons={seasons} />
             </section>
 
             <section>
-                <h3 className="font-semibold mb-2">Mouvements</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <MiniStat label="Montées" value={s.promotions} accent="text-success" />
-                    <MiniStat label="Descentes" value={s.relegations} accent="text-error" />
+                <h3 className="mb-2 font-display text-sm font-black uppercase tracking-wide text-white">Mouvements</h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <MiniStat label="Montées" value={s.promotions} accent="text-menthe" />
+                    <MiniStat label="Descentes" value={s.relegations} accent="text-rouge" />
                     <MiniStat label="Mouvements" value={s.moves} />
                     <MiniStat label="Rang moyen" value={s.avgRank} />
                 </div>
             </section>
 
             <section>
-                <h3 className="font-semibold mb-2">Performance</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <MiniStat label="% victoires" value={s.winPct} accent="text-primary" />
+                <h3 className="mb-2 font-display text-sm font-black uppercase tracking-wide text-white">Performance</h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <MiniStat label="% victoires" value={s.winPct} accent="text-rose" />
                     <MiniStat label="Buts pour" value={s.goalsFor} />
                     <MiniStat label="Buts contre" value={s.goalsAgainst} />
                     <MiniStat
                         label="Différence"
                         value={s.diff}
-                        accent={s.diff > 0 ? "text-success" : s.diff < 0 ? "text-error" : undefined}
+                        accent={s.diff > 0 ? "text-menthe" : s.diff < 0 ? "text-rouge" : undefined}
                     />
                 </div>
-                <div className="grid sm:grid-cols-2 gap-3 mt-3">
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     <SeasonHighlight title="🔥 Meilleure saison" season={s.best} />
                     <SeasonHighlight title="🥶 Pire saison" season={s.worst} />
                 </div>

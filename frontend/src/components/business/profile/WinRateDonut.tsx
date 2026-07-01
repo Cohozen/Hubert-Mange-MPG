@@ -4,13 +4,13 @@ export function WinRateDonut({ w, d, l }: { w: number; d: number; l: number }) {
     const total = w + d + l;
     const winPct = total ? Math.round((w / total) * 100) : 0;
     const data = [
-        { name: "Victoires", value: w, color: "var(--color-success)" },
-        { name: "Nuls", value: d, color: "var(--color-base-300)" },
-        { name: "Défaites", value: l, color: "var(--color-error)" },
+        { name: "Victoires", value: w, color: "var(--color-menthe)" },
+        { name: "Nuls", value: d, color: "var(--color-bord)" },
+        { name: "Défaites", value: l, color: "var(--color-rouge)" },
     ];
 
     return (
-        <div className="bg-base-100 rounded-box shadow p-4">
+        <div className="rounded-2xl border border-bord bg-carte p-4">
             <div className="relative h-48 [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -31,9 +31,9 @@ export function WinRateDonut({ w, d, l }: { w: number; d: number; l: number }) {
                         </Pie>
                     </PieChart>
                 </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-2xl font-bold text-success">{winPct}%</span>
-                    <span className="text-xs opacity-60">victoires</span>
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="font-display text-2xl font-black text-menthe">{winPct}%</span>
+                    <span className="text-xs text-texte-2">victoires</span>
                 </div>
             </div>
         </div>

@@ -4,7 +4,8 @@ import { WinRateDonut } from "@/components/business/profile/WinRateDonut";
 import { BigMatchCard } from "@/components/business/stats/BigMatchCard";
 import { DuelCard } from "@/components/business/stats/DuelCard";
 import { MiniStat } from "@/components/business/stats/MiniStat";
-import { H2H } from "@/components/business/stats/types";
+import type { H2H } from "@/components/business/stats/types";
+import { Empty } from "@/components/ui/Empty";
 
 export function ProfileSummaryTab({ managerId }: { managerId: string }) {
     const { data: h } = useQuery({
@@ -15,11 +16,7 @@ export function ProfileSummaryTab({ managerId }: { managerId: string }) {
     if (!h) return null;
 
     if (h.overall.played === 0) {
-        return (
-            <div className="card bg-base-100 shadow">
-                <div className="card-body text-sm opacity-60">Pas encore de match enregistré.</div>
-            </div>
-        );
+        return <Empty>Pas encore de match enregistré.</Empty>;
     }
 
     return (
@@ -29,9 +26,9 @@ export function ProfileSummaryTab({ managerId }: { managerId: string }) {
                 <WinRateDonut w={h.overall.w} d={h.overall.d} l={h.overall.l} />
                 <div className="grid grid-cols-2 gap-3">
                     <MiniStat label="Matchs" value={h.overall.played} />
-                    <MiniStat label="Victoires" value={h.overall.w} accent="text-success" />
+                    <MiniStat label="Victoires" value={h.overall.w} accent="text-menthe" />
                     <MiniStat label="Nuls" value={h.overall.d} />
-                    <MiniStat label="Défaites" value={h.overall.l} accent="text-error" />
+                    <MiniStat label="Défaites" value={h.overall.l} accent="text-rouge" />
                 </div>
             </div>
 

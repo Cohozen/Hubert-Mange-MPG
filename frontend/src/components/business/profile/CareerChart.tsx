@@ -27,20 +27,20 @@ function CareerTooltip({ active, payload }: { active?: boolean; payload?: { payl
     if (!active || !payload?.length) return null;
     const s = payload[0].payload;
     return (
-        <div className="bg-base-100 rounded-box shadow-lg border border-base-300 p-3 text-xs space-y-0.5">
-            <div className="font-semibold">
+        <div className="space-y-0.5 rounded-2xl border border-bord bg-carte p-3 text-xs text-texte-2 shadow-lg">
+            <div className="font-display font-black text-white">
                 {s.realSeason} — {s.gameSeason}
             </div>
-            <div>
+            <div className="text-white">
                 {s.division}
-                {s.finalRank != null && <span className="opacity-60"> · {s.finalRank}ᵉ</span>}
+                {s.finalRank != null && <span className="text-texte-2"> · {s.finalRank}ᵉ</span>}
                 {s.finalRank === 1 && " 🥇"}
             </div>
-            <div className="opacity-70">
-                {s.points ?? 0} pts · <span className="text-success">{s.won ?? 0}V</span> {s.drawn ?? 0}N{" "}
-                <span className="text-error">{s.lost ?? 0}D</span>
+            <div>
+                {s.points ?? 0} pts · <span className="text-menthe">{s.won ?? 0}V</span> {s.drawn ?? 0}N{" "}
+                <span className="text-rouge">{s.lost ?? 0}D</span>
             </div>
-            <div className="opacity-70">
+            <div>
                 Buts {s.goalsFor ?? 0}:{s.goalsAgainst ?? 0}
             </div>
         </div>
@@ -57,17 +57,17 @@ export function CareerChart({ seasons }: { seasons: TimelineSeason[] }) {
     const xInterval = isMobile ? Math.max(0, Math.ceil(data.length / 6) - 1) : 0;
 
     return (
-        <div className="bg-base-100 rounded-box shadow p-4 h-72 [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none">
+        <div className="h-72 rounded-2xl border border-bord bg-carte p-4 [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none">
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data} margin={{ top: 10, right: 16, bottom: 28, left: -8 }} accessibilityLayer={false}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-base-300)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-bord)" />
                     <XAxis
                         dataKey="label"
                         angle={-35}
                         textAnchor="end"
                         height={50}
                         interval={xInterval}
-                        tick={{ fontSize: 10, fill: "var(--color-base-content)" }}
+                        tick={{ fontSize: 10, fill: "var(--color-texte-2)" }}
                     />
                     <YAxis
                         reversed
@@ -75,13 +75,13 @@ export function CareerChart({ seasons }: { seasons: TimelineSeason[] }) {
                         ticks={yTicks}
                         allowDecimals={false}
                         tickFormatter={(v) => `D${v}`}
-                        tick={{ fontSize: 11, fill: "var(--color-base-content)" }}
+                        tick={{ fontSize: 11, fill: "var(--color-texte-2)" }}
                     />
                     <Tooltip content={<CareerTooltip />} />
                     <Line
                         type="linear"
                         dataKey="level"
-                        stroke="var(--color-primary)"
+                        stroke="var(--color-menthe)"
                         strokeWidth={2}
                         isAnimationActive={false}
                         dot={(props: any) => {
@@ -93,7 +93,7 @@ export function CareerChart({ seasons }: { seasons: TimelineSeason[] }) {
                                     </text>
                                 );
                             }
-                            return <circle key={index} cx={cx} cy={cy} r={4} fill="var(--color-primary)" />;
+                            return <circle key={index} cx={cx} cy={cy} r={4} fill="var(--color-menthe)" />;
                         }}
                         activeDot={{ r: 6 }}
                     />
