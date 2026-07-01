@@ -6,7 +6,7 @@ synchronisation des données depuis l'API MPG.
 ## Structure
 
 - `backend/` — API Express + TypeScript, Prisma. SQLite en local, Postgres (Supabase) en prod.
-- `frontend/` — Vite + React 18, React Router, TanStack Query, Tailwind + DaisyUI, Recharts
+- `frontend/` — Vite + React 18, React Router, TanStack Query, Tailwind v4 + shadcn/ui, Recharts
   (graphiques, ex. la frise de carrière du profil).
   - **Un seul composant par fichier, un seul fichier par composant.** Pas de sous-composant
     défini dans une page.
@@ -18,16 +18,27 @@ synchronisation des données depuis l'API MPG.
     composants métier, ne les définissent pas).
   - Imports via l'**alias `@/`** (`@/api/client`, `@/components/...`), configuré dans
     `tsconfig.json` (`paths`) et `vite.config.ts` (`resolve.alias`). Pas de chemins relatifs.
-  - **Toujours utiliser le skill `daisyui`** avant de générer/modifier du HTML/JSX front : c'est la
-    lib UI de référence (Tailwind v4 + daisyUI v5). Consulter le doc du composant concerné pour la
-    markup exacte (ex. la syntaxe `dropdown` v5).
-  - **Thème maison « Or & Nuit »** (or sur base nuit-stade) défini dans `src/styles.css` :
-    `hubert` (clair, `default`) + `hubert-dark` (sombre, `prefersdark`). Le toggle du header bascule
-    entre les deux (`data-theme` sur `<html>` + `localStorage`, voir `useTheme` dans `App.tsx`).
-    **Toujours utiliser les couleurs sémantiques** daisyUI (`primary`, `base-*`, `success`, `error`,
-    `warning`…) pour qu'elles suivent le thème — pas de couleurs Tailwind brutes (`bg-red-500`…).
-    `primary` = or, `warning` = or aussi (les coupes ⭐ utilisent `badge-warning`). Recharts lit les
-    `var(--color-*)` → s'adapte tout seul.
+  - **UI = shadcn/ui (Radix + Tailwind v4)**. Primitives générées dans `src/components/ui/` en
+    **minuscules** (`button.tsx`, `card.tsx`, `table.tsx`, `input.tsx`, `select.tsx`, `tabs.tsx`,
+    `dialog.tsx`, `sheet.tsx`…), ajoutées via `npx shadcn@latest add <nom>`. Helper `cn()` dans
+    `src/lib/utils.ts`, config `components.json` (style « new-york »). Les composants **maison**
+    génériques (`Avatar`, `Field`, `Empty`, `ManagerLabel`, `Logo`, `SectionTitle`) restent en
+    **PascalCase** dans `ui/` — ⚠️ FS macOS insensible à la casse : ne PAS générer le primitive
+    shadcn `avatar` (collision avec `Avatar.tsx`).
+  - **Design system « Broadcast » (V2)** défini dans `src/styles.css` — maquettes de référence dans
+    `docs/mockups/`. Palette de marque en `@theme` (`--color-violet/rose/orange/menthe/jaune/
+    violet-clair/rouge` + surfaces `nuit/carte/carte-2/bord` + `texte/texte-2`), rayons, polices
+    `--font-display` (Archivo, via `font-display`) / `--font-ui` (Inter), dégradés (`grad-energy/
+    banner/primary/lime/shield` + classes utilitaires), keyframes `lhmHalo/lhmPulse/lhmShine`.
+    Variables sémantiques shadcn (`--background/--card/--primary/--border`…) mappées sur ces tokens.
+    **Dark-only** au départ : classe `dark` forcée sur `<html>` (`useDarkTheme` dans `App.tsx`), pas
+    de toggle clair/sombre (surfaces `light-*` réservées pour plus tard). Polices chargées via
+    `@fontsource/{inter,archivo}` dans `main.tsx`. **Utiliser les tokens de marque** (`bg-carte`,
+    `text-menthe`, `border-bord`, `grad-energy`…), pas de couleurs Tailwind brutes. Icônes coupes :
+    ⭐ LDC · 🎖️ UEFA · 🍐 Conference. Variantes maison sur `Button` (`energy/violet/mint/danger/soft`
+    + tailles `pill`) et `Badge` (`champ/ldc/europa/conf/admin/tres/member`). **Recharts** lit les
+    `var(--color-*)` (ex. `--color-menthe`, `--color-bord`, `--color-texte-2`) → adapter là si les
+    tokens changent.
   - **Bannière de la page Stats** : asset statique `public/stats-banner.jpg` (servi à
     `/stats-banner.jpg`). À remplacer manuellement en fin de saison si le podium change.
 
@@ -78,7 +89,11 @@ synchronisation des données depuis l'API MPG.
   `ADMIN`/`TREASURER` sont stockés sur `Manager`. **ADMIN** gère ligues/tournois suivis + sync +
   cagnotte. **SUPERADMIN seul** : backfill de structure, attribution des rôles, fusion de managers,
   et la **suppression** d'une ligue/tournoi suivi.
-- **Pages & navigation** : la page **Paramètres** (`/parametres` ; `/admin` redirige) regroupe le
+- **Pages & navigation** : coquille `AppShell` (`src/components/layout/`) — sidebar fixe en desktop,
+  bottom nav en mobile (`< lg`). Routes : `/` = **Accueil** (dashboard, `AccueilPage` ; données
+  **factices** dans `business/accueil/mockData.ts`, `TODO backend`), `/palmares` = **Palmarès**,
+  `/stats` = **Rétro** (libellé « Rétro », route inchangée), `/cagnotte`, `/profil`, `/parametres`.
+  La page **Paramètres** (`/parametres` ; `/admin` redirige) regroupe le
   formulaire perso (visible par **tous**) + un encart **admin** (sync/ligues/tournois) et un encart
   **superadmin** (rôles), gatés par rôle. Le **profil public** d'un joueur est sur `/profil/:managerId`
   (`/profil` = soi), à onglets (Résumé / Salle des trophées / Stats / Confrontations). Pour lier vers
@@ -130,8 +145,9 @@ synchronisation des données depuis l'API MPG.
   Style : 4 espaces, double quotes, point-virgules, largeur 120. **Tri des imports** = action
   d'« assist » `source.organizeImports` (PAS une règle de linter — l'IDE le signale même linter
   off ; appliqué par `biome check --write`). **Linter désactivé** pour l'instant. **Formateur CSS
-  désactivé** (`styles.css` n'est jamais reformaté) ; le parseur CSS accepte la syntaxe Tailwind v4 /
-  daisyUI via `css.parser.tailwindDirectives` (sinon `@plugin`/`@import` font planter `biome check`).
+  désactivé** (`styles.css` n'est jamais reformaté) ; le parseur CSS accepte la syntaxe Tailwind v4
+  via `css.parser.tailwindDirectives` (sinon `@plugin`/`@import`/`@theme` font planter `biome check`).
+  `docs/` et `**/dist/**` sont exclus du scan Biome (`files.includes`).
 
 ## Commandes
 

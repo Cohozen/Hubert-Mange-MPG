@@ -13,10 +13,7 @@ import StatsPage from "@/pages/StatsPage";
 /** Force le thème sombre « Broadcast » (dark-only au départ). */
 function useDarkTheme() {
     useEffect(() => {
-        const html = document.documentElement;
-        html.classList.add("dark");
-        // hubert-dark : tant que DaisyUI cohabite (pages pas encore migrées).
-        html.setAttribute("data-theme", "hubert-dark");
+        document.documentElement.classList.add("dark");
     }, []);
 }
 
