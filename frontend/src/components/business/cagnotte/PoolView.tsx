@@ -4,7 +4,8 @@ import { ContributionsPanel } from "@/components/business/cagnotte/Contributions
 import { PayoutsPanel } from "@/components/business/cagnotte/PayoutsPanel";
 import { RulesEditor } from "@/components/business/cagnotte/RulesEditor";
 import { Stat } from "@/components/business/cagnotte/Stat";
-import { PoolDetail } from "@/components/business/cagnotte/types";
+import type { PoolDetail } from "@/components/business/cagnotte/types";
+import { Button } from "@/components/ui/button";
 
 export function PoolView({ pool, editor, onChange }: { pool: PoolDetail; editor: boolean; onChange: () => void }) {
     const canEdit = editor && !pool.closed;
@@ -20,17 +21,17 @@ export function PoolView({ pool, editor, onChange }: { pool: PoolDetail; editor:
     return (
         <div className="space-y-6">
             {pool.closed && (
-                <div className="flex items-center justify-between gap-2 text-sm bg-warning/20 text-warning border border-warning/30 rounded-lg px-4 py-2">
+                <div className="flex items-center justify-between gap-2 rounded-xl border border-jaune/30 bg-jaune/10 px-4 py-2 text-sm text-jaune">
                     <span>🔒 Cagnotte clôturée — consultation seule.</span>
                     {editor && (
-                        <button onClick={() => setClosed(false)} className="btn btn-xs">
+                        <Button onClick={() => setClosed(false)} variant="soft" size="sm">
                             Rouvrir
-                        </button>
+                        </Button>
                     )}
                 </div>
             )}
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <Stat label="Mise / joueur" value={formatMoney(pool.buyInAmount)} />
                 <Stat
                     label="Collecté"
@@ -48,9 +49,9 @@ export function PoolView({ pool, editor, onChange }: { pool: PoolDetail; editor:
 
             {canEdit && (
                 <div className="flex justify-end">
-                    <button onClick={() => setClosed(true)} className="btn btn-sm btn-outline btn-warning">
+                    <Button onClick={() => setClosed(true)} variant="soft" size="sm">
                         🔒 Clôturer la cagnotte
-                    </button>
+                    </Button>
                 </div>
             )}
         </div>

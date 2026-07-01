@@ -1,9 +1,9 @@
 export function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
     return (
-        <div className="bg-base-100 rounded-box shadow p-4">
-            <div className="text-xs opacity-60">{label}</div>
-            <div className="text-lg font-bold text-base-content whitespace-nowrap">{value}</div>
-            {sub && <div className="text-xs opacity-50 whitespace-nowrap">{sub}</div>}
+        <div className="rounded-2xl border border-bord bg-carte p-4">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-texte-2">{label}</div>
+            <div className="mt-1 whitespace-nowrap font-display text-lg font-black text-white">{value}</div>
+            {sub && <div className="whitespace-nowrap text-xs text-texte-2">{sub}</div>}
         </div>
     );
 }

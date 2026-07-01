@@ -2,7 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import { CreatePool } from "@/components/business/cagnotte/CreatePool";
 import { PoolView } from "@/components/business/cagnotte/PoolView";
-import { PoolDetail, SeasonRow } from "@/components/business/cagnotte/types";
+import type { PoolDetail, SeasonRow } from "@/components/business/cagnotte/types";
+import { Empty } from "@/components/ui/Empty";
 
 export function SeasonView({ season, editor }: { season: SeasonRow; editor: boolean }) {
     const qc = useQueryClient();
@@ -19,11 +20,7 @@ export function SeasonView({ season, editor }: { season: SeasonRow; editor: bool
 
     if (!season.poolId) {
         if (!editor) {
-            return (
-                <p className="text-sm opacity-60 bg-base-100 rounded-box shadow p-6">
-                    Pas encore de cagnotte pour cette saison.
-                </p>
-            );
+            return <Empty>Pas encore de cagnotte pour cette saison.</Empty>;
         }
         return <CreatePool season={season} onCreated={refresh} />;
     }

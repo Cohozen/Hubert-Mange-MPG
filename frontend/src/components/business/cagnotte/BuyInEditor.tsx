@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { api, eurosToCents } from "@/api/client";
-import { PoolDetail } from "@/components/business/cagnotte/types";
+import type { PoolDetail } from "@/components/business/cagnotte/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function BuyInEditor({ pool, onChange }: { pool: PoolDetail; onChange: () => void }) {
     const [val, setVal] = useState(String(pool.buyInAmount / 100));
@@ -31,27 +33,28 @@ export function BuyInEditor({ pool, onChange }: { pool: PoolDetail; onChange: ()
     }
 
     return (
-        <div className="bg-base-100 rounded-box shadow p-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-3">
+        <div className="flex flex-col gap-3 rounded-2xl border border-bord bg-carte p-4 sm:flex-row sm:flex-wrap sm:items-end">
             <label className="text-sm">
-                <span className="opacity-70">Mise par joueur (€)</span>
-                <input
+                <span className="text-texte-2">Mise par joueur (€)</span>
+                <Input
                     value={val}
                     onChange={(e) => setVal(e.target.value)}
-                    className="input input-bordered input-sm mt-1 block w-full sm:w-32"
+                    className="mt-1 block w-full bg-nuit sm:w-32"
                 />
             </label>
             <div className="flex gap-2">
-                <button onClick={saveMise} disabled={busy || saved} className="btn btn-sm flex-1 sm:flex-none">
+                <Button onClick={saveMise} disabled={busy || saved} variant="soft" className="flex-1 sm:flex-none">
                     Enregistrer la mise
-                </button>
-                <button
+                </Button>
+                <Button
                     onClick={initParticipants}
                     disabled={busy || !canInit}
-                    className="btn btn-sm btn-primary flex-1 sm:flex-none"
+                    variant="energy"
+                    className="flex-1 sm:flex-none"
                     title={canInit ? "Crée une ligne par membre actif de la saison" : "Enregistre d'abord la mise"}
                 >
                     Initialiser les participants
-                </button>
+                </Button>
             </div>
         </div>
     );

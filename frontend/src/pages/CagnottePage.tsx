@@ -3,7 +3,8 @@ import { useState } from "react";
 import { api } from "@/api/client";
 import { canEditCagnotte, useAuth } from "@/auth/useAuth";
 import { SeasonView } from "@/components/business/cagnotte/SeasonView";
-import { SeasonRow } from "@/components/business/cagnotte/types";
+import type { SeasonRow } from "@/components/business/cagnotte/types";
+import { Empty } from "@/components/ui/Empty";
 
 export default function CagnottePage() {
     const { data: me } = useAuth();
@@ -22,14 +23,20 @@ export default function CagnottePage() {
 
     if (seasons.isLoading) return null;
     if (!tabs.length) {
-        return <p className="text-sm opacity-60 bg-base-100 rounded-box shadow p-6">Aucune cagnotte disponible.</p>;
+        return <Empty>Aucune cagnotte disponible.</Empty>;
     }
 
     return (
         <div className="space-y-6">
-            <label className="select w-full max-w-full lg:max-w-xs">
-                <span className="label">Saison</span>
-                <select value={current?.id ?? ""} onChange={(e) => setSelId(e.target.value)}>
+            <label className="block max-w-full lg:max-w-xs">
+                <span className="mb-1.5 block font-display text-[11px] font-extrabold uppercase tracking-wider text-texte-2">
+                    Saison
+                </span>
+                <select
+                    value={current?.id ?? ""}
+                    onChange={(e) => setSelId(e.target.value)}
+                    className="h-10 w-full rounded-xl border border-bord bg-carte px-3 text-sm text-white outline-none focus:border-rose"
+                >
                     {tabs.map((s) => (
                         <option key={s.id} value={s.id}>
                             {s.name}

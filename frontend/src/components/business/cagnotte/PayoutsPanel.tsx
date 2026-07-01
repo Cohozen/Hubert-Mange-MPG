@@ -1,9 +1,10 @@
-import { Trash2 } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 import { Fragment, useState } from "react";
 import { api, formatMoney } from "@/api/client";
 import { PayQr } from "@/components/business/cagnotte/PayQr";
-import { Payout, PoolDetail } from "@/components/business/cagnotte/types";
+import type { Payout, PoolDetail } from "@/components/business/cagnotte/types";
 import { ManagerLabel } from "@/components/ui/ManagerLabel";
+import { cn } from "@/lib/utils";
 
 export function PayoutsPanel({
     pool,
@@ -29,56 +30,67 @@ export function PayoutsPanel({
     }
 
     return (
-        <div className="collapse collapse-arrow bg-base-100 rounded-box shadow">
-            <input type="checkbox" defaultChecked />
-            <div className="collapse-title font-semibold bg-base-200 min-h-0 py-3">
-                Reversements ({pool.payouts.filter((p) => p.paid).length}/{pool.payouts.length} versés)
-            </div>
-            <div className="collapse-content !p-0">
+        <details open className="group overflow-hidden rounded-2xl border border-bord bg-carte">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 font-display text-sm font-black text-white [&::-webkit-details-marker]:hidden">
+                <span>
+                    Reversements ({pool.payouts.filter((p) => p.paid).length}/{pool.payouts.length} versés)
+                </span>
+                <ChevronDown size={16} className="text-texte-2 transition group-open:rotate-180" />
+            </summary>
+            <div className="border-t border-bord">
                 {pool.payouts.length ? (
-                    <ul className="divide-y divide-base-200">
+                    <ul className="divide-y divide-bord">
                         {pool.payouts.map((p) => (
                             <Fragment key={p.id}>
                                 <li className="flex flex-wrap items-center gap-2 p-3 text-sm">
-                                    <span className="flex-1 min-w-0">
+                                    <span className="min-w-0 flex-1 text-white">
                                         <ManagerLabel
                                             name={p.manager}
                                             username={p.username}
                                             avatarUrl={p.avatarUrl}
                                             size={26}
                                         />
-                                        <span className="block text-xs opacity-60 ml-8 -mt-0.5">{p.reason}</span>
+                                        <span className="-mt-0.5 ml-8 block text-xs text-texte-2">{p.reason}</span>
                                     </span>
-                                    <span className="font-medium shrink-0">{formatMoney(p.amount)}</span>
+                                    <span className="shrink-0 font-medium text-white">{formatMoney(p.amount)}</span>
                                     {canEdit ? (
-                                        <span className="flex gap-1 shrink-0">
+                                        <span className="flex shrink-0 gap-1">
                                             <button
+                                                type="button"
                                                 onClick={() => setQrFor(qrFor === p.id ? null : p.id)}
-                                                className="btn btn-xs"
+                                                className="rounded-full bg-carte-2 px-3 py-1 text-xs font-semibold text-texte-2 transition hover:text-white"
                                             >
                                                 💳 Payer
                                             </button>
                                             <button
+                                                type="button"
                                                 onClick={() => togglePaid(p)}
-                                                className={`btn btn-xs ${p.paid ? "btn-success" : "btn-ghost bg-base-300"}`}
+                                                className={cn(
+                                                    "rounded-full px-3 py-1 text-xs font-semibold transition",
+                                                    p.paid
+                                                        ? "bg-menthe/20 text-menthe"
+                                                        : "bg-carte-2 text-texte-2 hover:text-white",
+                                                )}
                                             >
                                                 {p.paid ? "✓ versé" : "à verser"}
                                             </button>
                                             <button
+                                                type="button"
                                                 onClick={() => remove(p)}
-                                                className="btn btn-xs btn-ghost text-error"
+                                                aria-label="Supprimer"
+                                                className="grid size-7 place-items-center rounded-full text-rouge transition hover:bg-rouge/10"
                                             >
                                                 <Trash2 size={14} />
                                             </button>
                                         </span>
                                     ) : (
-                                        <span className={`shrink-0 ${p.paid ? "text-success" : "opacity-40"}`}>
+                                        <span className={cn("shrink-0", p.paid ? "text-menthe" : "text-texte-2/40")}>
                                             {p.paid ? "✓ versé" : "—"}
                                         </span>
                                     )}
                                 </li>
                                 {qrFor === p.id && (
-                                    <li className="p-3 bg-base-200">
+                                    <li className="bg-nuit p-3">
                                         <PayQr managerId={p.managerId} />
                                     </li>
                                 )}
@@ -86,11 +98,11 @@ export function PayoutsPanel({
                         ))}
                     </ul>
                 ) : (
-                    <p className="p-3 text-sm opacity-60">
+                    <p className="p-3 text-sm text-texte-2">
                         Aucun reversement. {canEdit && "Règle la grille de gains puis « Générer les reversements »."}
                     </p>
                 )}
             </div>
-        </div>
+        </details>
     );
 }

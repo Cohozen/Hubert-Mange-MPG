@@ -1,6 +1,8 @@
+import { ChevronDown } from "lucide-react";
 import { api, formatMoney } from "@/api/client";
-import { Contribution, PoolDetail } from "@/components/business/cagnotte/types";
+import type { Contribution, PoolDetail } from "@/components/business/cagnotte/types";
 import { ManagerLabel } from "@/components/ui/ManagerLabel";
+import { cn } from "@/lib/utils";
 
 export function ContributionsPanel({
     pool,
@@ -19,17 +21,19 @@ export function ContributionsPanel({
         onChange();
     }
     return (
-        <div className="collapse collapse-arrow bg-base-100 rounded-box shadow">
-            <input type="checkbox" defaultChecked />
-            <div className="collapse-title font-semibold bg-base-200 min-h-0 py-3">
-                Mises ({pool.contributions.filter((c) => c.paid).length}/{pool.contributions.length} payées)
-            </div>
-            <div className="collapse-content !p-0">
+        <details open className="group overflow-hidden rounded-2xl border border-bord bg-carte">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 font-display text-sm font-black text-white [&::-webkit-details-marker]:hidden">
+                <span>
+                    Mises ({pool.contributions.filter((c) => c.paid).length}/{pool.contributions.length} payées)
+                </span>
+                <ChevronDown size={16} className="text-texte-2 transition group-open:rotate-180" />
+            </summary>
+            <div className="border-t border-bord">
                 {pool.contributions.length ? (
-                    <ul className="divide-y divide-base-200">
+                    <ul className="divide-y divide-bord">
                         {pool.contributions.map((c) => (
                             <li key={c.id} className="flex items-center gap-2 p-3 text-sm">
-                                <span className="flex-1 min-w-0">
+                                <span className="min-w-0 flex-1 text-white">
                                     <ManagerLabel
                                         name={c.manager}
                                         username={c.username}
@@ -37,18 +41,22 @@ export function ContributionsPanel({
                                         size={26}
                                     />
                                 </span>
-                                <span className="opacity-60 shrink-0">{formatMoney(c.amount)}</span>
+                                <span className="shrink-0 text-texte-2">{formatMoney(c.amount)}</span>
                                 {canEdit ? (
                                     <button
+                                        type="button"
                                         onClick={() => togglePaid(c)}
-                                        className={`shrink-0 text-xs rounded-full px-3 py-1 ${
-                                            c.paid ? "bg-success text-success-content" : "bg-base-300"
-                                        }`}
+                                        className={cn(
+                                            "shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition",
+                                            c.paid
+                                                ? "bg-menthe/20 text-menthe"
+                                                : "bg-carte-2 text-texte-2 hover:text-white",
+                                        )}
                                     >
                                         {c.paid ? "✓ payé" : "à payer"}
                                     </button>
                                 ) : (
-                                    <span className={`shrink-0 ${c.paid ? "text-success" : "opacity-40"}`}>
+                                    <span className={cn("shrink-0", c.paid ? "text-menthe" : "text-texte-2/40")}>
                                         {c.paid ? "✓" : "—"}
                                     </span>
                                 )}
@@ -56,11 +64,11 @@ export function ContributionsPanel({
                         ))}
                     </ul>
                 ) : (
-                    <p className="p-3 text-sm opacity-60">
+                    <p className="p-3 text-sm text-texte-2">
                         Aucun participant. {canEdit && "Définis la mise puis « initialiser les participants »."}
                     </p>
                 )}
             </div>
-        </div>
+        </details>
     );
 }

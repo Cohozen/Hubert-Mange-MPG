@@ -1,6 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api, eurosToCents } from "@/api/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function RulesEditor({ poolId, onChange }: { poolId: string; onChange: () => void }) {
     const qc = useQueryClient();
@@ -41,18 +43,9 @@ export function RulesEditor({ poolId, onChange }: { poolId: string; onChange: ()
                 amount: eurosToCents(amounts[l] || "0"),
                 label: `Vainqueur D${l}`,
             }));
-            if (ldc)
-                rules.push({
-                    scope: "LDC",
-                    amount: eurosToCents(ldc),
-                    label: "Vainqueur Ligue des Crampons",
-                });
+            if (ldc) rules.push({ scope: "LDC", amount: eurosToCents(ldc), label: "Vainqueur Ligue des Crampons" });
             if (uefa)
-                rules.push({
-                    scope: "UEFA",
-                    amount: eurosToCents(uefa),
-                    label: "Vainqueur Heureux papa's League",
-                });
+                rules.push({ scope: "UEFA", amount: eurosToCents(uefa), label: "Vainqueur Heureux papa's League" });
             if (conference)
                 rules.push({
                     scope: "CONFERENCE",
@@ -84,60 +77,50 @@ export function RulesEditor({ poolId, onChange }: { poolId: string; onChange: ()
         }
     }
 
+    const inputCls = "mt-1 w-full bg-nuit";
+
     return (
-        <div className="bg-base-100 rounded-box shadow p-4 space-y-3">
-            <h3 className="font-semibold">Grille de gains (montants fixes)</h3>
-            <p className="text-xs opacity-60">
+        <div className="space-y-3 rounded-2xl border border-bord bg-carte p-4">
+            <h3 className="font-display text-base font-black text-white">Grille de gains (montants fixes)</h3>
+            <p className="text-xs text-texte-2">
                 Montant en € du vainqueur de chaque division et de chaque coupe. « Générer » crée les reversements des
                 gagnants une fois les saisons et coupes terminées (sans toucher aux gains déjà versés).
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {data?.divisionLevels.map((l) => (
                     <label key={l} className="text-sm">
-                        <span className="opacity-70">Vainqueur D{l}</span>
-                        <input
+                        <span className="text-texte-2">Vainqueur D{l}</span>
+                        <Input
                             value={amounts[l] ?? ""}
                             onChange={(e) => setAmounts((a) => ({ ...a, [l]: e.target.value }))}
-                            className="input input-bordered input-sm w-full mt-1"
+                            className={inputCls}
                         />
                     </label>
                 ))}
             </div>
             {/* Coupes : pleine largeur en mobile pour afficher le nom complet sur une seule ligne. */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <label className="text-sm">
-                    <span className="opacity-70">⭐ Ligue des Crampons</span>
-                    <input
-                        value={ldc}
-                        onChange={(e) => setLdc(e.target.value)}
-                        className="input input-bordered input-sm w-full mt-1"
-                    />
+                    <span className="text-texte-2">⭐ Ligue des Crampons</span>
+                    <Input value={ldc} onChange={(e) => setLdc(e.target.value)} className={inputCls} />
                 </label>
                 <label className="text-sm">
-                    <span className="opacity-70">🎖️ Heureux papa's League</span>
-                    <input
-                        value={uefa}
-                        onChange={(e) => setUefa(e.target.value)}
-                        className="input input-bordered input-sm w-full mt-1"
-                    />
+                    <span className="text-texte-2">🎖️ Heureux papa's League</span>
+                    <Input value={uefa} onChange={(e) => setUefa(e.target.value)} className={inputCls} />
                 </label>
                 <label className="text-sm">
-                    <span className="opacity-70">🍐 Heureux papa's League Conference</span>
-                    <input
-                        value={conference}
-                        onChange={(e) => setConference(e.target.value)}
-                        className="input input-bordered input-sm w-full mt-1"
-                    />
+                    <span className="text-texte-2">🍐 Heureux papa's League Conference</span>
+                    <Input value={conference} onChange={(e) => setConference(e.target.value)} className={inputCls} />
                 </label>
             </div>
-            <div className="flex flex-wrap gap-2 items-center">
-                <button onClick={saveRules} disabled={busy} className="btn btn-sm">
+            <div className="flex flex-wrap items-center gap-2">
+                <Button onClick={saveRules} disabled={busy} variant="soft">
                     Enregistrer la grille
-                </button>
-                <button onClick={generate} disabled={busy} className="btn btn-sm btn-primary">
+                </Button>
+                <Button onClick={generate} disabled={busy} variant="energy">
                     Générer les reversements
-                </button>
-                {genMsg && <span className="text-sm opacity-70">{genMsg}</span>}
+                </Button>
+                {genMsg && <span className="text-sm text-texte-2">{genMsg}</span>}
             </div>
         </div>
     );

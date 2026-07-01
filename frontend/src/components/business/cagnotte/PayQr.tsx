@@ -19,10 +19,10 @@ export function PayQr({ managerId }: { managerId: string }) {
         enabled: !!p?.weroUrl,
     });
 
-    if (payment.isLoading) return <p className="text-sm opacity-60">Chargement…</p>;
+    if (payment.isLoading) return <p className="text-sm text-texte-2">Chargement…</p>;
     if (!p?.iban && !p?.weroUrl && !p?.phone) {
         return (
-            <p className="text-sm opacity-60">Aucune coordonnée de paiement — le membre doit compléter son profil.</p>
+            <p className="text-sm text-texte-2">Aucune coordonnée de paiement — le membre doit compléter son profil.</p>
         );
     }
 
@@ -30,15 +30,15 @@ export function PayQr({ managerId }: { managerId: string }) {
         <div className="flex flex-wrap items-start gap-6">
             {wero.data && (
                 <div className="text-center">
-                    <img src={wero.data.dataUrl} alt="QR Wero" className="w-36 h-36 rounded" />
-                    <div className="text-xs font-bold mt-1">WERO — scanne pour payer</div>
+                    <img src={wero.data.dataUrl} alt="QR Wero" className="size-36 rounded-xl bg-white p-1" />
+                    <div className="mt-1 font-display text-xs font-black text-menthe">WERO — scanne pour payer</div>
                 </div>
             )}
-            <div className="text-sm opacity-80 space-y-1 min-w-0">
+            <div className="min-w-0 space-y-1 text-sm text-texte-2">
                 {p.ibanHolder && <p>Titulaire : {p.ibanHolder}</p>}
                 {p.iban && (
                     <p>
-                        IBAN : <span className="font-mono text-xs break-all">{p.iban}</span>
+                        IBAN : <span className="break-all font-mono text-xs text-white">{p.iban}</span>
                     </p>
                 )}
                 {p.phone && <p>Wero (tél) : {p.phone}</p>}
