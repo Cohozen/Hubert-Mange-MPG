@@ -43,7 +43,14 @@ export function PillTabs<K extends string>({
                 : undefined;
 
     return (
-        <div className={cn("rounded-full border border-bord bg-carte p-[5px]", container, className)}>
+        <div
+            className={cn(
+                // Filet de sécurité : jamais de débordement, on scrolle horizontalement au besoin.
+                "max-w-full overflow-x-auto rounded-full border border-bord bg-carte p-[5px] [&::-webkit-scrollbar]:hidden",
+                container,
+                className,
+            )}
+        >
             {items.map((it) => {
                 const active = it.key === value;
                 return (
