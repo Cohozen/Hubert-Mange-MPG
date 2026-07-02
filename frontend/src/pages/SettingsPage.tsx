@@ -44,18 +44,32 @@ export default function SettingsPage() {
             {isLeagueAdmin(me) && (
                 <section>
                     <Divider>Administration</Divider>
-                    <div className="columns-1 gap-6 lg:columns-2 [&>*]:mb-6 [&>*]:break-inside-avoid">
-                        <SyncSection />
-                        <LeaguesSection canDelete={isSuperadmin(me)} />
-                        <TournamentsSection canDelete={isSuperadmin(me)} />
+                    <div className="grid gap-3.5 lg:grid-cols-2 lg:items-start lg:gap-[22px]">
+                        <div className="flex flex-col gap-3.5 lg:gap-[22px]">
+                            <SyncSection />
+                            <LeaguesSection canDelete={isSuperadmin(me)} />
+                            <TournamentsSection canDelete={isSuperadmin(me)} />
+                        </div>
+                        <div className="flex flex-col gap-3.5 lg:gap-[22px]">
+                            {isSuperadmin(me) ? (
+                                <RolesSection />
+                            ) : (
+                                <div className="rounded-[20px] border border-dashed border-bord bg-carte p-6 text-center">
+                                    <div className="mx-auto mb-4 grid size-14 place-items-center rounded-2xl border border-rouge/30 bg-rouge/10 text-2xl">
+                                        🔒
+                                    </div>
+                                    <div className="font-display text-lg font-black uppercase tracking-[-0.3px] text-white">
+                                        Gestion des rôles
+                                    </div>
+                                    <p className="mx-auto mt-2 max-w-sm text-[13px] leading-relaxed text-texte-2">
+                                        Réservé au <b className="text-[#FF6B8A]">Superadmin</b>. En tant qu'
+                                        <b className="text-white">Admin</b>, tu pilotes la synchro, les ligues et les
+                                        tournois.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </section>
-            )}
-
-            {isSuperadmin(me) && (
-                <section>
-                    <Divider>Superadmin</Divider>
-                    <RolesSection />
                 </section>
             )}
         </div>

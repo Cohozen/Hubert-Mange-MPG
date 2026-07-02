@@ -1,8 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "@/api/client";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { SETTINGS_BARS, SettingsCard } from "@/components/business/settings/SettingsCard";
 
 interface SyncRun {
     trigger: string;
@@ -44,47 +43,92 @@ export function SyncSection() {
     }
 
     const run = last.data;
+    const ok = run?.status === "success";
 
     return (
-        <section className="space-y-3 rounded-2xl border border-bord bg-carte p-6">
-            <h2 className="font-display text-lg font-black text-white">Synchronisation MPG</h2>
-            <p className="text-sm text-texte-2">
-                Synchro automatique chaque lundi matin. Tu peux aussi la déclencher manuellement.
-            </p>
-            <Button onClick={runSync} disabled={loading} variant="energy">
-                {loading ? "Sync en cours…" : "Lancer le sync maintenant"}
-            </Button>
-            {error && <p className="text-sm text-rouge">{error}</p>}
+        <SettingsCard
+            bar={SETTINGS_BARS.profil}
+            title="Synchronisation MPG"
+            right={
+                <span className="rounded-full border border-violet-clair/40 bg-violet-clair/[0.12] px-2.5 py-1 font-display text-[9px] font-black uppercase tracking-[1px] text-violet-clair">
+                    API
+                </span>
+            }
+        >
+            <button
+                type="button"
+                onClick={runSync}
+                disabled={loading}
+                className="lhm-btn flex w-full items-center justify-center gap-2.5 rounded-[14px] py-[15px] font-display text-sm font-black uppercase tracking-[1.5px] text-white shadow-[0_8px_22px_rgba(255,45,120,.32)] grad-banner transition hover:brightness-110 disabled:opacity-60"
+            >
+                {loading ? (
+                    <>
+                        <span className="size-4 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                        Synchronisation…
+                    </>
+                ) : (
+                    <>
+                        <span className="size-3 rounded-full border-2 border-white" />
+                        Synchroniser MPG
+                    </>
+                )}
+            </button>
+            {error && <p className="mt-3 text-sm text-rouge">{error}</p>}
 
             {run && (
-                <div className="border-t border-bord pt-3 text-sm">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span
-                            className={cn(
-                                "inline-block size-2 shrink-0 rounded-full",
-                                run.status === "success"
-                                    ? "bg-menthe"
-                                    : run.status === "error"
-                                      ? "bg-rouge"
-                                      : "bg-jaune",
-                            )}
-                        />
-                        <span className="font-medium text-white">
-                            Dernière synchro : {run.status} ({run.trigger})
-                        </span>
-                        <span className="w-full pl-4 text-texte-2 sm:w-auto sm:pl-0">
-                            {new Date(run.startedAt).toLocaleString("fr-FR")}
-                        </span>
+                <div
+                    className="mt-3 flex items-center gap-3 rounded-[14px] border bg-nuit p-3.5"
+                    style={{ borderColor: ok ? "rgba(0,229,160,.32)" : "rgba(255,59,92,.34)" }}
+                >
+                    <span
+                        className="grid size-[30px] shrink-0 place-items-center rounded-[9px] border font-display text-sm font-black"
+                        style={
+                            ok
+                                ? {
+                                      background: "rgba(0,229,160,.13)",
+                                      borderColor: "rgba(0,229,160,.4)",
+                                      color: "#00E5A0",
+                                  }
+                                : {
+                                      background: "rgba(255,59,92,.13)",
+                                      borderColor: "rgba(255,59,92,.42)",
+                                      color: "#FF6B8A",
+                                  }
+                        }
+                    >
+                        {ok ? "✓" : "!"}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                        <div
+                            className="font-display text-xs font-black tracking-[0.3px]"
+                            style={{ color: ok ? "#00E5A0" : "#FF6B8A" }}
+                        >
+                            {ok ? "Dernière synchro réussie" : "Échec de la dernière synchro"}
+                        </div>
+                        <div className="mt-0.5 text-[11px] text-texte-2">
+                            {new Date(run.startedAt).toLocaleString("fr-FR")} · {run.trigger}
+                            {run.summary && ` · ${run.summary.leagues} ligues · ${run.summary.managers} managers`}
+                        </div>
+                        {run.error && <div className="mt-0.5 text-[11px] text-rouge">{run.error}</div>}
                     </div>
-                    {run.summary && (
-                        <p className="mt-1 text-texte-2">
-                            {run.summary.leagues} ligues · {run.summary.gameSeasons} saisons · {run.summary.divisions}{" "}
-                            divisions · {run.summary.managers} managers
-                        </p>
-                    )}
-                    {run.error && <p className="mt-1 text-rouge">{run.error}</p>}
                 </div>
             )}
-        </section>
+
+            <div className="mt-3 flex items-center gap-3 rounded-[14px] border border-bord bg-nuit p-3.5">
+                <div className="grid size-[38px] shrink-0 place-items-center rounded-[11px] border border-violet-clair/30 bg-violet-clair/10 text-lg">
+                    ⏱
+                </div>
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-white">Auto-sync</span>
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-menthe/40 bg-menthe/[0.12] px-2 py-[3px] font-display text-[8px] font-black uppercase tracking-[0.5px] text-menthe">
+                            <span className="size-[5px] animate-[lhmPulse_1.6s_infinite] rounded-full bg-menthe" />
+                            Active
+                        </span>
+                    </div>
+                    <div className="mt-1 text-[11px] text-texte-2">Synchro automatique chaque lundi matin.</div>
+                </div>
+            </div>
+        </SettingsCard>
     );
 }

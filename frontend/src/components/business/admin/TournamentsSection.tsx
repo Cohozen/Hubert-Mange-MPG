@@ -1,8 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { api } from "@/api/client";
+import { SETTINGS_BARS, SettingsCard } from "@/components/business/settings/SettingsCard";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 
 interface AvailableTournament {
     mpgTournamentId: string;
@@ -28,14 +29,14 @@ interface TournamentRow {
     competitionOverride: string | null;
 }
 
-// Options du type de coupe forcé ("" = détection auto par nom).
 const COMPETITION_OPTIONS: { value: string; label: string }[] = [
     { value: "", label: "Auto (par nom)" },
     { value: "LDC", label: "Ligue des Crampons" },
-    { value: "UEFA", label: "Europa (Heureux papa's)" },
-    { value: "CONFERENCE", label: "Conference" },
+    { value: "UEFA", label: "Europa" },
+    { value: "CONFERENCE", label: "Conférence" },
     { value: "OTHER", label: "Autre" },
 ];
+const ICON: Record<string, string> = { LDC: "⭐", UEFA: "🎖️", CONFERENCE: "🍐", OTHER: "🏆" };
 
 export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
     const qc = useQueryClient();
@@ -120,65 +121,63 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
     }
 
     return (
-        <section className="rounded-2xl border border-bord bg-carte p-6">
-            <h2 className="mb-1 font-display text-lg font-black text-white">Tournois suivis (coupes)</h2>
-            <p className="mb-3 text-sm text-texte-2">
-                Coche un tournoi pour le synchroniser. Décocher met le sync en pause. Le type de coupe est déduit du
-                nom. Force-le via le menu si la détection se trompe.
-            </p>
-
+        <SettingsCard
+            bar={SETTINGS_BARS.preferences}
+            title="Tournois suivis"
+            right={<span className="text-[11px] font-semibold text-texte-2">Type override</span>}
+        >
             {available.isError && (
-                <p className="mb-2 text-sm text-jaune">
-                    Tes tournois MPG n'ont pas pu être lus ({(available.error as Error).message}). Tu vois quand même
-                    les tournois déjà suivis ci-dessous.
+                <p className="mb-3 text-sm text-jaune">
+                    Tes tournois MPG n'ont pas pu être lus. Les tournois déjà suivis restent affichés.
                 </p>
             )}
 
-            <div className="divide-y divide-bord">
+            <div className="flex flex-col gap-2.5">
                 {rows.map((t) => (
-                    <div key={t.mpgTournamentId} className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center">
-                        <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
-                            <input
-                                type="checkbox"
-                                className="size-4 shrink-0 accent-menthe"
-                                checked={!!t.trackedId && t.active}
-                                onChange={() => toggle(t)}
-                            />
-                            <span className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                                <span className="flex flex-wrap items-center gap-1 font-medium text-white">
-                                    <span className="break-words">{t.name}</span>
-                                    {t.trackedId && !t.active && (
-                                        <span className="shrink-0 rounded-full bg-carte-2 px-2 py-0.5 text-xs text-texte-2">
-                                            en pause
-                                        </span>
-                                    )}
-                                </span>
-                                <span className="block text-xs text-texte-2">
+                    <div key={t.mpgTournamentId} className="lhm-row rounded-[14px] border border-bord bg-nuit p-3">
+                        <div className="flex items-center gap-3">
+                            <div className="grid size-[38px] shrink-0 place-items-center rounded-[11px] bg-carte-2 text-[17px]">
+                                {ICON[t.competitionOverride ?? ""] ?? "🏆"}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="truncate font-display text-[12px] font-black tracking-[0.2px] text-white">
+                                    {t.name}
+                                </div>
+                                <div className="mt-0.5 text-[10px] text-texte-2">
                                     {t.winner
                                         ? `🏆 ${t.winner}`
                                         : t.trackedId && !t.inMyDashboard
                                           ? "hors de ton compte MPG"
-                                          : ""}
-                                </span>
-                            </span>
+                                          : t.trackedId && !t.active
+                                            ? "en pause"
+                                            : ""}
+                                </div>
+                            </div>
+                            <ToggleSwitch
+                                on={!!t.trackedId && t.active}
+                                onChange={() => toggle(t)}
+                                label={`Suivre ${t.name}`}
+                            />
                             {t.trackedId && canDelete && (
                                 <button
                                     type="button"
                                     onClick={() => setPending(t)}
                                     title="Supprimer le tournoi et ses données"
-                                    className="rounded-full border border-bord p-2 text-rouge transition hover:border-rouge"
+                                    className="grid size-[34px] shrink-0 place-items-center rounded-[10px] border border-rouge/30 bg-rouge/[0.07] font-display text-[15px] font-black text-[#FF6B8A] transition hover:border-rouge/60 hover:bg-rouge/15"
                                 >
-                                    <Trash2 size={14} />
+                                    ×
                                 </button>
                             )}
-                        </label>
-                        <div className="flex shrink-0 items-center gap-2 pl-8 sm:self-auto sm:pl-0">
-                            {t.trackedId && (
+                        </div>
+                        {t.trackedId && (
+                            <div className="mt-2.5 flex items-center gap-2.5 border-t border-bord pt-2.5">
+                                <span className="font-display text-[9px] font-extrabold uppercase tracking-[1px] text-texte-2">
+                                    Type de compétition
+                                </span>
                                 <select
                                     value={t.competitionOverride ?? ""}
                                     onChange={(e) => setCompetition(t, e.target.value)}
-                                    title="Type de coupe (auto par défaut, déduit du nom)"
-                                    className="h-8 max-w-[10rem] rounded-lg border border-bord bg-nuit px-2 text-xs text-white outline-none focus:border-rose"
+                                    className="flex-1 rounded-[10px] border border-bord bg-carte px-3 py-2 font-display text-[11px] font-black tracking-[0.5px] text-white outline-none transition focus:border-rose"
                                 >
                                     {COMPETITION_OPTIONS.map((o) => (
                                         <option key={o.value} value={o.value}>
@@ -186,19 +185,14 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                                         </option>
                                     ))}
                                 </select>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 ))}
                 {rows.length === 0 && (
-                    <p className="py-2 text-sm text-texte-2">
-                        {available.isLoading ? "Lecture de MPG…" : "Aucun tournoi."}
-                    </p>
+                    <p className="text-sm text-texte-2">{available.isLoading ? "Lecture de MPG…" : "Aucun tournoi."}</p>
                 )}
             </div>
-            {available.isLoading && rows.length > 0 && (
-                <p className="mt-2 text-xs text-texte-2">Lecture de tes tournois MPG…</p>
-            )}
 
             <ConfirmDialog
                 open={!!pending}
@@ -212,6 +206,6 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                 }
                 onConfirm={() => pending && remove(pending)}
             />
-        </section>
+        </SettingsCard>
     );
 }

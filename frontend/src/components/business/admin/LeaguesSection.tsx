@@ -1,8 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { api } from "@/api/client";
+import { SETTINGS_BARS, SettingsCard } from "@/components/business/settings/SettingsCard";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 
 interface AvailableLeague {
     mpgLeagueId: string;
@@ -20,18 +21,26 @@ interface TrackedLeague {
     active: boolean;
 }
 
-// Ligne fusionnée : une ligue suivie (globale, visible par tous les admins) et/ou disponible dans
-// le dashboard MPG de l'admin connecté. La checkbox = « synchronisée » (suivie ET active).
 interface LeagueRow {
     mpgLeagueId: string;
     name: string;
-    trackedId?: string; // présent si suivie
-    active: boolean; // pertinent si suivie
-    inMyDashboard: boolean; // présente dans mes ligues MPG (mon token)
+    trackedId?: string;
+    active: boolean;
+    inMyDashboard: boolean;
     shortId?: string;
     totalUsers?: number;
     totalDivisions?: number;
     season?: number;
+}
+
+function tag(name: string) {
+    return name
+        .replace(/[^a-zA-Z0-9 ]/g, "")
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((w) => w[0]?.toUpperCase() ?? "")
+        .join("");
 }
 
 export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
@@ -78,7 +87,6 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
                 });
             }
         }
-        // Suivies d'abord, puis disponibles à ajouter ; alpha dans chaque groupe.
         return [...map.values()].sort((x, y) => {
             const gx = x.trackedId ? 0 : 1;
             const gy = y.trackedId ? 0 : 1;
@@ -91,16 +99,11 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
         qc.invalidateQueries({ queryKey: ["available-leagues"] });
     }
 
-    // Checkbox : crée le suivi si absent, sinon bascule active (gèle/réactive le sync).
     async function toggle(row: LeagueRow) {
         if (!row.trackedId) {
             await api("/api/admin/leagues", {
                 method: "POST",
-                body: JSON.stringify({
-                    mpgLeagueId: row.mpgLeagueId,
-                    name: row.name,
-                    shortId: row.shortId,
-                }),
+                body: JSON.stringify({ mpgLeagueId: row.mpgLeagueId, name: row.name, shortId: row.shortId }),
             });
         } else {
             await api(`/api/admin/leagues/${row.trackedId}`, {
@@ -117,70 +120,64 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
         invalidate();
     }
 
-    return (
-        <section className="rounded-2xl border border-bord bg-carte p-6">
-            <h2 className="mb-1 font-display text-lg font-black text-white">Ligues suivies</h2>
-            <p className="mb-3 text-sm text-texte-2">
-                Coche une ligue pour la synchroniser. Décocher met le sync en pause (les données déjà synchronisées
-                restent dans le classement). « Supprimer » efface la ligue et ses données.
-            </p>
+    const activeCount = rows.filter((r) => r.trackedId && r.active).length;
 
+    return (
+        <SettingsCard
+            bar={SETTINGS_BARS.paiement}
+            title="Ligues suivies"
+            right={<span className="text-[11px] font-semibold text-texte-2">{activeCount} actives</span>}
+        >
             {available.isError && (
-                <p className="mb-2 text-sm text-jaune">
-                    Tes ligues MPG n'ont pas pu être lues ({(available.error as Error).message}). Tu vois quand même les
-                    ligues déjà suivies ci-dessous.
+                <p className="mb-3 text-sm text-jaune">
+                    Tes ligues MPG n'ont pas pu être lues. Les ligues déjà suivies restent affichées.
                 </p>
             )}
 
-            <div className="divide-y divide-bord">
+            <div className="flex flex-col gap-2.5">
                 {rows.map((l) => (
-                    <div key={l.mpgLeagueId} className="flex items-center justify-between gap-2 py-2">
-                        <label className="flex min-w-0 cursor-pointer items-center gap-3">
-                            <input
-                                type="checkbox"
-                                className="size-4 shrink-0 accent-menthe"
-                                checked={!!l.trackedId && l.active}
-                                onChange={() => toggle(l)}
-                            />
-                            <span className="min-w-0 text-sm">
-                                <span className="flex items-center gap-2 font-medium text-white">
-                                    <span className="truncate">{l.name}</span>
-                                    {l.trackedId && !l.active && (
-                                        <span className="shrink-0 rounded-full bg-carte-2 px-2 py-0.5 text-xs text-texte-2">
-                                            en pause
-                                        </span>
-                                    )}
-                                </span>
-                                <span className="block text-xs text-texte-2">
-                                    {l.totalUsers != null
-                                        ? `${l.totalUsers} joueurs · ${l.totalDivisions} divisions · saison ${l.season}`
-                                        : l.trackedId && !l.inMyDashboard
-                                          ? "hors de ton compte MPG"
-                                          : ""}
-                                </span>
-                            </span>
-                        </label>
+                    <div
+                        key={l.mpgLeagueId}
+                        className="lhm-row flex items-center gap-3 rounded-[14px] border border-bord bg-nuit p-3 transition"
+                    >
+                        <div className="grid size-[38px] shrink-0 place-items-center rounded-[11px] font-display text-[11px] font-black text-white grad-banner">
+                            {tag(l.name)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <div className="truncate font-display text-[13px] font-black tracking-[0.2px] text-white">
+                                {l.name}
+                            </div>
+                            <div className="mt-0.5 text-[10px] text-texte-2">
+                                {l.totalUsers != null
+                                    ? `${l.totalUsers} joueurs · ${l.totalDivisions} div. · saison ${l.season}`
+                                    : l.trackedId && !l.inMyDashboard
+                                      ? "hors de ton compte MPG"
+                                      : l.trackedId && !l.active
+                                        ? "en pause"
+                                        : ""}
+                            </div>
+                        </div>
+                        <ToggleSwitch
+                            on={!!l.trackedId && l.active}
+                            onChange={() => toggle(l)}
+                            label={`Suivre ${l.name}`}
+                        />
                         {l.trackedId && canDelete && (
                             <button
                                 type="button"
                                 onClick={() => setPending(l)}
                                 title="Supprimer la ligue et ses données"
-                                className="rounded-full border border-bord p-2 text-rouge transition hover:border-rouge"
+                                className="grid size-[34px] shrink-0 place-items-center rounded-[10px] border border-rouge/30 bg-rouge/[0.07] font-display text-[15px] font-black text-[#FF6B8A] transition hover:border-rouge/60 hover:bg-rouge/15"
                             >
-                                <Trash2 size={14} />
+                                ×
                             </button>
                         )}
                     </div>
                 ))}
                 {rows.length === 0 && (
-                    <p className="py-2 text-sm text-texte-2">
-                        {available.isLoading ? "Lecture de MPG…" : "Aucune ligue."}
-                    </p>
+                    <p className="text-sm text-texte-2">{available.isLoading ? "Lecture de MPG…" : "Aucune ligue."}</p>
                 )}
             </div>
-            {available.isLoading && rows.length > 0 && (
-                <p className="mt-2 text-xs text-texte-2">Lecture de tes ligues MPG…</p>
-            )}
 
             <ConfirmDialog
                 open={!!pending}
@@ -194,6 +191,6 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
                 }
                 onConfirm={() => pending && remove(pending)}
             />
-        </section>
+        </SettingsCard>
     );
 }
