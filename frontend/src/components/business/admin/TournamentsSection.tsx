@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { api } from "@/api/client";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface AvailableTournament {
     mpgTournamentId: string;
@@ -38,6 +39,7 @@ const COMPETITION_OPTIONS: { value: string; label: string }[] = [
 
 export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
     const qc = useQueryClient();
+    const [pending, setPending] = useState<TournamentRow | null>(null);
     const tracked = useQuery<TrackedTournament[]>({
         queryKey: ["tracked-tournaments"],
         queryFn: () => api<TrackedTournament[]>("/api/admin/tournaments"),
@@ -113,7 +115,6 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
 
     async function remove(row: TournamentRow) {
         if (!row.trackedId) return;
-        if (!confirm(`Supprimer « ${row.name} » et ses données synchronisées ?`)) return;
         await api(`/api/admin/tournaments/${row.trackedId}`, { method: "DELETE" });
         invalidate();
     }
@@ -163,7 +164,7 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                             {t.trackedId && canDelete && (
                                 <button
                                     type="button"
-                                    onClick={() => remove(t)}
+                                    onClick={() => setPending(t)}
                                     title="Supprimer le tournoi et ses données"
                                     className="rounded-full border border-bord p-2 text-rouge transition hover:border-rouge"
                                 >
@@ -198,6 +199,19 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
             {available.isLoading && rows.length > 0 && (
                 <p className="mt-2 text-xs text-texte-2">Lecture de tes tournois MPG…</p>
             )}
+
+            <ConfirmDialog
+                open={!!pending}
+                onOpenChange={(o) => !o && setPending(null)}
+                title="Supprimer le tournoi"
+                description={
+                    <>
+                        Supprimer <b className="text-white">« {pending?.name} »</b> et ses données synchronisées ? Cette
+                        action est irréversible.
+                    </>
+                }
+                onConfirm={() => pending && remove(pending)}
+            />
         </section>
     );
 }

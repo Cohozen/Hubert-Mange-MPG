@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { api } from "@/api/client";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface AvailableLeague {
     mpgLeagueId: string;
@@ -35,6 +36,7 @@ interface LeagueRow {
 
 export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
     const qc = useQueryClient();
+    const [pending, setPending] = useState<LeagueRow | null>(null);
     const tracked = useQuery<TrackedLeague[]>({
         queryKey: ["tracked-leagues"],
         queryFn: () => api<TrackedLeague[]>("/api/admin/leagues"),
@@ -111,7 +113,6 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
 
     async function remove(row: LeagueRow) {
         if (!row.trackedId) return;
-        if (!confirm(`Supprimer « ${row.name} » et toutes ses données synchronisées ?`)) return;
         await api(`/api/admin/leagues/${row.trackedId}`, { method: "DELETE" });
         invalidate();
     }
@@ -162,7 +163,7 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
                         {l.trackedId && canDelete && (
                             <button
                                 type="button"
-                                onClick={() => remove(l)}
+                                onClick={() => setPending(l)}
                                 title="Supprimer la ligue et ses données"
                                 className="rounded-full border border-bord p-2 text-rouge transition hover:border-rouge"
                             >
@@ -180,6 +181,19 @@ export function LeaguesSection({ canDelete }: { canDelete: boolean }) {
             {available.isLoading && rows.length > 0 && (
                 <p className="mt-2 text-xs text-texte-2">Lecture de tes ligues MPG…</p>
             )}
+
+            <ConfirmDialog
+                open={!!pending}
+                onOpenChange={(o) => !o && setPending(null)}
+                title="Supprimer la ligue"
+                description={
+                    <>
+                        Supprimer <b className="text-white">« {pending?.name} »</b> et toutes ses données synchronisées
+                        (classements, matchs, trophées) ? Cette action est irréversible.
+                    </>
+                }
+                onConfirm={() => pending && remove(pending)}
+            />
         </section>
     );
 }
