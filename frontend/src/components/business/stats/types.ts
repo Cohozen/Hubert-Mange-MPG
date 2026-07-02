@@ -52,6 +52,20 @@ export interface CupCount {
     conference: number;
     total: number;
 }
+
+/** Ligne normalisée du classement all-time (podium + suite), maquette Rétro V2. */
+export interface RankingEntry {
+    managerId: string;
+    manager: string;
+    username: string | null;
+    rank: number;
+    titles: number[]; // index 0 = titres D1, 1 = D2, …
+    cups: { ldc: number; uefa: number; conference: number };
+    titres: number; // total titres de division
+    coupes: number; // total coupes
+    total: number; // titres + coupes
+    seasonsPlayed: number;
+}
 export interface FunStats {
     scapeGoat: RankRow[];
     rotaldo: RankRow[];
