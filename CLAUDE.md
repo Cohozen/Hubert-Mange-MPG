@@ -22,9 +22,16 @@ synchronisation des données depuis l'API MPG.
     **minuscules** (`button.tsx`, `card.tsx`, `table.tsx`, `input.tsx`, `select.tsx`, `tabs.tsx`,
     `dialog.tsx`, `sheet.tsx`…), ajoutées via `npx shadcn@latest add <nom>`. Helper `cn()` dans
     `src/lib/utils.ts`, config `components.json` (style « new-york »). Les composants **maison**
-    génériques (`Avatar`, `Field`, `Empty`, `ManagerLabel`, `Logo`, `SectionTitle`) restent en
-    **PascalCase** dans `ui/` — ⚠️ FS macOS insensible à la casse : ne PAS générer le primitive
-    shadcn `avatar` (collision avec `Avatar.tsx`).
+    génériques (`Avatar`, `Field`, `Empty`, `ManagerLabel`, `Logo`, `SectionTitle`, `PillTabs`,
+    `ConfirmDialog`, `ToggleSwitch`) restent en **PascalCase** dans `ui/` — ⚠️ FS macOS insensible à
+    la casse : ne PAS générer le primitive shadcn `avatar` (collision avec `Avatar.tsx`).
+  - **Composants génériques V2 réutilisés partout** : `PillTabs` (onglets pilules contrôlés, prop
+    `width` = `auto|full|mobile-full|scroll` ; scroll horizontal safe — Palmarès/Rétro/Cagnotte),
+    `ConfirmDialog` (**modale portale maison**, PAS le shadcn `dialog` — le `Dialog` radix contrôlé
+    plantait sur un souci de ref ; remplace `window.confirm` pour les suppressions admin),
+    `ToggleSwitch` (interrupteur on/off). Côté métier : `SettingsCard` (`settings/`, carte à barre de
+    dégradé + en-tête, réutilisée par settings ET admin) et `stats/playerStyle.ts`
+    (`playerGradient(seed)` déterministe + `initials` + chips titres/coupes).
   - **Design system « Broadcast » (V2)** défini dans `src/styles.css` — maquettes de référence dans
     `docs/mockups/`. Palette de marque en `@theme` (`--color-violet/rose/orange/menthe/jaune/
     violet-clair/rouge` + surfaces `nuit/carte/carte-2/bord` + `texte/texte-2`), rayons, polices
@@ -41,6 +48,15 @@ synchronisation des données depuis l'API MPG.
     tokens changent.
   - **Bannière de la page Stats** : asset statique `public/stats-banner.jpg` (servi à
     `/stats-banner.jpg`). À remplacer manuellement en fin de saison si le podium change.
+  - **Refonte « Broadcast V2 » selon les maquettes : faite pour TOUTES les pages sauf l'Accueil/
+    Dashboard** (`docs/mockups/design/LHM *.dc.html`, frame mobile 430 + desktop 1320, valeurs
+    px/hex en dur = source de vérité). Login, Palmarès, Rétro, Cagnotte, Profil (hero + 4 onglets),
+    Paramètres et Admin sont reconstruits. Le **Dashboard/Accueil reste à refaire** (données
+    factices dans `business/accueil/mockData.ts`). Conventions transverses tranchées avec Coco (cf.
+    mémoire) : **initiales colorées partout, pas de photos d'avatar** ; **pseudo (`username`)
+    affiché à côté du nom partout** (d'où l'ajout de `username` au `ranking` de
+    `/api/palmares/tournaments`) ; éléments sans backend (thème clair, notifications, forme des 5
+    derniers matchs, série de victoires en cours) affichés en **placeholder « bientôt » désactivé**.
 
 ## Déploiement
 
