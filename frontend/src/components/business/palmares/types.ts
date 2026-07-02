@@ -24,6 +24,7 @@ export interface CupRow {
 export interface CupCount {
     managerId: string;
     manager: string;
+    username: string | null;
     ldc: number;
     uefa: number;
     conference: number;
