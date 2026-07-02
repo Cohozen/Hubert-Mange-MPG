@@ -3,6 +3,8 @@ import { LeaguesSection } from "@/components/business/admin/LeaguesSection";
 import { RolesSection } from "@/components/business/admin/RolesSection";
 import { SyncSection } from "@/components/business/admin/SyncSection";
 import { TournamentsSection } from "@/components/business/admin/TournamentsSection";
+import { LogoutCard } from "@/components/business/settings/LogoutCard";
+import { PreferencesCard } from "@/components/business/settings/PreferencesCard";
 import { ProfileForm } from "@/components/business/settings/ProfileForm";
 
 function Divider({ children }: { children: React.ReactNode }) {
@@ -19,8 +21,25 @@ export default function SettingsPage() {
     const { data: me } = useAuth();
 
     return (
-        <div className="mx-auto max-w-5xl space-y-8">
-            <ProfileForm />
+        <div className="space-y-8">
+            <div className="space-y-6">
+                <header>
+                    <h1 className="font-display text-[30px] font-black uppercase leading-none tracking-[-1px] text-white lg:text-[32px]">
+                        Mon espace
+                    </h1>
+                    <p className="mt-1.5 text-[13px] text-texte-2 lg:text-sm">
+                        Gère ton profil, ton paiement et tes préférences.
+                    </p>
+                </header>
+
+                <div className="grid gap-3.5 lg:grid-cols-2 lg:items-start lg:gap-[22px]">
+                    <ProfileForm />
+                    <div className="flex flex-col gap-3.5 lg:gap-[22px]">
+                        <PreferencesCard />
+                        <LogoutCard />
+                    </div>
+                </div>
+            </div>
 
             {isLeagueAdmin(me) && (
                 <section>
