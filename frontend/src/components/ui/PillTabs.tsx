@@ -22,7 +22,7 @@ export function PillTabs<K extends string>({
     items: PillTabItem<K>[];
     value: K;
     onChange: (key: K) => void;
-    width?: "auto" | "full" | "mobile-full";
+    width?: "auto" | "full" | "mobile-full" | "scroll";
     className?: string;
 }) {
     const container =
@@ -30,8 +30,17 @@ export function PillTabs<K extends string>({
             ? "flex w-full gap-1"
             : width === "mobile-full"
               ? "flex w-full gap-1 lg:inline-flex lg:w-auto lg:gap-[3px]"
-              : "inline-flex gap-[3px]";
-    const segment = width === "full" ? "flex-1" : width === "mobile-full" ? "flex-1 lg:flex-none" : undefined;
+              : width === "scroll"
+                ? "flex max-w-full gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+                : "inline-flex gap-[3px]";
+    const segment =
+        width === "full"
+            ? "flex-1"
+            : width === "mobile-full"
+              ? "flex-1 lg:flex-none"
+              : width === "scroll"
+                ? "shrink-0"
+                : undefined;
 
     return (
         <div className={cn("rounded-full border border-bord bg-carte p-[5px]", container, className)}>

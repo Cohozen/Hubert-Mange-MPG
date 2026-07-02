@@ -5,6 +5,7 @@ import { canEditCagnotte, useAuth } from "@/auth/useAuth";
 import { SeasonView } from "@/components/business/cagnotte/SeasonView";
 import type { SeasonRow } from "@/components/business/cagnotte/types";
 import { Empty } from "@/components/ui/Empty";
+import { PillTabs } from "@/components/ui/PillTabs";
 
 export default function CagnottePage() {
     const { data: me } = useAuth();
@@ -17,9 +18,9 @@ export default function CagnottePage() {
     });
 
     // Onglets : membres → saisons avec cagnotte ; éditeurs → toutes les saisons (pour en créer).
-    // Triés par année croissante ; par défaut on ouvre la saison la plus récente.
-    const tabs = (seasons.data ?? []).filter((s) => s.poolId || editor).sort((a, b) => a.year - b.year);
-    const current = tabs.find((s) => s.id === selId) ?? tabs[tabs.length - 1];
+    // Triés par année décroissante (plus récente en premier) ; par défaut on ouvre la plus récente.
+    const tabs = (seasons.data ?? []).filter((s) => s.poolId || editor).sort((a, b) => b.year - a.year);
+    const current = tabs.find((s) => s.id === selId) ?? tabs[0];
 
     if (seasons.isLoading) return null;
     if (!tabs.length) {
@@ -28,23 +29,22 @@ export default function CagnottePage() {
 
     return (
         <div className="space-y-6">
-            <label className="block max-w-full lg:max-w-xs">
-                <span className="mb-1.5 block font-display text-[11px] font-extrabold uppercase tracking-wider text-texte-2">
-                    Saison
-                </span>
-                <select
+            <header className="space-y-3.5">
+                <div>
+                    <h1 className="font-display text-[34px] font-black uppercase leading-[0.95] tracking-[-1.2px] text-white lg:hidden">
+                        Cagnotte
+                    </h1>
+                    <p className="mt-1.5 text-xs text-texte-2 lg:text-sm">
+                        Le pot commun de la ligue. Une mise, des trophées, une redistribution.
+                    </p>
+                </div>
+                <PillTabs
                     value={current?.id ?? ""}
-                    onChange={(e) => setSelId(e.target.value)}
-                    className="h-10 w-full rounded-xl border border-bord bg-carte px-3 text-sm text-white outline-none focus:border-rose"
-                >
-                    {tabs.map((s) => (
-                        <option key={s.id} value={s.id}>
-                            {s.name}
-                            {s.closed ? " 🔒" : ""}
-                        </option>
-                    ))}
-                </select>
-            </label>
+                    onChange={setSelId}
+                    width="scroll"
+                    items={tabs.map((s) => ({ key: s.id, label: `${s.name}${s.closed ? " 🔒" : ""}` }))}
+                />
+            </header>
 
             {current && <SeasonView key={current.id} season={current} editor={editor} />}
         </div>

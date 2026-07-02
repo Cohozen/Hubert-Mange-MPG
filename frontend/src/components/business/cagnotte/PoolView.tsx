@@ -1,9 +1,9 @@
-import { api, formatMoney } from "@/api/client";
+import { api } from "@/api/client";
 import { BuyInEditor } from "@/components/business/cagnotte/BuyInEditor";
+import { CagnotteRecapCard } from "@/components/business/cagnotte/CagnotteRecapCard";
 import { ContributionsPanel } from "@/components/business/cagnotte/ContributionsPanel";
 import { PayoutsPanel } from "@/components/business/cagnotte/PayoutsPanel";
 import { RulesEditor } from "@/components/business/cagnotte/RulesEditor";
-import { Stat } from "@/components/business/cagnotte/Stat";
 import type { PoolDetail } from "@/components/business/cagnotte/types";
 import { Button } from "@/components/ui/button";
 
@@ -31,21 +31,19 @@ export function PoolView({ pool, editor, onChange }: { pool: PoolDetail; editor:
                 </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <Stat label="Mise / joueur" value={formatMoney(pool.buyInAmount)} />
-                <Stat
-                    label="Collecté"
-                    value={formatMoney(pool.totalCollected)}
-                    sub={`/ ${formatMoney(pool.totalExpected)} attendu`}
-                />
-                <Stat label="Reversé" value={formatMoney(pool.totalPaidOut)} />
-                <Stat label="Solde" value={formatMoney(pool.balance)} />
+            <CagnotteRecapCard pool={pool} />
+
+            <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+                <ContributionsPanel pool={pool} canEdit={canEdit} onChange={onChange} />
+                <PayoutsPanel pool={pool} canEdit={canEdit} onChange={onChange} />
             </div>
 
-            {canEdit && <BuyInEditor pool={pool} onChange={onChange} />}
-            <ContributionsPanel pool={pool} canEdit={canEdit} onChange={onChange} />
-            {canEdit && <RulesEditor poolId={pool.id} onChange={onChange} />}
-            <PayoutsPanel pool={pool} canEdit={canEdit} onChange={onChange} />
+            {canEdit && (
+                <div className="space-y-6">
+                    <BuyInEditor pool={pool} onChange={onChange} />
+                    <RulesEditor poolId={pool.id} onChange={onChange} />
+                </div>
+            )}
 
             {canEdit && (
                 <div className="flex justify-end">

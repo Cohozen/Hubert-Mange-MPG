@@ -1,8 +1,17 @@
-import { ChevronDown } from "lucide-react";
+import { Link } from "react-router-dom";
 import { api, formatMoney } from "@/api/client";
 import type { Contribution, PoolDetail } from "@/components/business/cagnotte/types";
-import { ManagerLabel } from "@/components/ui/ManagerLabel";
 import { cn } from "@/lib/utils";
+
+function initials(name?: string | null) {
+    if (!name) return "—";
+    return name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((w) => w[0]?.toUpperCase() ?? "")
+        .join("");
+}
 
 export function ContributionsPanel({
     pool,
@@ -20,55 +29,89 @@ export function ContributionsPanel({
         });
         onChange();
     }
+    const paidCount = pool.contributions.filter((c) => c.paid).length;
+
     return (
-        <details open className="group overflow-hidden rounded-2xl border border-bord bg-carte">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 font-display text-sm font-black text-white [&::-webkit-details-marker]:hidden">
-                <span>
-                    Mises ({pool.contributions.filter((c) => c.paid).length}/{pool.contributions.length} payées)
+        <section>
+            <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                    <span className="h-[18px] w-[5px] rounded-[3px]" style={{ background: "var(--grad-energy)" }} />
+                    <h2 className="font-display text-[15px] font-black uppercase tracking-[0.3px] text-white">
+                        Contributions
+                    </h2>
+                </div>
+                <span className="text-[11px] font-bold text-texte-2">
+                    {paidCount}/{pool.contributions.length} payé
                 </span>
-                <ChevronDown size={16} className="text-texte-2 transition group-open:rotate-180" />
-            </summary>
-            <div className="border-t border-bord">
-                {pool.contributions.length ? (
-                    <ul className="divide-y divide-bord">
-                        {pool.contributions.map((c) => (
-                            <li key={c.id} className="flex items-center gap-2 p-3 text-sm">
-                                <span className="min-w-0 flex-1 text-white">
-                                    <ManagerLabel
-                                        name={c.manager}
-                                        username={c.username}
-                                        avatarUrl={c.avatarUrl}
-                                        size={26}
-                                    />
-                                </span>
-                                <span className="shrink-0 text-texte-2">{formatMoney(c.amount)}</span>
+            </div>
+
+            {pool.contributions.length ? (
+                <div className="flex flex-col gap-2">
+                    {pool.contributions.map((c) => (
+                        <div
+                            key={c.id}
+                            className="lhm-row flex items-center gap-3 rounded-[13px] border bg-carte px-3 py-[11px]"
+                            style={{ borderColor: c.paid ? "rgba(0,229,160,.28)" : "var(--color-bord)" }}
+                        >
+                            <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-bord bg-carte-2 font-display text-[13px] font-black text-[#9aa3d4]">
+                                {initials(c.manager)}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-baseline gap-1.5">
+                                    <Link
+                                        to={`/profil/${c.managerId}`}
+                                        className="truncate font-display text-sm font-extrabold text-white hover:underline"
+                                    >
+                                        {c.manager}
+                                    </Link>
+                                    {c.username && (
+                                        <span className="shrink-0 text-[11px] font-medium text-texte-2">
+                                            {c.username}
+                                        </span>
+                                    )}
+                                </div>
                                 {canEdit ? (
                                     <button
                                         type="button"
                                         onClick={() => togglePaid(c)}
                                         className={cn(
-                                            "shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition",
+                                            "mt-1.5 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[10px] font-bold transition",
                                             c.paid
-                                                ? "bg-menthe/20 text-menthe"
-                                                : "bg-carte-2 text-texte-2 hover:text-white",
+                                                ? "border-menthe/50 bg-menthe/[0.15] text-menthe"
+                                                : "border-orange/50 bg-orange/[0.12] text-orange hover:brightness-110",
                                         )}
                                     >
-                                        {c.paid ? "✓ payé" : "à payer"}
+                                        {c.paid ? "✓ Payé" : "⏳ En attente"}
                                     </button>
                                 ) : (
-                                    <span className={cn("shrink-0", c.paid ? "text-menthe" : "text-texte-2/40")}>
-                                        {c.paid ? "✓" : "—"}
+                                    <span
+                                        className={cn(
+                                            "mt-1.5 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[10px] font-bold",
+                                            c.paid
+                                                ? "border-menthe/50 bg-menthe/[0.15] text-menthe"
+                                                : "border-orange/50 bg-orange/[0.12] text-orange",
+                                        )}
+                                    >
+                                        {c.paid ? "✓ Payé" : "⏳ En attente"}
                                     </span>
                                 )}
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="p-3 text-sm text-texte-2">
-                        Aucun participant. {canEdit && "Définis la mise puis « initialiser les participants »."}
-                    </p>
-                )}
-            </div>
-        </details>
+                            </div>
+                            <div
+                                className={cn(
+                                    "shrink-0 text-right font-display text-base font-black tabular-nums",
+                                    c.paid ? "text-menthe" : "text-orange",
+                                )}
+                            >
+                                {formatMoney(c.amount)}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="rounded-[13px] border border-bord bg-carte p-3 text-sm text-texte-2">
+                    Aucun participant. {canEdit && "Définis la mise puis « initialiser les participants »."}
+                </p>
+            )}
+        </section>
     );
 }
