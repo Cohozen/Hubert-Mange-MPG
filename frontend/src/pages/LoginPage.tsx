@@ -147,10 +147,11 @@ export default function LoginPage() {
                 <div className="relative z-10 w-full max-w-[380px]">
                     {/* Héros mobile : shield + nom + accroche */}
                     <div className="mb-[30px] flex flex-col items-center text-center lg:hidden">
-                        <Logo size={118} className="mb-[22px] drop-shadow-[0_14px_34px_rgba(255,45,120,.4)]" />
-                        <div className="mb-[30px] font-display text-[11px] font-extrabold uppercase tracking-[3px] text-menthe">
-                            Ligue Hubert Mange
-                        </div>
+                        <Logo
+                            variant="full"
+                            size={190}
+                            className="mb-[30px] drop-shadow-[0_14px_34px_rgba(255,45,120,.4)]"
+                        />
                         <h1 className="font-display text-[38px] font-black uppercase leading-[0.96] tracking-[-1.5px] text-white">
                             Prêt pour
                             <br />

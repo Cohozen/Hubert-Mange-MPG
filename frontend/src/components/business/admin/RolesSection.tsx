@@ -80,7 +80,7 @@ export function RolesSection() {
                             </div>
                             {m.username && <div className="mt-0.5 truncate text-[10px] text-texte-2">{m.username}</div>}
                         </div>
-                        <div className="flex shrink-0 gap-1.5">
+                        <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
                             {ASSIGNABLE.map((role) => {
                                 const active = m.roles.includes(role.code);
                                 return (

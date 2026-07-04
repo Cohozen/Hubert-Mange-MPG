@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useMatch } from "react-router-dom";
 import type { Me } from "@/auth/useAuth";
+import { cn } from "@/lib/utils";
 import { BottomNav } from "./BottomNav";
 import { MobileHeader } from "./MobileHeader";
 import { pageTitle } from "./nav";
@@ -10,19 +11,33 @@ import { Topbar } from "./Topbar";
 /** Coquille de l'app : sidebar (desktop) + topbar / header mobile + bottom nav. */
 export function AppShell({ me, onLogout, children }: { me: Me; onLogout: () => void; children: ReactNode }) {
     const { pathname } = useLocation();
+    // Pages « détail » (profil d'un autre, paramètres) : bouton retour, pas de bottom-nav.
+    const otherProfile = useMatch("/profil/:managerId");
+    const isDetail = pathname === "/parametres" || otherProfile !== null;
     return (
-        <div className="min-h-screen bg-nuit text-texte">
+        <div className="min-h-screen overflow-x-clip bg-nuit text-texte">
             <div className="flex min-h-screen">
                 <Sidebar className="hidden lg:flex" />
                 <div className="flex min-w-0 flex-1 flex-col">
-                    <MobileHeader me={me} onLogout={onLogout} className="lg:hidden" />
-                    <Topbar title={pageTitle(pathname)} me={me} onLogout={onLogout} className="hidden lg:flex" />
-                    <main className="flex-1 px-5 py-6 pb-28 lg:px-8 lg:pb-10">
-                        <div className="mx-auto w-full max-w-6xl">{children}</div>
+                    <MobileHeader me={me} onLogout={onLogout} back={isDetail} className="lg:hidden" />
+                    <Topbar
+                        title={pageTitle(pathname)}
+                        me={me}
+                        onLogout={onLogout}
+                        back={isDetail}
+                        className="hidden lg:flex"
+                    />
+                    <main className={cn("flex-1 px-5 py-6 lg:px-8 lg:pb-10", isDetail ? "pb-10" : "pb-28")}>
+                        <div
+                            key={pathname}
+                            className="mx-auto w-full max-w-6xl motion-safe:animate-[lhmPageIn_.28s_ease] lg:animate-none"
+                        >
+                            {children}
+                        </div>
                     </main>
                 </div>
             </div>
-            <BottomNav className="lg:hidden" />
+            {!isDetail && <BottomNav className="lg:hidden" />}
         </div>
     );
 }

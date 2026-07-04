@@ -177,7 +177,7 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                                 <select
                                     value={t.competitionOverride ?? ""}
                                     onChange={(e) => setCompetition(t, e.target.value)}
-                                    className="flex-1 rounded-[10px] border border-bord bg-carte px-3 py-2 font-display text-[11px] font-black tracking-[0.5px] text-white outline-none transition focus:border-rose"
+                                    className="min-w-0 flex-1 rounded-[10px] border border-bord bg-carte px-3 py-2 font-display text-[11px] font-black tracking-[0.5px] text-white outline-none transition focus:border-rose"
                                 >
                                     {COMPETITION_OPTIONS.map((o) => (
                                         <option key={o.value} value={o.value}>

@@ -23,13 +23,15 @@ synchronisation des données depuis l'API MPG.
     `dialog.tsx`, `sheet.tsx`…), ajoutées via `npx shadcn@latest add <nom>`. Helper `cn()` dans
     `src/lib/utils.ts`, config `components.json` (style « new-york »). Les composants **maison**
     génériques (`Avatar`, `Field`, `Empty`, `ManagerLabel`, `Logo`, `SectionTitle`, `PillTabs`,
-    `ConfirmDialog`, `ToggleSwitch`) restent en **PascalCase** dans `ui/` — ⚠️ FS macOS insensible à
+    `ConfirmDialog`, `ToggleSwitch`, `InfoHint`) restent en **PascalCase** dans `ui/` — ⚠️ FS macOS insensible à
     la casse : ne PAS générer le primitive shadcn `avatar` (collision avec `Avatar.tsx`).
   - **Composants génériques V2 réutilisés partout** : `PillTabs` (onglets pilules contrôlés, prop
     `width` = `auto|full|mobile-full|scroll` ; scroll horizontal safe — Palmarès/Rétro/Cagnotte),
     `ConfirmDialog` (**modale portale maison**, PAS le shadcn `dialog` — le `Dialog` radix contrôlé
     plantait sur un souci de ref ; remplace `window.confirm` pour les suppressions admin),
-    `ToggleSwitch` (interrupteur on/off). Côté métier : `SettingsCard` (`settings/`, carte à barre de
+    `ToggleSwitch` (interrupteur on/off), `InfoHint` (petit ⓘ qui ouvre un popover au clic/tap —
+    tap-friendly, fermeture au clic extérieur/Échap ; ex. explication de la note manager « MNG » sur
+    le profil). Côté métier : `SettingsCard` (`settings/`, carte à barre de
     dégradé + en-tête, réutilisée par settings ET admin) et `stats/playerStyle.ts`
     (`playerGradient(seed)` déterministe + `initials` + chips titres/coupes).
   - **Design system « Broadcast » (V2)** défini dans `src/styles.css` — maquettes de référence dans
@@ -105,8 +107,13 @@ synchronisation des données depuis l'API MPG.
   `ADMIN`/`TREASURER` sont stockés sur `Manager`. **ADMIN** gère ligues/tournois suivis + sync +
   cagnotte. **SUPERADMIN seul** : backfill de structure, attribution des rôles, fusion de managers,
   et la **suppression** d'une ligue/tournoi suivi.
-- **Pages & navigation** : coquille `AppShell` (`src/components/layout/`) — sidebar fixe en desktop,
-  bottom nav en mobile (`< lg`). Routes : `/` = **Accueil** (dashboard, `AccueilPage` ; données
+- **Pages & navigation** : coquille `AppShell` (`src/components/layout/`) — sidebar fixe en desktop
+  (`sticky top-0 h-screen`, ne s'étire plus avec le contenu), bottom nav en mobile (`< lg`). Le header
+  de page (`Topbar` desktop / `MobileHeader` mobile) et le bloc logo de la sidebar font tous **`h-[72px]`**
+  (bordures alignées). **Pages « détail »** (profil d'un autre = `/profil/:managerId`, et `/parametres`) :
+  `AppShell` calcule `isDetail` (via `useMatch`) → **pas de bottom-nav** + **bouton retour** (`navigate(-1)`)
+  dans le header (mobile ET desktop). Navigation mobile animée (keyframe `lhmPageIn`, wrapper contenu
+  `key={pathname}`, désactivée en `lg`). Routes : `/` = **Accueil** (dashboard, `AccueilPage` ; données
   **factices** dans `business/accueil/mockData.ts`, `TODO backend`), `/palmares` = **Palmarès**,
   `/stats` = **Rétro** (libellé « Rétro », route inchangée), `/cagnotte`, `/profil`, `/parametres`.
   La page **Paramètres** (`/parametres` ; `/admin` redirige) regroupe le

@@ -3,6 +3,7 @@ import { api } from "@/api/client";
 import { useAuth } from "@/auth/useAuth";
 import type { TimelineSeason } from "@/components/business/profile/types";
 import type { AllTimeRow, CupCount } from "@/components/business/stats/types";
+import { InfoHint } from "@/components/ui/InfoHint";
 
 function initials(name?: string | null) {
     if (!name) return "—";
@@ -77,8 +78,17 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
                     <div className="font-display text-[38px] font-black leading-[0.8] text-jaune lg:text-[64px]">
                         {rating}
                     </div>
-                    <div className="mt-1 font-display text-[10px] font-black tracking-[1.5px] text-white lg:mt-1.5 lg:text-[13px] lg:tracking-[2px]">
-                        MNG
+                    <div className="mt-1 flex items-center gap-1 lg:mt-1.5">
+                        <span className="font-display text-[10px] font-black tracking-[1.5px] text-white lg:text-[13px] lg:tracking-[2px]">
+                            MNG
+                        </span>
+                        <InfoHint label="Comment est calculée la note manager ?">
+                            <span className="font-display text-[10px] font-black uppercase tracking-wide text-white">
+                                Note manager
+                            </span>
+                            <br />
+                            Base 60, +4 par trophée et +1 par tranche de 5&nbsp;% de victoires. Bornée entre 55 et 99.
+                        </InfoHint>
                     </div>
                     <div className="my-[7px] h-px w-6 bg-white/25 lg:my-[11px] lg:w-11" />
                     <div className="font-display text-sm font-black leading-none text-jaune lg:text-[22px]">
@@ -143,7 +153,7 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
                 </div>
 
                 {/* Stats clés (desktop) */}
-                <div className="hidden shrink-0 gap-2.5 lg:flex">
+                <div className="hidden shrink-0 gap-2 lg:flex">
                     <HeadlineStat value={row ? `${row.rank}e` : "—"} label="Rang all-time" color="text-white" />
                     <HeadlineStat value={trophies} label="Trophées" color="text-jaune" />
                     <HeadlineStat value={`${winPct}%`} label="Réussite" color="text-menthe" />
@@ -167,9 +177,9 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
 
 function HeadlineStat({ value, label, color }: { value: string | number; label: string; color: string }) {
     return (
-        <div className="w-16 rounded-2xl border border-white/10 bg-nuit/[0.34] px-2.5 py-4 text-center">
-            <div className={`font-display text-[26px] font-black leading-none ${color}`}>{value}</div>
-            <div className="mt-1.5 text-[8px] font-bold uppercase tracking-[0.5px] text-[#C9B8F5]">{label}</div>
+        <div className="w-[86px] rounded-2xl border border-white/10 bg-nuit/[0.34] px-2 py-4 text-center">
+            <div className={`font-display text-[28px] font-black leading-none tabular-nums ${color}`}>{value}</div>
+            <div className="mt-2 text-[9px] font-bold uppercase tracking-[0.5px] text-[#C9B8F5]">{label}</div>
         </div>
     );
 }

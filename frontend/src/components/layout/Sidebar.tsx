@@ -24,8 +24,13 @@ function SideItem({ item }: { item: NavItem }) {
 /** Sidebar de navigation (desktop). */
 export function Sidebar({ className }: { className?: string }) {
     return (
-        <aside className={cn("w-[230px] shrink-0 flex-col border-r border-bord bg-carte px-4 py-5", className)}>
-            <div className="mb-3 flex items-center gap-3 border-b border-bord px-2 pb-4">
+        <aside
+            className={cn(
+                "sticky top-0 h-screen w-[230px] shrink-0 self-start flex-col overflow-y-auto border-r border-bord bg-carte px-4 pb-5",
+                className,
+            )}
+        >
+            <div className="mb-3 flex h-[72px] items-center gap-3 border-b border-bord px-2">
                 <Logo size={38} />
                 <div>
                     <div className="font-display text-base font-black leading-none text-texte">LHM</div>
