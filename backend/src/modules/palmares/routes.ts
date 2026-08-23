@@ -141,6 +141,8 @@ palmaresRouter.get("/all-time", async (_req, res) => {
 });
 
 // Classements "fun" : montées et descentes entre saisons jeu consécutives (même ligue).
+// ⚠️ Plus consommée par le front depuis le retrait du bloc « Montées · Descentes · Yo-yo » de la
+// Rétro (retrait temporaire assumé) : on garde la route pour pouvoir le rebrancher.
 palmaresRouter.get("/movements", async (_req, res) => {
     const managers = await prisma.manager.findMany({
         include: {
