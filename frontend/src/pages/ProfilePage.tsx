@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/auth/useAuth";
 import { ProfileConfrontationsTab } from "@/components/business/profile/ProfileConfrontationsTab";
@@ -6,6 +6,7 @@ import { ProfileHeader } from "@/components/business/profile/ProfileHeader";
 import { ProfileStatsTab } from "@/components/business/profile/ProfileStatsTab";
 import { ProfileSummaryTab } from "@/components/business/profile/ProfileSummaryTab";
 import { ProfileTrophiesTab } from "@/components/business/profile/ProfileTrophiesTab";
+import { useTabParam } from "@/lib/useTabParam";
 
 type TabKey = "resume" | "trophees" | "stats" | "confrontations";
 
@@ -20,10 +21,13 @@ export default function ProfilePage() {
     const { managerId } = useParams<{ managerId?: string }>();
     const { data: me } = useAuth();
     const targetId = managerId ?? me?.id;
-    const [tab, setTab] = useState<TabKey>("resume");
-
-    // Repart sur l'onglet Résumé quand on consulte un autre manager.
-    useEffect(() => setTab("resume"), [targetId]);
+    // L'onglet vit dans l'URL : bouton retour et favoris fonctionnent. Un lien vers un autre
+    // manager n'emporte pas de `?tab`, donc on retombe naturellement sur le Résumé.
+    const [tab, setTab] = useTabParam<TabKey>(
+        "tab",
+        "resume",
+        TABS.map((t) => t.key),
+    );
 
     // Amène l'onglet actif dans la vue en douceur (sans scroller verticalement la page).
     const activeRef = useRef<HTMLButtonElement>(null);

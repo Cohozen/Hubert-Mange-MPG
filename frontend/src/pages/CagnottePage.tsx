@@ -1,17 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { api } from "@/api/client";
 import { canEditCagnotte, useAuth } from "@/auth/useAuth";
 import { SeasonView } from "@/components/business/cagnotte/SeasonView";
 import type { SeasonRow } from "@/components/business/cagnotte/types";
 import { Empty } from "@/components/ui/Empty";
 import { PillTabs } from "@/components/ui/PillTabs";
+import { useTabParam } from "@/lib/useTabParam";
 
 export default function CagnottePage() {
     const { data: me } = useAuth();
     const editor = canEditCagnotte(me);
-    const [selId, setSelId] = useState<string | null>(null);
-
     const seasons = useQuery({
         queryKey: ["cagnotte-seasons"],
         queryFn: () => api<SeasonRow[]>("/api/cagnotte/seasons"),
@@ -20,7 +18,10 @@ export default function CagnottePage() {
     // Onglets : membres → saisons avec cagnotte ; éditeurs → toutes les saisons (pour en créer).
     // Triés par année décroissante (plus récente en premier) ; par défaut on ouvre la plus récente.
     const tabs = (seasons.data ?? []).filter((s) => s.poolId || editor).sort((a, b) => b.year - a.year);
-    const current = tabs.find((s) => s.id === selId) ?? tabs[0];
+    // La saison ouverte vit dans l'URL sous son nom (`?saison=2025-2026`), plus lisible qu'un id.
+    const names = tabs.map((s) => s.name);
+    const [selName, setSelName] = useTabParam<string>("saison", names[0] ?? "", names);
+    const current = tabs.find((s) => s.name === selName) ?? tabs[0];
 
     if (seasons.isLoading) return null;
     if (!tabs.length) {
@@ -39,10 +40,10 @@ export default function CagnottePage() {
                     </p>
                 </div>
                 <PillTabs
-                    value={current?.id ?? ""}
-                    onChange={setSelId}
+                    value={current?.name ?? ""}
+                    onChange={setSelName}
                     width="scroll"
-                    items={tabs.map((s) => ({ key: s.id, label: `${s.name}${s.closed ? " 🔒" : ""}` }))}
+                    items={tabs.map((s) => ({ key: s.name, label: `${s.name}${s.closed ? " 🔒" : ""}` }))}
                 />
             </header>
 

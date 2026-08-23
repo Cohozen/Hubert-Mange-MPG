@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { api } from "@/api/client";
 import { CupCompetitionCard } from "@/components/business/palmares/CupCompetitionCard";
 import { PalmaresRankingCard } from "@/components/business/palmares/PalmaresRankingCard";
@@ -7,8 +6,10 @@ import { SeasonChampionsView } from "@/components/business/palmares/SeasonChampi
 import type { CupCount, CupRow, DivisionWinner } from "@/components/business/palmares/types";
 import { Empty } from "@/components/ui/Empty";
 import { PillTabs } from "@/components/ui/PillTabs";
+import { useTabParam } from "@/lib/useTabParam";
 
 type Tab = "coupes" | "saisons";
+const TABS: Tab[] = ["coupes", "saisons"];
 
 export default function PalmaresPage() {
     const winners = useQuery({
@@ -20,7 +21,7 @@ export default function PalmaresPage() {
         queryFn: () => api<{ list: CupRow[]; ranking: CupCount[] }>("/api/palmares/tournaments"),
     });
 
-    const [tab, setTab] = useState<Tab>("coupes");
+    const [tab, setTab] = useTabParam<Tab>("tab", "coupes", TABS);
     const allWinners = winners.data?.divisionWinners ?? [];
     const list = cups.data?.list ?? [];
     const ranking = cups.data?.ranking ?? [];
