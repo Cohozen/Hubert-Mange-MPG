@@ -59,12 +59,24 @@ function tournamentYear(t: any, fallbackName: string): number {
  * repli, on crée une RealSeason bâtarde ("<ligue> — saison N", year = N) qu'un sync ultérieur ne
  * corrige jamais (la clé `name` est unique et diffère de la bonne).
  */
-async function activeChampionshipSeasons(mpg: MpgConnector): Promise<Map<string, number>> {
-    const seasons = new Map<string, number>();
+interface ActiveChampionship {
+    season: number;
+    startDate: Date | null;
+    endDate: Date | null;
+}
+
+async function activeChampionshipSeasons(mpg: MpgConnector): Promise<Map<string, ActiveChampionship>> {
+    const seasons = new Map<string, ActiveChampionship>();
     try {
         const active = await mpg.apiGet<any>("/championships/active");
         for (const [id, c] of Object.entries<any>(active?.championships ?? {})) {
-            if (typeof c?.season === "number") seasons.set(String(id), c.season);
+            if (typeof c?.season === "number") {
+                seasons.set(String(id), {
+                    season: c.season,
+                    startDate: parseDate(c.startDate),
+                    endDate: parseDate(c.endDate),
+                });
+            }
         }
     } catch {
         // Repli assuré par la logique appelante (on laissera la saison sans année).
@@ -72,8 +84,46 @@ async function activeChampionshipSeasons(mpg: MpgConnector): Promise<Map<string,
     return seasons;
 }
 
+function parseDate(value: unknown): Date | null {
+    if (typeof value !== "string") return null;
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Dates de coup d'envoi des journées du championnat réel (1 = Ligue 1), par numéro de journée.
+ *
+ * `/division/{id}/game-week/{n}/matches` ne porte AUCUNE date : la seule façon de dater un match
+ * est de passer par la journée L1 correspondante (`/division/{id}/calendar` → `realGameWeek`) puis
+ * par ce calendrier. ⚠️ L'endpoint ne renvoie que la saison en cours — on ne date donc que les
+ * matchs d'une saison active. Mis en cache par championnat pour la durée du sync.
+ */
+async function championshipGameWeekDates(mpg: MpgConnector, championshipId: string): Promise<Map<number, Date>> {
+    const dates = new Map<number, Date>();
+    try {
+        const cal = await mpg.apiGet<any>(`/championship-calendar/${championshipId}`);
+        for (const gw of Object.values<any>(cal?.gameWeeks ?? {})) {
+            const start = parseDate(gw?.startDate);
+            if (typeof gw?.gameWeekNumber === "number" && start) dates.set(gw.gameWeekNumber, start);
+        }
+    } catch {
+        // Calendrier indisponible : les matchs resteront sans date (dashboard sans compte à rebours).
+    }
+    return dates;
+}
+
 export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): Promise<SyncResult> {
     const notes: string[] = [];
+    // Un seul appel au calendrier par championnat pour tout le run.
+    const calendarCache = new Map<string, Map<number, Date>>();
+    const championshipDates = async (championshipId: string) => {
+        let dates = calendarCache.get(championshipId);
+        if (!dates) {
+            dates = await championshipGameWeekDates(mpg, championshipId);
+            calendarCache.set(championshipId, dates);
+        }
+        return dates;
+    };
     const counters = {
         gameSeasons: 0,
         divisions: 0,
@@ -126,8 +176,8 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
 
             // Saison réelle (adossée au championnat Ligue 1). Pour la saison en cours, /winners
             // n'existe pas encore : on prend l'année du championnat actif.
-            const year =
-                championshipSeason ?? (season === currentSeason ? activeSeasons.get(championshipId) : undefined);
+            const active = season === currentSeason ? activeSeasons.get(championshipId) : undefined;
+            const year = championshipSeason ?? active?.season;
             const realName = year ? `${year}-${year + 1}` : `${league.name} — saison ${season}`;
             const realSeason = await prisma.realSeason.upsert({
                 where: { name: realName },
@@ -136,6 +186,7 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
             });
 
             const isFinished = season < currentSeason || league.status === 5;
+            const seasonDates = { startDate: active?.startDate ?? undefined, endDate: active?.endDate ?? undefined };
             const gameSeason = await prisma.gameSeason.upsert({
                 where: { mpgLeagueId_mpgSeason: { mpgLeagueId: tile.leagueId, mpgSeason: season } },
                 update: {
@@ -144,6 +195,7 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                     index: season,
                     mpgChampionshipId: championshipId,
                     status: isFinished ? "finished" : "active",
+                    ...seasonDates,
                 },
                 create: {
                     realSeasonId: realSeason.id,
@@ -153,6 +205,7 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                     mpgSeason: season,
                     mpgChampionshipId: championshipId,
                     status: isFinished ? "finished" : "active",
+                    ...seasonDates,
                 },
             });
             counters.gameSeasons++;
@@ -172,23 +225,57 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                 // On normalise toujours le nom (les noms MPG varient d'une année à l'autre).
                 const divName = `Division ${d}`;
 
-                // Map userId MPG → managerId (pour les matchs H2H).
+                // Map userId MPG → managerId (pour les matchs joués) et teamId → managerId (un
+                // match À VENIR ne porte que le teamId, MPG n'y expose pas encore les userId).
                 const userToManager = new Map<string, string>();
+                const teamToManager = new Map<string, string>();
 
-                // Noms d'équipe (teamId → {name, abbr}) pour cette division.
-                const teamInfo = new Map<string, { name?: string; abbr?: string }>();
+                // Équipes de la division : nom, abréviation et budget mercato restant.
+                const teamInfo = new Map<string, { name?: string; abbr?: string; budget?: number }>();
                 try {
                     const teams = await mpg.apiGet<any>(`/teams/division/${divId}`);
                     for (const t of Array.isArray(teams) ? teams : []) {
-                        teamInfo.set(t.id, { name: t.name, abbr: t.abbreviation });
+                        teamInfo.set(t.id, { name: t.name, abbr: t.abbreviation, budget: t.budget });
                     }
                 } catch {
                     // équipes indisponibles
                 }
+                // État live (journée en cours, mercato) : n'a de sens que pour une saison en cours,
+                // et c'est ce qui alimente le dashboard d'accueil. `/division/{id}` donne aussi le
+                // vrai nombre de journées, plus fiable que le calcul (nbÉquipes - 1) × 2.
+                let live: { currentGameWeek?: number; totalGameWeeks?: number } = {};
+                let mercato: { mercatoClosed?: boolean; nextMercatoTurn?: Date | null } = {};
+                if (!isFinished) {
+                    try {
+                        const detail = await mpg.apiGet<any>(`/division/${divId}`);
+                        live = {
+                            currentGameWeek: detail?.liveState?.currentGameWeek,
+                            totalGameWeeks: detail?.liveState?.totalGameWeeks,
+                        };
+                        mercato = {
+                            mercatoClosed: detail?.mercatoState?.mercatoClosed,
+                            nextMercatoTurn: parseDate(detail?.mercatoState?.nextMercatoTurn),
+                        };
+                    } catch {
+                        // détail de division indisponible : le dashboard se rabattra sur les standings
+                    }
+                }
+                const divisionState = {
+                    currentGameWeek: live.currentGameWeek ?? null,
+                    totalGameWeeks: live.totalGameWeeks ?? null,
+                    mercatoClosed: mercato.mercatoClosed ?? null,
+                    nextMercatoTurn: mercato.nextMercatoTurn ?? null,
+                };
                 const division = await prisma.division.upsert({
                     where: { gameSeasonId_level: { gameSeasonId: gameSeason.id, level: d } },
-                    update: { name: divName, mpgDivisionId: divId },
-                    create: { gameSeasonId: gameSeason.id, level: d, name: divName, mpgDivisionId: divId },
+                    update: { name: divName, mpgDivisionId: divId, ...divisionState },
+                    create: {
+                        gameSeasonId: gameSeason.id,
+                        level: d,
+                        name: divName,
+                        mpgDivisionId: divId,
+                        ...divisionState,
+                    },
                 });
                 counters.divisions++;
 
@@ -211,6 +298,7 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                     });
                     managerIds.add(manager.id);
                     userToManager.set(u.id, manager.id);
+                    teamToManager.set(row.teamId, manager.id);
 
                     const team = teamInfo.get(row.teamId);
                     const stats = {
@@ -225,6 +313,8 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                         mpgTeamId: row.teamId,
                         teamName: team?.name ?? null,
                         teamAbbr: team?.abbr ?? null,
+                        rankVariation: row.variation ?? null,
+                        budget: team?.budget ?? null,
                     };
                     await prisma.participation.upsert({
                         where: { managerId_divisionId: { managerId: manager.id, divisionId: division.id } },
@@ -314,9 +404,28 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                     // stats de saison indisponibles pour cette division
                 }
 
-                // Matchs (head-to-head) : aller-retour → (nb équipes - 1) * 2 journées.
+                // Calendrier de la division : journée MPG → journée L1 réelle. Sert à dater les
+                // matchs (via le calendrier du championnat), donc inutile sur une saison finie.
+                const realGameWeeks = new Map<number, number>();
+                if (!isFinished) {
+                    try {
+                        const cal = await mpg.apiGet<any>(`/division/${divId}/calendar`);
+                        for (const f of cal?.fixtures ?? []) {
+                            if (typeof f?.gameWeek === "number" && typeof f?.realGameWeek === "number") {
+                                realGameWeeks.set(f.gameWeek, f.realGameWeek);
+                            }
+                        }
+                    } catch {
+                        // calendrier indisponible : matchs sans date
+                    }
+                }
+                const gameWeekDates = realGameWeeks.size ? await championshipDates(championshipId) : null;
+
+                // Matchs : les journées à venir sont stockées elles aussi (played = false), elles
+                // alimentent le « prochain rendez-vous » du dashboard. Repli sur aller-retour
+                // (nb équipes - 1) × 2 quand MPG ne donne pas le nombre de journées.
                 const teamCount = standings.standings.length;
-                const totalGameWeeks = Math.max(0, (teamCount - 1) * 2);
+                const totalGameWeeks = live.totalGameWeeks ?? Math.max(0, (teamCount - 1) * 2);
                 for (let gw = 1; gw <= totalGameWeeks; gw++) {
                     let matchesData: any;
                     try {
@@ -326,17 +435,29 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                     }
                     const dms: any[] = matchesData?.divisionMatches ?? [];
                     if (dms.length === 0) break;
+                    const realGw = realGameWeeks.get(gw);
+                    const kickoffAt = realGw ? (gameWeekDates?.get(realGw) ?? null) : null;
                     for (const m of dms) {
-                        if (!m?.finalResult) continue; // match non joué
-                        const homeId = m.home?.userId ? userToManager.get(m.home.userId) : null;
-                        const awayId = m.away?.userId ? userToManager.get(m.away.userId) : null;
+                        // « Joué » = MPG a posé un score. `finalResult` n'apparaît qu'une fois la
+                        // journée close (absent pendant le live), et `status` vaut 1 ou 2 selon
+                        // l'âge du match : la présence des scores est le seul critère fiable.
+                        const played = m.home?.score != null && m.away?.score != null;
+                        // Un match à venir n'expose que le teamId, pas le userId du manager.
+                        const homeId =
+                            (m.home?.userId ? userToManager.get(m.home.userId) : null) ??
+                            (m.home?.teamId ? teamToManager.get(m.home.teamId) : null);
+                        const awayId =
+                            (m.away?.userId ? userToManager.get(m.away.userId) : null) ??
+                            (m.away?.teamId ? teamToManager.get(m.away.teamId) : null);
                         const data = {
                             divisionId: division.id,
                             gameWeek: gw,
                             homeManagerId: homeId ?? null,
                             awayManagerId: awayId ?? null,
-                            homeScore: m.home?.score ?? 0,
-                            awayScore: m.away?.score ?? 0,
+                            homeScore: played ? m.home.score : null,
+                            awayScore: played ? m.away.score : null,
+                            played,
+                            kickoffAt,
                         };
                         await prisma.match.upsert({
                             where: { mpgMatchId: m.id },

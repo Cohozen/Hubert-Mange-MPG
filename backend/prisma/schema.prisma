@@ -89,6 +89,13 @@ model Division {
   name          String // ex. "Division 1"
   mpgDivisionId String? // id côté MPG si récupéré par le sync
 
+  // État live de la division (source : /division/{id} → liveState / mercatoState).
+  // Renseigné pour la saison en cours ; sert au dashboard d'accueil.
+  currentGameWeek Int?
+  totalGameWeeks  Int?
+  mercatoClosed   Boolean?
+  nextMercatoTurn DateTime?
+
   participations Participation[]
   awards         DivisionAward[]
   matches        Match[]
@@ -116,6 +123,9 @@ model Participation {
   teamName     String? // nom de l'équipe MPG du manager dans cette division
   teamAbbr     String? // abréviation (ex. "JBO")
 
+  rankVariation Int? // évolution de place à la dernière journée (standings[].variation)
+  budget        Int? // budget mercato restant de l'équipe (/teams/division/{id} → budget)
+
   @@unique([managerId, divisionId])
 }
 
@@ -138,6 +148,8 @@ model DivisionAward {
 }
 
 /// Match de division (confrontation directe entre 2 managers) — base du head-to-head.
+/// Contient aussi les matchs À VENIR (`played = false`, scores nuls) : ils alimentent le
+/// « prochain rendez-vous » du dashboard. Toute lecture de résultats doit filtrer `played`.
 model Match {
   id            String   @id @default(cuid())
   mpgMatchId    String   @unique
@@ -148,8 +160,10 @@ model Match {
   homeManager   Manager? @relation("HomeMatch", fields: [homeManagerId], references: [id], onDelete: SetNull)
   awayManagerId String?
   awayManager   Manager? @relation("AwayMatch", fields: [awayManagerId], references: [id], onDelete: SetNull)
-  homeScore     Int
-  awayScore     Int
+  homeScore     Int? // null tant que le match n'est pas joué
+  awayScore     Int?
+  played        Boolean   @default(true)
+  kickoffAt     DateTime? // début de la journée réelle L1 (/championship-calendar/{id})
 }
 
 /// Coupe MPG (tournoi). "Ligue des Crampons" = LDC, "Heureux papa's League" = UEFA.
