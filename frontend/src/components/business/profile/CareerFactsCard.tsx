@@ -1,14 +1,29 @@
 import type { TimelineSeason } from "@/components/business/profile/types";
 
-/** Faits marquants dérivés de la trajectoire : point de départ, montée, relégations. */
+/**
+ * Faits marquants dérivés de la trajectoire : point de départ, montée, relégations.
+ *
+ * La montée se mesure sur le MEILLEUR niveau atteint et sur le temps qu'il a fallu pour y
+ * arriver — pas sur la dernière saison : un joueur monté en D1 tôt puis redescendu méritait
+ * quand même son fait d'armes, et « en N saisons » comptait à tort toute sa carrière.
+ */
 function careerFacts(seasons: TimelineSeason[]): string[] {
     if (!seasons.length) return [];
     const first = seasons[0];
-    const last = seasons[seasons.length - 1];
     let relegations = 0;
     for (let i = 1; i < seasons.length; i++) if (seasons[i].level > seasons[i - 1].level) relegations++;
+
     const facts = [`🚀 Parti de Division ${first.level} en ${first.year}`];
-    if (last.level < first.level) facts.push(`📈 Montée D${first.level} → D${last.level} en ${seasons.length} saisons`);
+
+    const bestLevel = Math.min(...seasons.map((s) => s.level));
+    const climbIdx = seasons.findIndex((s) => s.level === bestLevel);
+    if (bestLevel < first.level) {
+        const nb = climbIdx + 1; // saisons jouées, celle de l'arrivée incluse
+        facts.push(
+            `📈 Montée D${first.level} → D${bestLevel} en ${nb} saison${nb > 1 ? "s" : ""} (${seasons[climbIdx].year})`,
+        );
+    }
+
     facts.push(
         relegations === 0
             ? `🛡️ Aucune relégation en ${seasons.length} saisons`

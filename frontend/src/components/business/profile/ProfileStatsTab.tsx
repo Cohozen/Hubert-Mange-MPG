@@ -111,13 +111,14 @@ export function ProfileStatsTab({ managerId }: { managerId: string }) {
     const goalsFor = sum(seasons.map((s) => s.goalsFor));
     const goalsAgainst = sum(seasons.map((s) => s.goalsAgainst));
     const winPct = played ? Math.round((won / played) * 100) : 0;
-    const titles = seasons.filter((s) => s.finalRank === 1).length;
+    // Même règle que le palmarès : le rang d'une saison en cours n'est que provisoire.
+    const titles = seasons.filter((s) => s.finalRank === 1 && s.status === "finished").length;
 
     const withPts = seasons.filter((s) => s.points != null);
     const best = withPts.length ? withPts.reduce((a, b) => ((b.points ?? 0) > (a.points ?? 0) ? b : a)) : null;
     const worst = withPts.length ? withPts.reduce((a, b) => ((b.points ?? 0) < (a.points ?? 0) ? b : a)) : null;
     const seasonSub = (s: TimelineSeason | null) =>
-        s ? `${s.division} · ${s.realSeason}${s.finalRank === 1 ? " · 🏆" : ""}` : "";
+        s ? `${s.division} · ${s.realSeason}${s.finalRank === 1 && s.status === "finished" ? " · 🏆" : ""}` : "";
 
     const records = [
         {

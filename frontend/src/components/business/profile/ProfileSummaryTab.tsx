@@ -263,7 +263,14 @@ export function ProfileSummaryTab({ managerId }: { managerId: string }) {
     // Série de victoires : verte tant qu'elle court, sinon on prend la couleur du dernier résultat.
     const streakAccent = h.currentWinStreak > 0 ? RESULT.W.c : h.lastMatch ? RESULT[h.lastMatch.result].c : "#FF6B35";
     const last = tl?.seasons.at(-1);
-    const lastValue = last ? (last.finalRank === 1 ? "Champion" : last.finalRank ? `${last.finalRank}e` : "—") : "—";
+    // Tant que la saison court, le rang est provisoire : on n'annonce pas un champion.
+    const lastValue = !last?.finalRank
+        ? "—"
+        : last.finalRank === 1
+          ? last.status === "finished"
+              ? "Champion"
+              : "1er"
+          : `${last.finalRank}e`;
     const lastSub = last ? `${last.division} · ${last.realSeason}` : "Saison à venir";
 
     return (

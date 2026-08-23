@@ -96,10 +96,3 @@ export interface FunStats {
     bestAttack: RankRow[];
     mostPoints: RankRow[];
 }
-export interface Movement {
-    managerId: string;
-    manager: string;
-    username: string | null;
-    avatarUrl: string | null;
-    count: number;
-}

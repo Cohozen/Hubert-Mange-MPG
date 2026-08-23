@@ -1,37 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { api } from "@/api/client";
 import { useAuth } from "@/auth/useAuth";
 import { HubertBookCard } from "@/components/business/stats/HubertBookCard";
-import { MovementCard } from "@/components/business/stats/MovementCard";
 import { RankingPodiumCard } from "@/components/business/stats/RankingPodiumCard";
 import { RankingRestList } from "@/components/business/stats/RankingRestList";
 import { StatsInfoDialog } from "@/components/business/stats/StatsInfoDialog";
-import type {
-    AllTimeRow,
-    CupCount,
-    FunStats,
-    Movement,
-    RankingEntry,
-    RankRow,
-} from "@/components/business/stats/types";
+import type { AllTimeRow, CupCount, FunStats, RankingEntry, RankRow } from "@/components/business/stats/types";
 import { Empty } from "@/components/ui/Empty";
 import { PillTabs } from "@/components/ui/PillTabs";
+import { useTabParam } from "@/lib/useTabParam";
 
 type Tab = "classement" | "fun";
-
-const moveRows = (m?: Movement[]): RankRow[] =>
-    (m ?? []).map((x) => ({
-        managerId: x.managerId,
-        manager: x.manager,
-        username: x.username,
-        avatarUrl: x.avatarUrl,
-        value: x.count,
-    }));
+const TABS: Tab[] = ["classement", "fun"];
 
 export default function StatsPage() {
     const { data: me } = useAuth();
-    const [tab, setTab] = useState<Tab>("classement");
+    const [tab, setTab] = useTabParam<Tab>("tab", "classement", TABS);
 
     const allTime = useQuery({
         queryKey: ["all-time"],
@@ -41,11 +25,6 @@ export default function StatsPage() {
     const cups = useQuery({
         queryKey: ["tournaments"],
         queryFn: () => api<{ ranking: CupCount[] }>("/api/palmares/tournaments"),
-    });
-    const movements = useQuery({
-        queryKey: ["movements"],
-        queryFn: () =>
-            api<{ promotions: Movement[]; relegations: Movement[]; yoyo: Movement[] }>("/api/palmares/movements"),
     });
 
     const cupsBy = new Map((cups.data?.ranking ?? []).map((c) => [c.managerId, c]));
@@ -68,11 +47,6 @@ export default function StatsPage() {
     });
     const podium = entries.slice(0, 3);
     const rest = entries.slice(3);
-
-    const promotions = moveRows(movements.data?.promotions);
-    const relegations = moveRows(movements.data?.relegations);
-    const yoyo = moveRows(movements.data?.yoyo);
-    const hasMovements = promotions.length + relegations.length + yoyo.length > 0;
 
     const records: { icon: string; title: string; subtitle: string; unit: string; color: string; rows?: RankRow[] }[] =
         [
@@ -283,56 +257,6 @@ export default function StatsPage() {
                                     La suite du classement
                                 </div>
                                 <RankingRestList entries={rest} meId={me?.id} />
-                            </div>
-                        )}
-
-                        {/* Mouvements */}
-                        {hasMovements && (
-                            <div className="space-y-3">
-                                <div className="font-display text-[10px] font-extrabold uppercase tracking-[1.5px] text-texte-2 lg:text-base lg:tracking-[-0.2px] lg:normal-case lg:text-white">
-                                    Montées · Descentes · Yo-yo
-                                </div>
-                                <div className="grid gap-2.5 lg:grid-cols-3 lg:gap-[18px]">
-                                    <MovementCard
-                                        title="Montées"
-                                        icon="▲"
-                                        accentColor="#00E5A0"
-                                        accentRgb="0,229,160"
-                                        rows={promotions}
-                                        formatValue={(n) => `▲ ${n}`}
-                                        headerRight={
-                                            <span className="rounded-full bg-menthe/15 px-[9px] py-[3px] font-display text-[11px] font-black text-menthe lg:px-[11px] lg:py-1 lg:text-xs">
-                                                {promotions.length}
-                                            </span>
-                                        }
-                                    />
-                                    <MovementCard
-                                        title="Descentes"
-                                        icon="▼"
-                                        accentColor="#FF2D78"
-                                        accentRgb="255,45,120"
-                                        rows={relegations}
-                                        formatValue={(n) => `▼ ${n}`}
-                                        headerRight={
-                                            <span className="rounded-full bg-rose/15 px-[9px] py-[3px] font-display text-[11px] font-black text-rose lg:px-[11px] lg:py-1 lg:text-xs">
-                                                {relegations.length}
-                                            </span>
-                                        }
-                                    />
-                                    <MovementCard
-                                        title="Les yo-yo"
-                                        icon="🎢"
-                                        accentColor="#A78BFA"
-                                        accentRgb="167,139,250"
-                                        rows={yoyo}
-                                        formatValue={(n) => `🎢 ${n}× A/R`}
-                                        headerRight={
-                                            <span className="font-display text-[9px] font-black uppercase tracking-[0.5px] text-violet-clair lg:text-[10px]">
-                                                Ascenseur
-                                            </span>
-                                        }
-                                    />
-                                </div>
                             </div>
                         )}
                     </div>

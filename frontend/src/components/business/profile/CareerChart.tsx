@@ -34,7 +34,7 @@ function CareerTooltip({ active, payload }: { active?: boolean; payload?: { payl
             <div className="text-white">
                 {s.division}
                 {s.finalRank != null && <span className="text-texte-2"> · {s.finalRank}ᵉ</span>}
-                {s.finalRank === 1 && " 🥇"}
+                {s.finalRank === 1 && s.status === "finished" && " 🥇"}
             </div>
             <div>
                 {s.points ?? 0} pts · <span className="text-menthe">{s.won ?? 0}V</span> {s.drawn ?? 0}N{" "}
@@ -86,7 +86,7 @@ export function CareerChart({ seasons }: { seasons: TimelineSeason[] }) {
                         isAnimationActive={false}
                         dot={(props: any) => {
                             const { cx, cy, index, payload } = props;
-                            if (payload.finalRank === 1) {
+                            if (payload.finalRank === 1 && payload.status === "finished") {
                                 return (
                                     <text key={index} x={cx} y={cy} dy={5} textAnchor="middle" fontSize={15}>
                                         🥇
