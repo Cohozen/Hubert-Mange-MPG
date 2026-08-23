@@ -86,9 +86,22 @@ synchronisation des données depuis l'API MPG.
   le serveur MCP Supabase.
 - **Montants en centimes (`Int`)** partout (cagnotte, contributions, payouts) — éviter les
   flottants. Convertir uniquement à l'affichage.
-- **`backend/src/connector/` = flow OAuth MPG non officiel et fragile.** C'est le SEUL point de
-  contact avec MPG. Si MPG/Ligue1 change son OAuth, on corrige UNIQUEMENT là. Le reste de l'appli
-  ne dépend que de l'interface `MpgConnector` (`getData` cookie / `apiGet` token).
+- **`backend/src/connector/` = flow d'auth MPG non officiel et fragile.** C'est le SEUL point de
+  contact avec MPG. Si MPG/Ligue1 change son auth, on corrige UNIQUEMENT là. Le reste de l'appli
+  ne dépend que de `MpgConnector.apiGet(path)` (api.mpg.football, JWT en Bearer).
+  **Depuis la refonte MPG d'août 2026** : mpg.football est une SPA Expo statique (les routes Remix
+  `?_data=...` et `/auth/callback` ont disparu) et l'auth passe par **Auth0 Universal Login** sur
+  `connect.ligue1.fr`. `auth.ts` rejoue donc un **Authorization Code + PKCE** côté serveur :
+  `/authorize` → `/u/login` (POST `state`/`username`/`password`/`action`) → `/authorize/resume`
+  → `/oauth/token`. Constantes (client_id web, audience `https://mpg.ligue1.fr`, `redirect_uri`
+  `https://mpg.football/`) extraites de leur bundle. Détails : le grant Auth0 `password` est
+  **désactivé** (pas de raccourci login/mot de passe → token) ; il y a du **Cloudflare** devant
+  `connect.ligue1.fr`, d'où le `User-Agent` navigateur obligatoire ; les cookies (`did`, `auth0`,
+  `__cf_bm`) doivent être propagés d'une étape à l'autre. `MpgAuthError.kind` distingue
+  `credentials` (401) de `flow` (502) — ne jamais ré-avaler cette distinction, c'est ce qui rend
+  la prochaine casse MPG diagnosticable. Headers du client v13 exigés par l'API :
+  `platform: web`, `client-version`, `application: mpg`, `client-language: fr-FR`.
+  **Diagnostic en 1 commande : `npm run connector:test`** (claims du JWT, TTL, refresh token, tuiles).
 - **Authentification du sync :**
   - Sync manuel (`POST /api/sync`) + découverte/gestion ligues-tournois (`/leagues|tournaments...`) →
     token MPG de **l'admin connecté** (capturé au login, chiffré sur `Manager`). Ouvert au rôle
@@ -97,11 +110,16 @@ synchronisation des données depuis l'API MPG.
   - **Tests / preview :** toute l'appli est derrière le login MPG (`App.tsx` : `if (!me)` →
     `LoginPage`). Pour se connecter en local (et atteindre les pages protégées comme Stats), les
     identifiants de test sont dans `backend/.env` (`MPG_ADMIN_EMAIL` / `MPG_ADMIN_PASSWORD`).
-  - Token expiré → échec explicite « reconnecte-toi » (pas de fallback silencieux).
+  - **Refresh token** : Auth0 accorde `offline_access` → le refresh token est stocké chiffré
+    (`Manager.mpgRefreshTokenEncrypted`) et `connectorForManager` renouvelle l'access token tout
+    seul quand le préflight `/user` échoue, puis re-persiste les deux (Auth0 fait tourner les
+    refresh tokens). L'access token vit ~30 jours.
+  - Token expiré ET refresh impossible → échec explicite « reconnecte-toi » (pas de fallback
+    silencieux).
   - **Multi-admin** : les `TrackedLeague`/`TrackedTournament` sont globales (visibles par tous les
     admins). Le sync manuel est **résilient** : une ligue suivie non visible par le token de l'admin
     connecté est ignorée avec une note, sans planter (`try/catch` autour de `apiGet('/league/{id}')`).
-- **`ENCRYPTION_KEY` (AES-256-GCM)** chiffre les IBAN ET le token MPG. Obligatoire en prod, à ne
+- **`ENCRYPTION_KEY` (AES-256-GCM)** chiffre les IBAN ET les tokens MPG (access + refresh). Obligatoire en prod, à ne
   jamais perdre ni committer.
 - **Rôles** : `SUPERADMIN` vient de `SUPERADMIN_MPG_USER_IDS` (config, recalculé par requête) ;
   `ADMIN`/`TREASURER` sont stockés sur `Manager`. **ADMIN** gère ligues/tournois suivis + sync +
@@ -144,6 +162,12 @@ synchronisation des données depuis l'API MPG.
   (rôle ADMIN) ; **la route met à jour immédiatement la ligne `Tournament` déjà synchronisée** (effet
   visible sans relancer un sync). L'override est **par environnement** (donnée DB) : à reposer dans
   l'admin prod après déploiement.
+- **Année d'une saison de ligue EN COURS** : `/league/{id}/winners?season=N` renvoie **404** tant
+  que la saison n'est pas finie, donc pas de `championshipSeason`. Repli obligatoire sur
+  `/championships/active` → `championships[championshipId].season` (`activeChampionshipSeasons`
+  dans `sync.ts`, appliqué à la seule saison courante). Sans ça on crée une `RealSeason` bâtarde
+  (`"<ligue> — saison N"`, `year = N`) qu'un sync ultérieur **ne corrige jamais** (`name` est
+  `@unique` et la bonne clé est différente) — il faut alors la supprimer à la main.
 - **Année d'une coupe = `createdAt` MPG** (`/tournament/{id}`), pas le nom (l'année n'y est pas
   toujours) — `tournamentYear()` dans `sync.ts`, replis nom puis année courante. Convention
   inchangée : **coupe année N ↔ `RealSeason` N-1**. Pour corriger des données déjà en prod
