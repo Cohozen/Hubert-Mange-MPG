@@ -40,15 +40,67 @@ export function initials(name?: string | null): string {
         .join("");
 }
 
-const DIV: Record<number, { c: string; bg: string; bd: string }> = {
-    1: { c: "#FFD23F", bg: "rgba(255,210,63,.13)", bd: "rgba(255,210,63,.42)" },
-    2: { c: "#A78BFA", bg: "rgba(167,139,250,.13)", bd: "rgba(167,139,250,.42)" },
-    3: { c: "#FF2D78", bg: "rgba(255,45,120,.13)", bd: "rgba(255,45,120,.42)" },
-    4: { c: "#FF6B35", bg: "rgba(255,107,53,.13)", bd: "rgba(255,107,53,.42)" },
-    5: { c: "#00E5A0", bg: "rgba(0,229,160,.13)", bd: "rgba(0,229,160,.42)" },
-    6: { c: "#8B92C4", bg: "rgba(139,146,196,.13)", bd: "rgba(139,146,196,.42)" },
+/** Couleurs d'une division : accent, fond et bordure de chip, dégradé de pastille. */
+export interface DivisionStyle {
+    c: string;
+    bg: string;
+    bd: string;
+    grad: string;
+}
+
+/**
+ * Palette des divisions D1 → D6, **source unique** : chips du classement Rétro, cards de
+ * champion du Palmarès et cards de trophée du Profil. Niveau inconnu (> D6) → gris neutre.
+ */
+const DIV: Record<number, DivisionStyle> = {
+    1: {
+        c: "#FFD23F",
+        bg: "rgba(255,210,63,.13)",
+        bd: "rgba(255,210,63,.42)",
+        grad: "linear-gradient(135deg,#FFD23F,#FF6B35)",
+    },
+    2: {
+        c: "#A78BFA",
+        bg: "rgba(167,139,250,.13)",
+        bd: "rgba(167,139,250,.42)",
+        grad: "linear-gradient(135deg,#6D28D9,#A78BFA)",
+    },
+    3: {
+        c: "#FF2D78",
+        bg: "rgba(255,45,120,.13)",
+        bd: "rgba(255,45,120,.42)",
+        grad: "linear-gradient(135deg,#FF2D78,#FF6B35)",
+    },
+    4: {
+        c: "#FF6B35",
+        bg: "rgba(255,107,53,.13)",
+        bd: "rgba(255,107,53,.42)",
+        grad: "linear-gradient(135deg,#FF6B35,#FFD23F)",
+    },
+    5: {
+        c: "#00E5A0",
+        bg: "rgba(0,229,160,.13)",
+        bd: "rgba(0,229,160,.42)",
+        grad: "linear-gradient(135deg,#00E5A0,#34D399)",
+    },
+    6: {
+        c: "#8B92C4",
+        bg: "rgba(139,146,196,.13)",
+        bd: "rgba(139,146,196,.42)",
+        grad: "linear-gradient(135deg,#3A4280,#8B92C4)",
+    },
 };
-const DIV_NEUTRAL = { c: "#8B92C4", bg: "rgba(139,146,196,.13)", bd: "rgba(139,146,196,.42)" };
+const DIV_NEUTRAL: DivisionStyle = {
+    c: "#8B92C4",
+    bg: "rgba(139,146,196,.13)",
+    bd: "rgba(139,146,196,.42)",
+    grad: "linear-gradient(135deg,#3A4280,#8B92C4)",
+};
+
+/** Couleurs d'un niveau de division (1 = D1). */
+export function divisionStyle(level: number): DivisionStyle {
+    return DIV[level] ?? DIV_NEUTRAL;
+}
 const CUP = {
     ldc: { c: "#00E5A0", bg: "rgba(0,229,160,.13)", bd: "rgba(0,229,160,.42)" },
     uefa: { c: "#FFD23F", bg: "rgba(255,210,63,.13)", bd: "rgba(255,210,63,.42)" },
@@ -59,7 +111,8 @@ const CUP = {
 export function divChips(titles: number[]): Chip[] {
     const out: Chip[] = [];
     titles.forEach((n, i) => {
-        if (n > 0) out.push({ label: `D${i + 1}`, count: n > 1 ? `×${n}` : "", ...(DIV[i + 1] ?? DIV_NEUTRAL) });
+        const { c, bg, bd } = divisionStyle(i + 1);
+        if (n > 0) out.push({ label: `D${i + 1}`, count: n > 1 ? `×${n}` : "", c, bg, bd });
     });
     return out;
 }

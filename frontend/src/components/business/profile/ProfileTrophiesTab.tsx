@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import type { CupRow, DivisionWinner } from "@/components/business/palmares/types";
-import type { TimelineSeason } from "@/components/business/profile/types";
+import { divisionStyle } from "@/components/business/stats/playerStyle";
 import { Empty } from "@/components/ui/Empty";
 
 interface Trophy {
@@ -17,6 +17,9 @@ interface Trophy {
     sort: number;
 }
 
+/** Poids de tri : les coupes d'abord (C1 → C4), puis les titres de division par niveau. */
+const DIVISION_SORT_OFFSET = 10;
+
 const CUP = {
     LDC: {
         icon: "⭐",
@@ -25,7 +28,7 @@ const CUP = {
         color: "#00E5A0",
         grad: "linear-gradient(135deg,#00E5A0,#34D399)",
         rgb: "0,229,160",
-        sort: 1,
+        sort: 0,
     },
     UEFA: {
         icon: "🎖️",
@@ -34,7 +37,7 @@ const CUP = {
         color: "#FF6B35",
         grad: "linear-gradient(135deg,#FF6B35,#FFD23F)",
         rgb: "255,107,53",
-        sort: 2,
+        sort: 1,
     },
     CONFERENCE: {
         icon: "🍐",
@@ -43,25 +46,9 @@ const CUP = {
         color: "#A78BFA",
         grad: "linear-gradient(135deg,#6D28D9,#A78BFA)",
         rgb: "167,139,250",
-        sort: 3,
+        sort: 2,
     },
 } as const;
-
-function careerFacts(seasons: TimelineSeason[]): string[] {
-    if (!seasons.length) return [];
-    const first = seasons[0];
-    const last = seasons[seasons.length - 1];
-    let relegations = 0;
-    for (let i = 1; i < seasons.length; i++) if (seasons[i].level > seasons[i - 1].level) relegations++;
-    const facts = [`🚀 Parti de Division ${first.level} en ${first.year}`];
-    if (last.level < first.level) facts.push(`📈 Montée D${first.level} → D${last.level} en ${seasons.length} saisons`);
-    facts.push(
-        relegations === 0
-            ? `🛡️ Aucune relégation en ${seasons.length} saisons`
-            : `📉 ${relegations} relégation${relegations > 1 ? "s" : ""}`,
-    );
-    return facts;
-}
 
 export function ProfileTrophiesTab({ managerId }: { managerId: string }) {
     const winners = useQuery({
@@ -72,11 +59,6 @@ export function ProfileTrophiesTab({ managerId }: { managerId: string }) {
         queryKey: ["tournaments"],
         queryFn: () => api<{ list: CupRow[] }>("/api/palmares/tournaments"),
     });
-    const tl = useQuery({
-        queryKey: ["timeline", managerId],
-        queryFn: () => api<{ seasons: TimelineSeason[] }>(`/api/palmares/timeline/${managerId}`),
-    });
-
     if (winners.isLoading || cups.isLoading) return null;
 
     const titles = (winners.data?.divisionWinners ?? []).filter((w) => w.managerId === managerId);
@@ -87,18 +69,21 @@ export function ProfileTrophiesTab({ managerId }: { managerId: string }) {
     }
 
     const trophies: Trophy[] = [
-        ...titles.map((t) => ({
-            icon: t.level === 1 ? "🏆" : "🥇",
-            comp: `Champion D${t.level}`,
-            sub: "Titre de division",
-            year: t.realSeason,
-            tag: `Division ${t.level}`,
-            color: "#FFD23F",
-            grad: "linear-gradient(135deg,#FFD23F,#FF6B35)",
-            tagBg: "rgba(255,210,63,.13)",
-            tagBd: "rgba(255,210,63,.45)",
-            sort: 0,
-        })),
+        ...titles.map((t) => {
+            const d = divisionStyle(t.level);
+            return {
+                icon: t.level === 1 ? "🏆" : "🥇",
+                comp: `Division ${t.level}`,
+                sub: "Titre de division",
+                year: t.realSeason,
+                tag: `S${t.gameSeasonIndex}`,
+                color: d.c,
+                grad: d.grad,
+                tagBg: d.bg,
+                tagBd: d.bd,
+                sort: DIVISION_SORT_OFFSET + t.level,
+            };
+        }),
         ...cupWins.map((c) => {
             const m = CUP[c.competition as keyof typeof CUP] ?? CUP.CONFERENCE;
             return {
@@ -115,8 +100,6 @@ export function ProfileTrophiesTab({ managerId }: { managerId: string }) {
             };
         }),
     ].sort((a, b) => a.sort - b.sort || b.year.localeCompare(a.year));
-
-    const facts = careerFacts(tl.data?.seasons ?? []);
 
     return (
         <div>
@@ -169,19 +152,6 @@ export function ProfileTrophiesTab({ managerId }: { managerId: string }) {
                         </div>
                     </div>
                 ))}
-
-                {facts.length > 0 && (
-                    <div className="col-span-2 flex flex-col justify-center rounded-2xl border border-dashed border-bord bg-gradient-to-br from-carte-2 to-carte p-4 lg:col-span-1 lg:p-5">
-                        <div className="mb-3 font-display text-[10px] font-extrabold uppercase tracking-[1.5px] text-texte-2">
-                            Faits de carrière
-                        </div>
-                        <div className="flex flex-col gap-2.5 text-xs text-[#C7CEEF]">
-                            {facts.map((f) => (
-                                <div key={f}>{f}</div>
-                            ))}
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

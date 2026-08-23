@@ -1,29 +1,23 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { DivisionWinner } from "@/components/business/palmares/types";
+import { divisionStyle } from "@/components/business/stats/playerStyle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-/** Couleurs / dégradés par niveau de division (D1 → D6). */
-const DIVS: Record<number, { color: string; grad: string; txt: string; label: string }> = {
-    1: {
-        color: "#FFD23F",
-        grad: "linear-gradient(135deg,#FFD23F,#FF6B35)",
-        txt: "#3D2E00",
-        label: "Division 1 · Élite",
-    },
-    2: { color: "#A78BFA", grad: "linear-gradient(135deg,#6D28D9,#A78BFA)", txt: "#ffffff", label: "Division 2" },
-    3: { color: "#FF2D78", grad: "linear-gradient(135deg,#FF2D78,#FF6B35)", txt: "#ffffff", label: "Division 3" },
-    4: { color: "#FF6B35", grad: "linear-gradient(135deg,#FF6B35,#FFD23F)", txt: "#3D2E00", label: "Division 4" },
-    5: { color: "#00E5A0", grad: "linear-gradient(135deg,#00E5A0,#34D399)", txt: "#06251A", label: "Division 5" },
-    6: { color: "#8B92C4", grad: "linear-gradient(135deg,#3A4280,#8B92C4)", txt: "#0A0E27", label: "Division 6" },
+/** Couleur du texte sur la pastille + libellé (les couleurs viennent de `divisionStyle`). */
+const DIV_LABEL: Record<number, { txt: string; label: string }> = {
+    1: { txt: "#3D2E00", label: "Division 1 · Élite" },
+    2: { txt: "#ffffff", label: "Division 2" },
+    3: { txt: "#ffffff", label: "Division 3" },
+    4: { txt: "#3D2E00", label: "Division 4" },
+    5: { txt: "#06251A", label: "Division 5" },
+    6: { txt: "#0A0E27", label: "Division 6" },
 };
-const NEUTRAL = {
-    color: "#8B92C4",
-    grad: "linear-gradient(135deg,#3A4280,#8B92C4)",
-    txt: "#0A0E27",
-    label: "Division",
+const NEUTRAL_LABEL = { txt: "#0A0E27", label: "Division" };
+const divStyle = (level: number) => {
+    const { c, grad } = divisionStyle(level);
+    return { color: c, grad, ...(DIV_LABEL[level] ?? NEUTRAL_LABEL) };
 };
-const divStyle = (level: number) => DIVS[level] ?? NEUTRAL;
 
 function initials(name?: string | null) {
     if (!name) return "—";

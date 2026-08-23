@@ -1,6 +1,7 @@
 export interface DivisionWinner {
     season: string;
     realSeason: string;
+    gameSeasonIndex: number; // numéro de saison MPG (badge « S3 »)
     division: string;
     level: number;
     winner: string | null;
