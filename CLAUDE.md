@@ -11,7 +11,7 @@ synchronisation des données depuis l'API MPG.
   - **Un seul composant par fichier, un seul fichier par composant.** Pas de sous-composant
     défini dans une page.
   - Composants **métier** → `src/components/business/<domaine>/` (ex. `cagnotte/`, `stats/`,
-    `palmares/`, `admin/`, `profile/`, `settings/`) ; UI **générique réutilisable** (Avatar,
+    `palmares/`, `admin/`, `profile/`, `settings/`, `login/`) ; UI **générique réutilisable** (Avatar,
     ManagerLabel, Field, Empty…) → `src/components/ui/`. Les types partagés d'un domaine vont dans
     son `types.ts`.
   - Les `src/pages/*.tsx` ne font que **data-fetching + composition** (elles assemblent les
@@ -119,6 +119,15 @@ synchronisation des données depuis l'API MPG.
   - **Multi-admin** : les `TrackedLeague`/`TrackedTournament` sont globales (visibles par tous les
     admins). Le sync manuel est **résilient** : une ligue suivie non visible par le token de l'admin
     connecté est ignorée avec une note, sans planter (`try/catch` autour de `apiGet('/league/{id}')`).
+- **`/api/public` = seul namespace SANS authentification** (`backend/src/modules/public/routes.ts`).
+  Il existe parce que la page de connexion s'affiche **avant** le login et ne peut donc taper aucun
+  endpoint protégé. Règle : **agrégats uniquement** (des compteurs), jamais de nom, d'email ni de
+  donnée perso — la réponse est lisible par n'importe qui. Aujourd'hui une seule route,
+  `GET /api/public/teaser` → `{ saison, equipes, editions, divisions }`, qui alimente le hero du
+  Login (`business/login/LoginStatsTicker`) : **plus aucune valeur en dur à reposer chaque saison**.
+  `editions` = nombre de **ligues MPG distinctes réellement synchronisées** (`GameSeason.mpgLeagueId`,
+  pas `TrackedLeague` : on n'annonce pas une édition au palmarès vide) ; `equipes`/`divisions` =
+  dernière saison jeu de la saison réelle la plus récente.
 - **`ENCRYPTION_KEY` (AES-256-GCM)** chiffre les IBAN ET les tokens MPG (access + refresh).
   Obligatoire en prod, à ne jamais perdre ni committer.
 - **Rôles** : `SUPERADMIN` vient de `SUPERADMIN_MPG_USER_IDS` (config, recalculé par requête) ;

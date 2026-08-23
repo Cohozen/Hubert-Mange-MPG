@@ -9,6 +9,7 @@ import { adminRouter } from "./modules/admin/routes.js";
 import { cagnotteRouter } from "./modules/cagnotte/routes.js";
 import { palmaresRouter } from "./modules/palmares/routes.js";
 import { profileRouter } from "./modules/profile/routes.js";
+import { publicRouter } from "./modules/public/routes.js";
 import { startScheduler } from "./sync/scheduler.js";
 import { connectorForManager, executeSync } from "./sync/service.js";
 
@@ -35,6 +36,8 @@ app.use(attachSession);
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
 app.use("/auth", authRouter);
+// Routes sans authentification (chiffres du hero de la page de connexion).
+app.use("/api/public", publicRouter);
 app.use("/api/cagnotte", cagnotteRouter);
 app.use("/api/palmares", palmaresRouter);
 app.use("/api/admin", adminRouter);

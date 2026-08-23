@@ -1,7 +1,9 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/api/client";
+import { LoginStatsTicker } from "@/components/business/login/LoginStatsTicker";
+import type { LoginTeaser } from "@/components/business/login/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/ui/Logo";
@@ -26,6 +28,12 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const qc = useQueryClient();
     const navigate = useNavigate();
+    // Chiffres du hero : endpoint PUBLIC (la page s'affiche avant authentification).
+    const teaser = useQuery({
+        queryKey: ["public-teaser"],
+        queryFn: () => api<LoginTeaser>("/api/public/teaser"),
+        staleTime: 5 * 60_000,
+    });
 
     async function onSubmit(e: FormEvent) {
         e.preventDefault();
@@ -77,7 +85,7 @@ export default function LoginPage() {
                             LIGUE HUBERT MANGE
                         </div>
                         <div className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/70">
-                            Saison 2025/2026
+                            {teaser.data?.saison ? `Saison ${teaser.data.saison}` : "\u00a0"}
                         </div>
                     </div>
                 </div>
@@ -95,21 +103,12 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                {/* Ticker stats */}
-                <div className="relative z-10 flex gap-[38px]">
-                    {[
-                        { v: "36", l: "Équipes" },
-                        { v: "3", l: "Editions" },
-                        { v: "6", l: "Divisions" },
-                    ].map((s) => (
-                        <div key={s.l}>
-                            <div className="font-display text-[34px] font-black leading-none text-white">{s.v}</div>
-                            <div className="mt-1 text-[10px] font-bold uppercase tracking-[1.5px] text-white/70">
-                                {s.l}
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                {/* Ticker stats (masqué si l'API publique ne répond pas) */}
+                {!teaser.isError && (
+                    <div className="relative z-10">
+                        <LoginStatsTicker teaser={teaser.data} />
+                    </div>
+                )}
             </div>
 
             {/* ===== Panneau formulaire (desktop) / écran complet (mobile) ===== */}
