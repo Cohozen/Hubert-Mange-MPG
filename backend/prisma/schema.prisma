@@ -14,34 +14,35 @@ datasource db {
 
 /// Un humain du groupe. Stable dans le temps, relié à son compte MPG.
 model Manager {
-  id          String   @id @default(cuid())
-  mpgUserId   String?  @unique // identifiant utilisateur côté MPG (rempli au login/sync)
-  email       String?  @unique
-  displayName String
-  username    String? // pseudo MPG (ex. "Coco#4B9KV")
-  avatarUrl   String?
-  roles       String   @default("") // CSV de rôles assignés : "ADMIN", "TREASURER" (SUPERADMIN via config)
+  id                       String    @id @default(cuid())
+  mpgUserId                String?   @unique // identifiant utilisateur côté MPG (rempli au login/sync)
+  email                    String?   @unique
+  displayName              String
+  username                 String? // pseudo MPG (ex. "Coco#4B9KV")
+  avatarUrl                String?
+  roles                    String    @default("") // CSV de rôles assignés : "ADMIN", "TREASURER" (SUPERADMIN via config)
   // Coordonnées de paiement (visibles par le membre + banquier/superadmin uniquement).
-  phone         String? // numéro Wero (optionnel)
-  weroUrl       String? // lien de partage Wero perso (https://share.weropay.eu/...) → QR
-  ibanEncrypted String? // IBAN chiffré au repos (AES-256-GCM)
-  ibanHolder    String? // nom du titulaire (pour le QR SEPA)
-  // Token API MPG du membre, capturé au login et chiffré au repos (AES-256-GCM).
-  // Sert au sync manuel + à la découverte admin (à la place des identifiants .env).
-  mpgTokenEncrypted String? // token api.mpg.football chiffré
-  mpgTokenUpdatedAt DateTime? // date de dernière capture du token
-  createdAt   DateTime @default(now())
+  phone                    String? // numéro Wero (optionnel)
+  weroUrl                  String? // lien de partage Wero perso (https://share.weropay.eu/...) → QR
+  ibanEncrypted            String? // IBAN chiffré au repos (AES-256-GCM)
+  ibanHolder               String? // nom du titulaire (pour le QR SEPA)
+  // Tokens MPG du membre, capturés au login et chiffrés au repos (AES-256-GCM).
+  // Servent au sync manuel + à la découverte admin (à la place des identifiants .env).
+  mpgTokenEncrypted        String? // access token api.mpg.football chiffré
+  mpgTokenUpdatedAt        DateTime? // date de dernière capture du token
+  mpgRefreshTokenEncrypted String? // refresh token Auth0 chiffré : renouvelle l'access token sans mot de passe
+  createdAt                DateTime  @default(now())
 
   participations Participation[]
   contributions  Contribution[]
   payouts        Payout[]
-  cupMatchesHome CupMatch[]       @relation("HomeManager")
-  cupMatchesAway CupMatch[]       @relation("AwayManager")
-  cupMatchesWon  CupMatch[]       @relation("WinnerManager")
+  cupMatchesHome CupMatch[]      @relation("HomeManager")
+  cupMatchesAway CupMatch[]      @relation("AwayManager")
+  cupMatchesWon  CupMatch[]      @relation("WinnerManager")
   awards         DivisionAward[]
-  tournamentsWon Tournament[]     @relation("TournamentWinner")
-  homeMatches    Match[]          @relation("HomeMatch")
-  awayMatches    Match[]          @relation("AwayMatch")
+  tournamentsWon Tournament[]    @relation("TournamentWinner")
+  homeMatches    Match[]         @relation("HomeMatch")
+  awayMatches    Match[]         @relation("AwayMatch")
 }
 
 /// Saison réelle (ex. "2025-2026"). Contient les saisons jeu MPG + 1 coupe.
@@ -61,7 +62,7 @@ model RealSeason {
 
 /// Une des 3 saisons "jeu" d'une saison réelle.
 model GameSeason {
-  id                String   @id @default(cuid())
+  id                String     @id @default(cuid())
   realSeasonId      String
   realSeason        RealSeason @relation(fields: [realSeasonId], references: [id], onDelete: Cascade)
   index             Int // position dans la saison réelle (= numéro de saison MPG)
@@ -69,7 +70,7 @@ model GameSeason {
   mpgLeagueId       String? // ex. "mpg_league_TJ4ZP8MT"
   mpgSeason         Int? // numéro de saison côté MPG (1, 2, 3...)
   mpgChampionshipId String? // championshipId côté MPG (ex. "1")
-  status            String   @default("active") // active | finished
+  status            String     @default("active") // active | finished
   startDate         DateTime?
   endDate           DateTime?
 
@@ -98,22 +99,22 @@ model Division {
 /// La "ligne" d'un manager dans une division pour une saison jeu.
 /// Table pivot qui absorbe montées/descentes et la croissance du groupe.
 model Participation {
-  id         String   @id @default(cuid())
-  managerId  String
-  manager    Manager  @relation(fields: [managerId], references: [id], onDelete: Cascade)
-  divisionId String
-  division   Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
-  finalRank  Int? // classement final dans la division (1 = vainqueur)
-  points     Int?
-  played     Int?
-  won        Int?
-  drawn      Int?
-  lost       Int?
-  goalsFor   Int?
+  id           String   @id @default(cuid())
+  managerId    String
+  manager      Manager  @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  divisionId   String
+  division     Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  finalRank    Int? // classement final dans la division (1 = vainqueur)
+  points       Int?
+  played       Int?
+  won          Int?
+  drawn        Int?
+  lost         Int?
+  goalsFor     Int?
   goalsAgainst Int?
-  mpgTeamId  String?
-  teamName   String? // nom de l'équipe MPG du manager dans cette division
-  teamAbbr   String? // abréviation (ex. "JBO")
+  mpgTeamId    String?
+  teamName     String? // nom de l'équipe MPG du manager dans cette division
+  teamAbbr     String? // abréviation (ex. "JBO")
 
   @@unique([managerId, divisionId])
 }
@@ -182,9 +183,9 @@ model Cup {
 
 /// Un tour de coupe (8es, 1/4...) pour une compétition donnée (LDC ou UEFA).
 model CupRound {
-  id          String   @id @default(cuid())
+  id          String @id @default(cuid())
   cupId       String
-  cup         Cup      @relation(fields: [cupId], references: [id], onDelete: Cascade)
+  cup         Cup    @relation(fields: [cupId], references: [id], onDelete: Cascade)
   competition String // LDC | UEFA
   name        String // ex. "8es de finale"
   order       Int
@@ -284,11 +285,11 @@ model Contribution {
 
 /// Gain reversé à un manager + suivi du versement. Rattaché à une saison jeu si applicable.
 model Payout {
-  id           String      @id @default(cuid())
-  prizePoolId  String
-  prizePool    PrizePool   @relation(fields: [prizePoolId], references: [id], onDelete: Cascade)
-  managerId    String
-  manager      Manager     @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  prizePoolId   String
+  prizePool     PrizePool   @relation(fields: [prizePoolId], references: [id], onDelete: Cascade)
+  managerId     String
+  manager       Manager     @relation(fields: [managerId], references: [id], onDelete: Cascade)
   gameSeasonId  String? // saison jeu concernée (null = coupe / autre)
   gameSeason    GameSeason? @relation(fields: [gameSeasonId], references: [id], onDelete: SetNull)
   tournamentId  String? // coupe concernée (pour les reversements de coupe générés)

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { config } from "../config.js";
-import { MpgConnector } from "../connector/index.js";
+import { MpgAuthError, MpgConnector } from "../connector/index.js";
 import { prisma } from "../db/client.js";
 import { requireAuth } from "../http/middleware.js";
 import { encrypt, isEncryptionConfigured } from "../lib/crypto.js";
@@ -32,9 +32,11 @@ authRouter.post("/login", async (req, res) => {
     let avatarUrl: string | undefined;
     let userLeagueIds: string[] = [];
     let mpgToken: string | undefined;
+    let mpgRefreshToken: string | undefined;
     try {
         const mpg = await MpgConnector.login(email, password);
         mpgToken = mpg.token;
+        mpgRefreshToken = mpg.refreshToken;
         // Endpoint réel confirmé : GET /user → { id, firstName, username, avatarUrl, email }.
         const u = await mpg.apiGet<any>("/user");
         mpgUserId = u?.id;
@@ -46,7 +48,15 @@ authRouter.post("/login", async (req, res) => {
         userLeagueIds = (dash?.orderedTiles ?? [])
             .filter((t: any) => t.type === "league" && t.leagueId)
             .map((t: any) => t.leagueId);
-    } catch {
+    } catch (err: any) {
+        // Ne PAS confondre « mauvais mot de passe » et « le flow d'auth MPG a cassé » : sans ça,
+        // une refonte côté MPG se traduit par un 401 trompeur et un diagnostic très coûteux.
+        const message = err?.message ?? String(err);
+        console.error("Login MPG échoué:", message);
+        if (err instanceof MpgAuthError && err.kind === "flow") {
+            res.status(502).json({ error: "Connexion à MPG indisponible", detail: message });
+            return;
+        }
         res.status(401).json({ error: "Identifiants MPG invalides" });
         return;
     }
@@ -75,10 +85,18 @@ authRouter.post("/login", async (req, res) => {
 
     // Token MPG chiffré (capturé au login) : sert au sync manuel + à la découverte admin.
     // On ne casse jamais le login si le chiffrement n'est pas configuré ou échoue.
-    let tokenFields: { mpgTokenEncrypted: string; mpgTokenUpdatedAt: Date } | undefined;
+    let tokenFields:
+        | { mpgTokenEncrypted: string; mpgTokenUpdatedAt: Date; mpgRefreshTokenEncrypted?: string }
+        | undefined;
     if (mpgToken && isEncryptionConfigured()) {
         try {
-            tokenFields = { mpgTokenEncrypted: encrypt(mpgToken), mpgTokenUpdatedAt: new Date() };
+            tokenFields = {
+                mpgTokenEncrypted: encrypt(mpgToken),
+                mpgTokenUpdatedAt: new Date(),
+                // Le refresh token permet de renouveler l'access token sans repasser par le
+                // mot de passe (le sync survit donc à l'expiration).
+                ...(mpgRefreshToken ? { mpgRefreshTokenEncrypted: encrypt(mpgRefreshToken) } : {}),
+            };
         } catch {
             // chiffrement indisponible : on continue sans stocker le token.
         }

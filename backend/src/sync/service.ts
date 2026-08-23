@@ -1,7 +1,7 @@
 import { config } from "../config.js";
 import { MpgConnector } from "../connector/index.js";
 import { prisma } from "../db/client.js";
-import { decrypt, isEncryptionConfigured } from "../lib/crypto.js";
+import { decrypt, encrypt, isEncryptionConfigured } from "../lib/crypto.js";
 import { runSync } from "./sync.js";
 
 /**
@@ -14,8 +14,9 @@ let running = false;
 const TOKEN_EXPIRED_MSG = "Token MPG expiré ou absent — reconnecte-toi pour relancer la synchronisation.";
 
 /**
- * Construit un connecteur MPG à partir du token (chiffré) capturé au login d'un membre.
- * Valide le token par un appel /user : si absent ou expiré (401), throw explicite.
+ * Construit un connecteur MPG à partir des tokens (chiffrés) capturés au login d'un membre.
+ * Valide l'access token par un appel /user ; s'il a expiré et qu'on dispose d'un refresh token,
+ * on le renouvelle et on le re-persiste, de façon transparente. Sinon, throw explicite.
  */
 export async function connectorForManager(managerId: string): Promise<MpgConnector> {
     if (!isEncryptionConfigured()) {
@@ -23,24 +24,59 @@ export async function connectorForManager(managerId: string): Promise<MpgConnect
     }
     const manager = await prisma.manager.findUnique({
         where: { id: managerId },
-        select: { mpgTokenEncrypted: true },
+        select: { mpgTokenEncrypted: true, mpgRefreshTokenEncrypted: true },
     });
-    if (!manager?.mpgTokenEncrypted) {
+
+    const accessToken = safeDecrypt(manager?.mpgTokenEncrypted);
+    if (accessToken) {
+        const mpg = MpgConnector.fromToken(accessToken);
+        try {
+            await mpg.apiGet("/user"); // préflight : valide que le token est encore actif.
+            return mpg;
+        } catch {
+            // Token expiré (ou révoqué) : on tente le renouvellement ci-dessous.
+        }
+    }
+
+    const refreshToken = safeDecrypt(manager?.mpgRefreshTokenEncrypted);
+    if (!refreshToken) {
         throw new Error(TOKEN_EXPIRED_MSG);
     }
-    let token: string;
+    let mpg: MpgConnector;
     try {
-        token = decrypt(manager.mpgTokenEncrypted);
-    } catch {
+        mpg = await MpgConnector.fromRefreshToken(refreshToken);
+    } catch (err: any) {
+        console.error("Renouvellement du token MPG échoué:", err?.message ?? err);
         throw new Error(TOKEN_EXPIRED_MSG);
     }
-    const mpg = MpgConnector.fromToken(token);
-    try {
-        await mpg.apiGet("/user"); // préflight : valide que le token est encore actif.
-    } catch {
-        throw new Error(TOKEN_EXPIRED_MSG);
-    }
+    await persistTokens(managerId, mpg);
     return mpg;
+}
+
+function safeDecrypt(enc: string | null | undefined): string | undefined {
+    if (!enc) return undefined;
+    try {
+        return decrypt(enc);
+    } catch {
+        return undefined;
+    }
+}
+
+/** Re-persiste les tokens après un renouvellement (Auth0 fait tourner les refresh tokens). */
+async function persistTokens(managerId: string, mpg: MpgConnector): Promise<void> {
+    try {
+        await prisma.manager.update({
+            where: { id: managerId },
+            data: {
+                mpgTokenEncrypted: encrypt(mpg.token),
+                mpgTokenUpdatedAt: new Date(),
+                ...(mpg.refreshToken ? { mpgRefreshTokenEncrypted: encrypt(mpg.refreshToken) } : {}),
+            },
+        });
+    } catch (err: any) {
+        // Le sync peut continuer avec le token en mémoire même si l'écriture échoue.
+        console.error("Persistance du token MPG échouée:", err?.message ?? err);
+    }
 }
 
 export async function executeSync(trigger: "manual" | "auto", opts?: { leagueId?: string; mpg?: MpgConnector }) {
