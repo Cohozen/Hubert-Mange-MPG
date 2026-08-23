@@ -42,15 +42,15 @@ export function BuyInEditor({ pool, onChange }: { pool: PoolDetail; onChange: ()
                     className="mt-1 block w-full bg-nuit sm:w-32"
                 />
             </label>
-            <div className="flex gap-2">
-                <Button onClick={saveMise} disabled={busy || saved} variant="soft" className="flex-1 sm:flex-none">
+            <div className="flex flex-col gap-2 sm:flex-row">
+                <Button onClick={saveMise} disabled={busy || saved} variant="soft" className="w-full sm:w-auto">
                     Enregistrer la mise
                 </Button>
                 <Button
                     onClick={initParticipants}
                     disabled={busy || !canInit}
                     variant="energy"
-                    className="flex-1 sm:flex-none"
+                    className="w-full sm:w-auto"
                     title={canInit ? "Crée une ligne par membre actif de la saison" : "Enregistre d'abord la mise"}
                 >
                     Initialiser les participants

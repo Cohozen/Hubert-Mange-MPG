@@ -42,7 +42,7 @@ export default function PalmaresPage() {
                     onChange={setTab}
                     items={[
                         { key: "coupes", label: "🏆 Coupes" },
-                        { key: "saisons", label: "📅 Saisons" },
+                        { key: "saisons", label: "📅 Ligues" },
                     ]}
                 />
             </header>
