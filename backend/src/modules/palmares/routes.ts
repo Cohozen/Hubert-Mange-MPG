@@ -4,6 +4,16 @@ import { requireAuth } from "../../http/middleware.js";
 import { playedMatchesOf, summarizeForm } from "./form.js";
 
 /**
+ * Une saison de jeu n'entre au palmarès qu'une fois TERMINÉE.
+ *
+ * `Participation.finalRank` est écrit à chaque sync depuis les standings live : c'est le rang
+ * instantané, pas le rang final. Sans ce filtre, le leader provisoire d'une saison qui vient de
+ * commencer apparaît comme champion (palmarès, salle des trophées, tableau des médailles).
+ * Les cumuls (buts, points, Rotaldo) restent volontairement en direct.
+ */
+const FINISHED_SEASON = { gameSeason: { status: "finished" } } as const;
+
+/**
  * Module palmarès / historique (lecture). Calcule vainqueurs, classement all-time « façon JO »
  * (tableau des médailles par division), et classements "fun" (montées / descentes).
  */
@@ -14,6 +24,7 @@ palmaresRouter.use(requireAuth);
 // Vainqueurs par saison jeu (1er de chaque division) + vainqueurs de coupe.
 palmaresRouter.get("/winners", async (_req, res) => {
     const divisions = await prisma.division.findMany({
+        where: FINISHED_SEASON,
         include: {
             gameSeason: { include: { realSeason: true } },
             participations: { where: { finalRank: 1 }, include: { manager: true } },
@@ -58,7 +69,7 @@ palmaresRouter.get("/winners", async (_req, res) => {
 // Pas de notion de podium ici (un classement dédié existe dans /fun-stats).
 palmaresRouter.get("/all-time", async (_req, res) => {
     const managers = await prisma.manager.findMany({
-        include: { participations: { include: { division: true } } },
+        include: { participations: { where: { division: FINISHED_SEASON }, include: { division: true } } },
     });
 
     // Coupes par manager : départagent le classement APRÈS les championnats (cf. comparateur plus bas).
@@ -246,13 +257,13 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
     });
     const podiumAgg = await prisma.participation.groupBy({
         by: ["managerId"],
-        where: { finalRank: { lte: 3 } },
+        where: { finalRank: { lte: 3 }, division: FINISHED_SEASON },
         _count: { _all: true },
     });
     // Jean-Claude Duss : le plus de fois 2e (« du mal à conclure »).
     const secondAgg = await prisma.participation.groupBy({
         by: ["managerId"],
-        where: { finalRank: 2 },
+        where: { finalRank: 2, division: FINISHED_SEASON },
         _count: { _all: true },
     });
     const awards = await prisma.divisionAward.findMany({
@@ -273,7 +284,10 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
     // Plus longue série de titres consécutifs (rang 1 sur saisons jeu consécutives).
     const mgrsForStreak = await prisma.manager.findMany({
         include: {
-            participations: { include: { division: { include: { gameSeason: { include: { realSeason: true } } } } } },
+            participations: {
+                where: { division: FINISHED_SEASON },
+                include: { division: { include: { gameSeason: { include: { realSeason: true } } } } },
+            },
         },
     });
     const streak = new Map<string, number>();
@@ -447,6 +461,7 @@ palmaresRouter.get("/timeline/:managerId", async (req, res) => {
             gameSeason: p.division.gameSeason.name,
             year: p.division.gameSeason.realSeason.year,
             mpgSeason: p.division.gameSeason.mpgSeason,
+            status: p.division.gameSeason.status, // active | finished (une saison en cours n'a pas de vainqueur)
             index: p.division.gameSeason.index,
             division: p.division.name,
             level: p.division.level,
