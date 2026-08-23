@@ -51,6 +51,27 @@ function tournamentYear(t: any, fallbackName: string): number {
     return m ? Number(m[1]) : new Date().getFullYear();
 }
 
+/**
+ * Année du championnat réel actuellement en cours, par championshipId (1 = Ligue 1).
+ *
+ * Indispensable pour une saison EN COURS : `/league/{id}/winners?season=N` renvoie 404 tant que
+ * la saison n'est pas terminée, donc `championshipSeason` est introuvable par ce biais. Sans ce
+ * repli, on crée une RealSeason bâtarde ("<ligue> — saison N", year = N) qu'un sync ultérieur ne
+ * corrige jamais (la clé `name` est unique et diffère de la bonne).
+ */
+async function activeChampionshipSeasons(mpg: MpgConnector): Promise<Map<string, number>> {
+    const seasons = new Map<string, number>();
+    try {
+        const active = await mpg.apiGet<any>("/championships/active");
+        for (const [id, c] of Object.entries<any>(active?.championships ?? {})) {
+            if (typeof c?.season === "number") seasons.set(String(id), c.season);
+        }
+    } catch {
+        // Repli assuré par la logique appelante (on laissera la saison sans année).
+    }
+    return seasons;
+}
+
 export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): Promise<SyncResult> {
     const notes: string[] = [];
     const counters = {
@@ -62,6 +83,7 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
         matches: 0,
     };
     const managerIds = new Set<string>();
+    const activeSeasons = await activeChampionshipSeasons(mpg);
 
     // Soit une ligue explicite (resync ponctuel d'une ligue masquée), soit les ligues SUIVIES
     // (TrackedLeague active) — on ne synchronise pas les autres ligues de l'utilisateur.
@@ -102,8 +124,10 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                 // saison passée non exposée : on tentera quand même les standings.
             }
 
-            // Saison réelle (adossée au championnat Ligue 1). Repli si l'année est inconnue.
-            const year = championshipSeason;
+            // Saison réelle (adossée au championnat Ligue 1). Pour la saison en cours, /winners
+            // n'existe pas encore : on prend l'année du championnat actif.
+            const year =
+                championshipSeason ?? (season === currentSeason ? activeSeasons.get(championshipId) : undefined);
             const realName = year ? `${year}-${year + 1}` : `${league.name} — saison ${season}`;
             const realSeason = await prisma.realSeason.upsert({
                 where: { name: realName },
