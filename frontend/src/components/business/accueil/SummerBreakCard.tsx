@@ -1,5 +1,5 @@
+import type { DashboardSeason } from "@/components/business/accueil/types";
 import { Halo } from "./Halo";
-import { accueilMock } from "./mockData";
 
 function CountUnit({ value, label }: { value: number; label: string }) {
     return (
@@ -10,9 +10,18 @@ function CountUnit({ value, label }: { value: number; label: string }) {
     );
 }
 
-/** Carte de trêve estivale : compte à rebours avant reprise (factice). */
-export function SummerBreakCard() {
-    const s = accueilMock.summerBreak;
+/** Trêve estivale : compte à rebours si l'on connaît la date de reprise du championnat. */
+export function SummerBreakCard({ season }: { season: DashboardSeason | null }) {
+    const start = season?.startDate ? new Date(season.startDate).getTime() : null;
+    const diff = start && start > Date.now() ? start - Date.now() : null;
+    const countdown = diff
+        ? {
+              days: Math.floor(diff / 86_400_000),
+              hours: Math.floor((diff % 86_400_000) / 3_600_000),
+              minutes: Math.floor((diff % 3_600_000) / 60_000),
+          }
+        : null;
+
     return (
         <div
             className="lhm-card relative flex h-full flex-col justify-center overflow-hidden rounded-2xl border border-transparent p-7"
@@ -28,17 +37,21 @@ export function SummerBreakCard() {
                     <br />
                     revient bientôt
                 </h3>
-                <div className="mb-4 rounded-2xl bg-nuit/30 p-4">
-                    <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-white/85">
-                        Reprise estimée dans
+                {countdown && (
+                    <div className="mb-4 rounded-2xl bg-nuit/30 p-4">
+                        <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-white/85">
+                            Reprise du championnat dans
+                        </div>
+                        <div className="flex gap-2">
+                            <CountUnit value={countdown.days} label="Jours" />
+                            <CountUnit value={countdown.hours} label="Heures" />
+                            <CountUnit value={countdown.minutes} label="Min" />
+                        </div>
                     </div>
-                    <div className="flex gap-2">
-                        <CountUnit value={s.countdown.days} label="Jours" />
-                        <CountUnit value={s.countdown.hours} label="Heures" />
-                        <CountUnit value={s.countdown.minutes} label="Min" />
-                    </div>
-                </div>
-                <p className="text-xs leading-relaxed text-white/90">{s.text}</p>
+                )}
+                <p className="text-xs leading-relaxed text-white/90">
+                    On attend le coup d'envoi de la nouvelle saison réelle pour relancer la Ligue Hubert Mange.
+                </p>
             </div>
         </div>
     );
