@@ -119,8 +119,8 @@ synchronisation des données depuis l'API MPG.
   - **Multi-admin** : les `TrackedLeague`/`TrackedTournament` sont globales (visibles par tous les
     admins). Le sync manuel est **résilient** : une ligue suivie non visible par le token de l'admin
     connecté est ignorée avec une note, sans planter (`try/catch` autour de `apiGet('/league/{id}')`).
-- **`ENCRYPTION_KEY` (AES-256-GCM)** chiffre les IBAN ET les tokens MPG (access + refresh). Obligatoire en prod, à ne
-  jamais perdre ni committer.
+- **`ENCRYPTION_KEY` (AES-256-GCM)** chiffre les IBAN ET les tokens MPG (access + refresh).
+  Obligatoire en prod, à ne jamais perdre ni committer.
 - **Rôles** : `SUPERADMIN` vient de `SUPERADMIN_MPG_USER_IDS` (config, recalculé par requête) ;
   `ADMIN`/`TREASURER` sont stockés sur `Manager`. **ADMIN** gère ligues/tournois suivis + sync +
   cagnotte. **SUPERADMIN seul** : backfill de structure, attribution des rôles, fusion de managers,
