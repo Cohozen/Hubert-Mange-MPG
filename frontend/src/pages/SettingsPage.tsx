@@ -12,7 +12,7 @@ export default function SettingsPage() {
                 <p className="mt-1.5 text-[13px] text-texte-2 lg:text-sm">Gère ton profil et ton moyen de paiement.</p>
             </header>
 
-            <div className="grid gap-3.5 lg:grid-cols-2 lg:items-start lg:gap-[22px]">
+            <div className="grid min-w-0 gap-3.5 lg:grid-cols-2 lg:items-start lg:gap-[22px]">
                 <ProfileForm />
                 <LogoutCard />
             </div>

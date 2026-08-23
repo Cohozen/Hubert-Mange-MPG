@@ -19,7 +19,14 @@ export function PalmaresSummaryCard({ palmares }: { palmares: DashboardPalmares 
         valueLabel: t.count > 1 ? "Titres" : "Titre",
         accent: divisionStyle(t.level).c,
     }));
-    if (palmares.firstLevel) {
+    // Division de départ : ligne dédiée seulement si ce niveau n'est pas déjà au palmarès, sinon
+    // on complète la note de la ligne existante (deux lignes « D4 » n'apprennent rien).
+    const startRow = palmares.firstLevel ? rows.find((r) => r.code === `D${palmares.firstLevel}`) : null;
+    if (startRow) {
+        startRow.note = [startRow.note, `Division de départ · ${palmares.firstYear ?? "—"}`]
+            .filter(Boolean)
+            .join(" · ");
+    } else if (palmares.firstLevel) {
         rows.push({
             code: `D${palmares.firstLevel}`,
             title: `Division ${palmares.firstLevel}`,

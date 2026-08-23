@@ -1,5 +1,5 @@
 import type { DashboardNext } from "@/components/business/accueil/types";
-import { daysUntil } from "@/components/business/accueil/types";
+import { daysUntil, ordinal } from "@/components/business/accueil/types";
 import { initials, playerGradient } from "@/components/business/stats/playerStyle";
 import type { FormMatch } from "@/components/business/stats/types";
 import { Empty } from "@/components/ui/Empty";
@@ -108,7 +108,9 @@ export function LastMatchCard({
                         <div className="min-w-0">
                             <div className="text-[9px] font-bold uppercase tracking-wider text-texte-2">
                                 Prochain · J{next.gameWeek}
-                                {next.opponentRank ? ` · ${next.opponentRank}e de la division` : ""}
+                                {next.opponentRank
+                                    ? ` · ${next.opponentRank}${ordinal(next.opponentRank)} de la division`
+                                    : ""}
                             </div>
                             <div className="truncate font-display text-sm font-black text-white">
                                 vs {next.opponent ?? "à définir"}

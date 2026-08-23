@@ -114,7 +114,9 @@ export function ProfileStatsTab({ managerId }: { managerId: string }) {
     // Même règle que le palmarès : le rang d'une saison en cours n'est que provisoire.
     const titles = seasons.filter((s) => s.finalRank === 1 && s.status === "finished").length;
 
-    const withPts = seasons.filter((s) => s.points != null);
+    // Meilleure / pire saison : uniquement sur des saisons closes — celle qui vient de démarrer
+    // est à 0 point et passerait pour la pire de la carrière.
+    const withPts = seasons.filter((s) => s.points != null && s.status === "finished");
     const best = withPts.length ? withPts.reduce((a, b) => ((b.points ?? 0) > (a.points ?? 0) ? b : a)) : null;
     const worst = withPts.length ? withPts.reduce((a, b) => ((b.points ?? 0) < (a.points ?? 0) ? b : a)) : null;
     const seasonSub = (s: TimelineSeason | null) =>

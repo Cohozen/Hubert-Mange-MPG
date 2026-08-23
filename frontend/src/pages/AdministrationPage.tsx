@@ -26,13 +26,13 @@ export default function AdministrationPage() {
                 </p>
             </header>
 
-            <div className="grid gap-3.5 lg:grid-cols-2 lg:items-start lg:gap-[22px]">
-                <div className="flex flex-col gap-3.5 lg:gap-[22px]">
+            <div className="grid min-w-0 gap-3.5 lg:grid-cols-2 lg:items-start lg:gap-[22px]">
+                <div className="flex min-w-0 flex-col gap-3.5 lg:gap-[22px]">
                     <SyncSection />
                     <LeaguesSection canDelete={isSuperadmin(me)} />
                     <TournamentsSection canDelete={isSuperadmin(me)} />
                 </div>
-                <div className="flex flex-col gap-3.5 lg:gap-[22px]">
+                <div className="flex min-w-0 flex-col gap-3.5 lg:gap-[22px]">
                     {isSuperadmin(me) ? (
                         <RolesSection />
                     ) : (

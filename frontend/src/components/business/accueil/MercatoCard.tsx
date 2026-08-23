@@ -9,7 +9,10 @@ const dateLabel = (iso: string | null) =>
 /** Mini-carte mercato : budget restant et état du marché (ouvert / fermé, prochain tour). */
 export function MercatoCard({ mercato }: { mercato: DashboardMercato | null }) {
     const open = mercato?.closed === false;
-    const nextTurn = dateLabel(mercato?.nextTurnAt ?? null);
+    // Le tour de mercato n'est affiché que s'il est encore à venir (MPG garde la dernière valeur).
+    const upcomingTurn =
+        mercato?.nextTurnAt && new Date(mercato.nextTurnAt).getTime() > Date.now() ? mercato.nextTurnAt : null;
+    const nextTurn = dateLabel(upcomingTurn);
 
     return (
         <div className="lhm-card relative overflow-hidden rounded-[18px] border border-bord bg-carte p-[18px]">
@@ -30,7 +33,7 @@ export function MercatoCard({ mercato }: { mercato: DashboardMercato | null }) {
             </div>
             <div className="font-display text-3xl font-black leading-none text-white">
                 {mercato?.budget ?? "—"}
-                <span className="text-[15px] text-texte-2">M€</span>
+                <span className="ml-1 text-[15px] text-texte-2">M€</span>
             </div>
             <div className="mt-1 text-[11px] text-texte-2">Budget restant</div>
             {nextTurn && (

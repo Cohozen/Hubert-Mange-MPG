@@ -13,14 +13,16 @@ function careerFacts(seasons: TimelineSeason[]): string[] {
     let relegations = 0;
     for (let i = 1; i < seasons.length; i++) if (seasons[i].level > seasons[i - 1].level) relegations++;
 
-    const facts = [`🚀 Parti de Division ${first.level} en ${first.year}`];
+    // On date avec la saison réelle (« 2024-2025 ») : plusieurs saisons MPG tombent dans la même
+    // année, et « en 2024 » deux fois de suite laisse croire à une erreur.
+    const facts = [`🚀 Parti de Division ${first.level} en ${first.realSeason}`];
 
     const bestLevel = Math.min(...seasons.map((s) => s.level));
     const climbIdx = seasons.findIndex((s) => s.level === bestLevel);
     if (bestLevel < first.level) {
         const nb = climbIdx + 1; // saisons jouées, celle de l'arrivée incluse
         facts.push(
-            `📈 Montée D${first.level} → D${bestLevel} en ${nb} saison${nb > 1 ? "s" : ""} (${seasons[climbIdx].year})`,
+            `📈 Montée D${first.level} → D${bestLevel} en ${nb} saison${nb > 1 ? "s" : ""} (${seasons[climbIdx].realSeason})`,
         );
     }
 
