@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { isLeagueAdmin, useAuth } from "@/auth/useAuth";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
 import { MAIN_NAV, type NavItem, SECONDARY_NAV } from "./nav";
@@ -23,6 +24,8 @@ function SideItem({ item }: { item: NavItem }) {
 
 /** Sidebar de navigation (desktop). */
 export function Sidebar({ className }: { className?: string }) {
+    const { data: me } = useAuth();
+    const secondary = SECONDARY_NAV.filter((it) => !it.adminOnly || isLeagueAdmin(me));
     return (
         <aside
             className={cn(
@@ -46,7 +49,7 @@ export function Sidebar({ className }: { className?: string }) {
             </nav>
             <div className="flex-1" />
             <div className="flex flex-col gap-1.5 border-t border-bord pt-3">
-                {SECONDARY_NAV.map((it) => (
+                {secondary.map((it) => (
                     <SideItem key={it.to} item={it} />
                 ))}
             </div>

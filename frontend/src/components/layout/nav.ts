@@ -1,10 +1,12 @@
-import { History, Home, type LucideIcon, Settings, Trophy, User, Wallet } from "lucide-react";
+import { History, Home, type LucideIcon, Settings, ShieldCheck, Trophy, User, Wallet } from "lucide-react";
 
 export interface NavItem {
     to: string;
     label: string;
     icon: LucideIcon;
     end?: boolean;
+    /** Visible uniquement pour les ADMIN / SUPERADMIN. */
+    adminOnly?: boolean;
 }
 
 /** Navigation principale (sidebar desktop + bottom bar mobile). */
@@ -17,7 +19,10 @@ export const MAIN_NAV: NavItem[] = [
 ];
 
 /** Navigation secondaire (bas de sidebar). */
-export const SECONDARY_NAV: NavItem[] = [{ to: "/parametres", label: "Paramètres", icon: Settings }];
+export const SECONDARY_NAV: NavItem[] = [
+    { to: "/parametres", label: "Paramètres", icon: Settings },
+    { to: "/administration", label: "Administration", icon: ShieldCheck, adminOnly: true },
+];
 
 /** Titre de page à partir du pathname courant (topbar desktop). */
 export function pageTitle(pathname: string): string {
@@ -27,5 +32,6 @@ export function pageTitle(pathname: string): string {
     if (pathname.startsWith("/cagnotte")) return "Cagnotte";
     if (pathname.startsWith("/profil")) return "Profil";
     if (pathname.startsWith("/parametres")) return "Paramètres";
+    if (pathname.startsWith("/administration")) return "Administration";
     return "Ligue Hubert Mange";
 }

@@ -11,9 +11,10 @@ import { Topbar } from "./Topbar";
 /** Coquille de l'app : sidebar (desktop) + topbar / header mobile + bottom nav. */
 export function AppShell({ me, onLogout, children }: { me: Me; onLogout: () => void; children: ReactNode }) {
     const { pathname } = useLocation();
-    // Pages « détail » (profil d'un autre, paramètres) : bouton retour, pas de bottom-nav.
+    // Pages « détail » (profil d'un autre, paramètres, administration) : bouton retour,
+    // pas de bottom-nav — elles ne font pas partie de la navigation principale.
     const otherProfile = useMatch("/profil/:managerId");
-    const isDetail = pathname === "/parametres" || otherProfile !== null;
+    const isDetail = pathname === "/parametres" || pathname === "/administration" || otherProfile !== null;
     return (
         <div className="min-h-screen overflow-x-clip bg-nuit text-texte">
             <div className="flex min-h-screen">

@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { useAuth, useLogout } from "@/auth/useAuth";
+import { isLeagueAdmin, useAuth, useLogout } from "@/auth/useAuth";
 import { AppShell } from "@/components/layout/AppShell";
 import AccueilPage from "@/pages/AccueilPage";
+import AdministrationPage from "@/pages/AdministrationPage";
 import CagnottePage from "@/pages/CagnottePage";
 import LoginPage from "@/pages/LoginPage";
 import PalmaresPage from "@/pages/PalmaresPage";
@@ -52,7 +53,11 @@ export default function App() {
                 <Route path="/profil" element={<ProfilePage />} />
                 <Route path="/profil/:managerId" element={<ProfilePage />} />
                 <Route path="/parametres" element={<SettingsPage />} />
-                <Route path="/admin" element={<Navigate to="/parametres" />} />
+                <Route
+                    path="/administration"
+                    element={isLeagueAdmin(me) ? <AdministrationPage /> : <Navigate to="/" />}
+                />
+                <Route path="/admin" element={<Navigate to="/administration" />} />
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </AppShell>

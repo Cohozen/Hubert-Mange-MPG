@@ -31,10 +31,10 @@ export function SettingsCard({
     );
 }
 
-/** Dégradés de barre par section (repris de la maquette Paramètres V2). */
+/** Dégradés de barre par section (repris des maquettes Paramètres et Admin V2). */
 export const SETTINGS_BARS = {
     profil: "linear-gradient(90deg,#6D28D9,#FF2D78,#FF6B35)",
     paiement: "linear-gradient(90deg,#00E5A0,#34D399)",
-    preferences: "linear-gradient(90deg,#6D28D9,#A78BFA)",
     logout: "linear-gradient(90deg,#FF3B5C,#FF6B35)",
+    tournois: "linear-gradient(90deg,#6D28D9,#A78BFA)",
 } as const;

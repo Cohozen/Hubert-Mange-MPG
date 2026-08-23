@@ -122,7 +122,7 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
 
     return (
         <SettingsCard
-            bar={SETTINGS_BARS.preferences}
+            bar={SETTINGS_BARS.tournois}
             title="Tournois suivis"
             right={<span className="text-[11px] font-semibold text-texte-2">Type override</span>}
         >
@@ -170,7 +170,7 @@ export function TournamentsSection({ canDelete }: { canDelete: boolean }) {
                             )}
                         </div>
                         {t.trackedId && (
-                            <div className="mt-2.5 flex items-center gap-2.5 border-t border-bord pt-2.5">
+                            <div className="mt-2.5 flex flex-col gap-2 border-t border-bord pt-2.5 sm:flex-row sm:items-center sm:gap-2.5">
                                 <span className="font-display text-[9px] font-extrabold uppercase tracking-[1px] text-texte-2">
                                     Type de compétition
                                 </span>

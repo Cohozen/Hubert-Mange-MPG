@@ -71,16 +71,20 @@ export function RolesSection() {
                 {members.map((m) => (
                     <div
                         key={m.id}
-                        className="lhm-row flex items-center gap-3 rounded-[14px] border border-bord bg-nuit p-3 transition"
+                        className="lhm-row flex flex-col gap-2.5 rounded-[14px] border border-bord bg-nuit p-3 transition sm:flex-row sm:items-center sm:gap-3"
                     >
-                        <Avatar name={m.displayName} />
-                        <div className="min-w-0 flex-1">
-                            <div className="truncate font-display text-[13px] font-black tracking-[0.2px] text-white">
-                                {m.displayName}
+                        <div className="flex min-w-0 items-center gap-3">
+                            <Avatar name={m.displayName} />
+                            <div className="min-w-0 flex-1">
+                                <div className="truncate font-display text-[13px] font-black tracking-[0.2px] text-white">
+                                    {m.displayName}
+                                </div>
+                                {m.username && (
+                                    <div className="mt-0.5 truncate text-[10px] text-texte-2">{m.username}</div>
+                                )}
                             </div>
-                            {m.username && <div className="mt-0.5 truncate text-[10px] text-texte-2">{m.username}</div>}
                         </div>
-                        <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+                        <div className="flex flex-wrap gap-1.5 sm:ml-auto sm:shrink-0 sm:justify-end">
                             {ASSIGNABLE.map((role) => {
                                 const active = m.roles.includes(role.code);
                                 return (

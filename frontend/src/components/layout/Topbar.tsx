@@ -1,8 +1,8 @@
 import { ChevronLeft, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import type { Me } from "@/auth/useAuth";
-import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/button";
+import { InitialsAvatar } from "@/components/ui/InitialsAvatar";
 import { cn } from "@/lib/utils";
 
 /** Barre du haut (desktop) : titre de page + identité + déconnexion. */
@@ -42,7 +42,7 @@ export function Topbar({
                     to="/profil"
                     className="flex items-center gap-2.5 rounded-full px-2 py-1 transition hover:bg-carte-2"
                 >
-                    <Avatar url={me.avatarUrl} name={me.displayName} size={32} />
+                    <InitialsAvatar name={me.displayName} size={32} />
                     <span className="text-sm font-medium text-texte-2">{me.displayName}</span>
                 </Link>
                 <Button variant="ghost" size="icon" onClick={onLogout} aria-label="Déconnexion">
