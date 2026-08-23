@@ -1,83 +1,63 @@
 import axios from "axios";
-import { authenticateMPG, MpgSession } from "./auth.js";
+import { authenticateMPG, MpgTokens, refreshMpgToken } from "./auth.js";
 
 /**
  * Connecteur MPG : SEUL point de contact avec MPG.
  * Le reste de l'appli ne dépend que de cette interface, pas des détails HTTP.
  *
- * Deux chemins d'accès aux données après authentification :
- *  - `getData(path)`  : routes Remix de mpg.football avec le cookie __session (ex. "/dashboard?_data=root")
- *  - `apiGet(path)`   : API api.mpg.football avec le token (header Authorization)
- *
- * Les endpoints exacts (divisions, classements) sont à confirmer via `npm run connector:test`
- * une fois authentifié — voir src/connector/test.ts.
+ * Après authentification (Auth0, cf. auth.ts), tous les accès aux données passent par
+ * `apiGet(path)` sur api.mpg.football, avec le JWT en `Authorization: Bearer`.
  */
+
+/** Headers du client web MPG (relevés dans leur bundle) — certaines routes les exigent. */
+const CLIENT_HEADERS = {
+    platform: "web",
+    "client-version": "13.3.0",
+    application: "mpg",
+    "client-language": "fr-FR",
+};
+
 export class MpgConnector {
-    private constructor(private readonly creds: MpgSession) {}
+    private constructor(private readonly creds: MpgTokens) {}
 
     static async login(email: string, password: string): Promise<MpgConnector> {
-        const creds = await authenticateMPG(email, password);
-        return new MpgConnector(creds);
+        return new MpgConnector(await authenticateMPG(email, password));
     }
 
     /**
-     * Construit un connecteur à partir d'un token API déjà obtenu (capturé au login d'un membre
-     * et stocké chiffré). Seul `apiGet` est alors utilisable — `getData` (cookie __session) ne
-     * l'est pas, ce qui suffit pour le sync et la découverte des ligues/tournois.
+     * Construit un connecteur à partir d'un access token déjà obtenu (capturé au login d'un
+     * membre et stocké chiffré).
      */
     static fromToken(token: string): MpgConnector {
-        return new MpgConnector({ session: "", token, dashboard: null });
+        return new MpgConnector({ accessToken: token });
     }
 
-    get session(): string {
-        return this.creds.session;
+    /** Renouvelle un access token depuis un refresh token, sans mot de passe. */
+    static async fromRefreshToken(refreshToken: string): Promise<MpgConnector> {
+        return new MpgConnector(await refreshMpgToken(refreshToken));
     }
 
     get token(): string {
-        return this.creds.token;
+        return this.creds.accessToken;
     }
 
-    get dashboard(): any {
-        return this.creds.dashboard;
+    get refreshToken(): string | undefined {
+        return this.creds.refreshToken;
     }
 
-    /** Lit une route Remix de mpg.football (ex. "/dashboard?_data=root"). */
-    async getData<T = any>(path: string): Promise<T> {
-        const url = path.startsWith("http") ? path : `https://mpg.football${path}`;
+    get expiresAt(): Date | undefined {
+        return this.creds.expiresAt;
+    }
+
+    /** Appelle l'API api.mpg.football (ex. "/user", "/dashboard", "/league/{id}"). */
+    async apiGet<T = any>(path: string): Promise<T> {
+        const url = path.startsWith("http") ? path : `https://api.mpg.football${path}`;
         const res = await axios.get<T>(url, {
-            headers: { Cookie: `__session=${this.creds.session}` },
+            headers: { Authorization: `Bearer ${this.creds.accessToken}`, ...CLIENT_HEADERS },
         });
         return res.data;
     }
-
-    /**
-     * Appelle l'API api.mpg.football avec le token (ex. "/user", "/dashboard").
-     * Le site envoie le token en Bearer + quelques headers client. On tente Bearer, et en
-     * cas de 401 on retombe sur le token brut (ancienne convention MPG).
-     */
-    async apiGet<T = any>(path: string): Promise<T> {
-        const url = path.startsWith("http") ? path : `https://api.mpg.football${path}`;
-        const clientHeaders = {
-            "client-version": "5.3.0",
-            platform: "web",
-            language: "fr",
-        };
-        try {
-            const res = await axios.get<T>(url, {
-                headers: { Authorization: `Bearer ${this.creds.token}`, ...clientHeaders },
-            });
-            return res.data;
-        } catch (err: any) {
-            if (err?.response?.status === 401) {
-                const res = await axios.get<T>(url, {
-                    headers: { Authorization: this.creds.token, ...clientHeaders },
-                });
-                return res.data;
-            }
-            throw err;
-        }
-    }
 }
 
-export type { MpgSession } from "./auth.js";
-export { authenticateMPG } from "./auth.js";
+export type { MpgTokens } from "./auth.js";
+export { authenticateMPG, MpgAuthError, refreshMpgToken } from "./auth.js";
