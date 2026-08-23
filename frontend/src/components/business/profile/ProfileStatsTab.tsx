@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import { CareerChart } from "@/components/business/profile/CareerChart";
 import type { TimelineSeason } from "@/components/business/profile/types";
+import type { H2H } from "@/components/business/stats/types";
 import { Empty } from "@/components/ui/Empty";
 
 const sum = (xs: (number | null)[]): number => xs.reduce<number>((a, b) => a + (b ?? 0), 0);
@@ -92,8 +93,13 @@ export function ProfileStatsTab({ managerId }: { managerId: string }) {
         queryKey: ["timeline", managerId],
         queryFn: () => api<{ seasons: TimelineSeason[] }>(`/api/palmares/timeline/${managerId}`),
     });
+    // Même clé que l'onglet Résumé : servi par le cache si le Résumé a déjà été ouvert.
+    const { data: h } = useQuery({
+        queryKey: ["h2h", managerId],
+        queryFn: () => api<H2H>(`/api/palmares/h2h/${managerId}`),
+    });
 
-    if (!data) return null;
+    if (!data || !h) return null;
     const { seasons } = data;
     if (seasons.length === 0) return <Empty>Pas encore de saison jouée.</Empty>;
 
@@ -131,11 +137,10 @@ export function ProfileStatsTab({ managerId }: { managerId: string }) {
         },
         {
             icon: "🔥",
-            value: "Bientôt",
+            value: String(h.bestWinStreak),
             label: "Meilleure série",
             sub: "victoires d'affilée",
             color: "#FF6B35",
-            soon: true,
         },
         {
             icon: "🏅",

@@ -1,10 +1,49 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api } from "@/api/client";
+import { CareerFactsCard } from "@/components/business/profile/CareerFactsCard";
 import type { TimelineSeason } from "@/components/business/profile/types";
 import { initials, playerGradient } from "@/components/business/stats/playerStyle";
-import type { H2H, OppRow } from "@/components/business/stats/types";
+import type { FormMatch, H2H, OppRow } from "@/components/business/stats/types";
 import { Empty } from "@/components/ui/Empty";
+
+/** Couleurs et libellés d'un résultat vu du manager (V / N / D). */
+const RESULT = {
+    W: { label: "V", word: "victoire", c: "#00E5A0", bg: "rgba(0,229,160,.18)" },
+    D: { label: "N", word: "nul", c: "#8B92C4", bg: "rgba(139,146,196,.18)" },
+    L: { label: "D", word: "défaite", c: "#FF6B8A", bg: "rgba(255,59,92,.18)" },
+} as const;
+
+/** Sous-titre de la card « Série en cours » : série en cours, ou dernier match + dernière victoire. */
+function StreakSub({ h }: { h: H2H }) {
+    if (!h.lastMatch) return <>Aucun match joué</>;
+    if (h.currentWinStreak > 0) {
+        return (
+            <>
+                <div>victoire{h.currentWinStreak > 1 ? "s" : ""} d'affilée</div>
+                {h.streakSince && (
+                    <div className="mt-0.5">
+                        depuis la J{h.streakSince.gameWeek} · {h.streakSince.gameSeason} · {h.streakSince.realSeason}
+                    </div>
+                )}
+            </>
+        );
+    }
+    const last = h.lastMatch;
+    return (
+        <>
+            <div>
+                Dernier : {RESULT[last.result].word} {last.score}
+                {last.opponent ? ` vs ${last.opponent}` : ""}
+            </div>
+            <div className="mt-0.5">
+                {h.lastWin
+                    ? `Dernière victoire : J${h.lastWin.gameWeek} · ${h.lastWin.gameSeason} · ${h.lastWin.realSeason}`
+                    : "Aucune victoire"}
+            </div>
+        </>
+    );
+}
 
 function CardShell({
     accent,
@@ -101,7 +140,7 @@ function MetricCard({
     icon: string;
     tag: string;
     value: string;
-    sub: string;
+    sub: React.ReactNode;
     soon?: boolean;
 }) {
     return (
@@ -165,6 +204,42 @@ function DonutCard({ w, d, l }: { w: number; d: number; l: number }) {
     );
 }
 
+function FormCard({ form }: { form: FormMatch[] }) {
+    return (
+        <div className="lhm-card rounded-[18px] border border-bord bg-carte p-4 lg:p-5">
+            <div className="mb-3 font-display text-[10px] font-extrabold uppercase tracking-[1.5px] text-texte-2">
+                5 derniers matchs · forme
+            </div>
+            {form.length === 0 ? (
+                <div className="flex items-center gap-2 rounded-xl border border-dashed border-bord bg-nuit/40 px-4 py-5 text-sm text-texte-2">
+                    ⏳ Pas encore de match joué.
+                </div>
+            ) : (
+                <div className="flex gap-1.5 lg:gap-2">
+                    {form.map((m) => {
+                        const r = RESULT[m.result];
+                        return (
+                            <div
+                                key={`${m.context}-${m.gameWeek}`}
+                                className="flex flex-1 flex-col items-center gap-1.5"
+                                title={`J${m.gameWeek} · ${m.score}${m.opponent ? ` vs ${m.opponent}` : ""} · ${m.context}`}
+                            >
+                                <span
+                                    className="grid h-[34px] w-full place-items-center rounded-lg font-display text-[13px] font-black lg:h-[46px] lg:text-base"
+                                    style={{ background: r.bg, color: r.c }}
+                                >
+                                    {r.label}
+                                </span>
+                                <span className="text-[9px] text-texte-2 lg:text-[10px]">{m.score}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export function ProfileSummaryTab({ managerId }: { managerId: string }) {
     const { data: h } = useQuery({
         queryKey: ["h2h", managerId],
@@ -177,9 +252,16 @@ export function ProfileSummaryTab({ managerId }: { managerId: string }) {
 
     if (!h) return null;
     if (h.overall.played === 0) {
-        return <Empty>Pas encore de match enregistré.</Empty>;
+        return (
+            <div className="space-y-3 lg:space-y-[18px]">
+                <Empty>Pas encore de match enregistré.</Empty>
+                <CareerFactsCard seasons={tl?.seasons ?? []} />
+            </div>
+        );
     }
 
+    // Série de victoires : verte tant qu'elle court, sinon on prend la couleur du dernier résultat.
+    const streakAccent = h.currentWinStreak > 0 ? RESULT.W.c : h.lastMatch ? RESULT[h.lastMatch.result].c : "#FF6B35";
     const last = tl?.seasons.at(-1);
     const lastValue = last ? (last.finalRank === 1 ? "Champion" : last.finalRank ? `${last.finalRank}e` : "—") : "—";
     const lastSub = last ? `${last.division} · ${last.realSeason}` : "Saison à venir";
@@ -206,27 +288,22 @@ export function ProfileSummaryTab({ managerId }: { managerId: string }) {
                     />
                 )}
                 <MetricCard
-                    accent="#FF6B35"
+                    accent={streakAccent}
                     icon="🔥"
                     tag="Série en cours"
-                    value="Bientôt"
-                    sub="Disponible prochainement"
-                    soon
+                    value={h.lastMatch ? String(h.currentWinStreak) : "—"}
+                    sub={<StreakSub h={h} />}
+                    soon={!h.lastMatch}
                 />
                 <MetricCard accent="#FFD23F" icon="🏆" tag="Dernière saison" value={lastValue} sub={lastSub} />
             </div>
 
             <div className="grid gap-3 lg:grid-cols-2 lg:gap-[18px]">
                 <DonutCard w={h.overall.w} d={h.overall.d} l={h.overall.l} />
-                <div className="lhm-card rounded-[18px] border border-bord bg-carte p-4 lg:p-5">
-                    <div className="mb-3 font-display text-[10px] font-extrabold uppercase tracking-[1.5px] text-texte-2">
-                        5 derniers matchs · forme
-                    </div>
-                    <div className="flex items-center gap-2 rounded-xl border border-dashed border-bord bg-nuit/40 px-4 py-5 text-sm text-texte-2">
-                        ⏳ Forme récente disponible bientôt.
-                    </div>
-                </div>
+                <FormCard form={h.form} />
             </div>
+
+            <CareerFactsCard seasons={tl?.seasons ?? []} />
         </div>
     );
 }

@@ -37,6 +37,7 @@ palmaresRouter.get("/winners", async (_req, res) => {
             return {
                 season: `${d.gameSeason.realSeason.name} — ${d.gameSeason.name}`,
                 realSeason: d.gameSeason.realSeason.name,
+                gameSeasonIndex: d.gameSeason.index,
                 division: d.name,
                 level: d.level,
                 winner: p?.manager.displayName ?? null,
@@ -337,7 +338,8 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
     });
 });
 
-// Head-to-head d'un manager : bilan global, par adversaire, bête noire, victime préférée.
+// Head-to-head d'un manager : bilan global, par adversaire, bête noire, victime préférée,
+// + la forme récente (5 derniers matchs) et les séries (en cours / meilleure série de victoires).
 palmaresRouter.get("/h2h/:managerId", async (req, res) => {
     const id = req.params.managerId;
     const matches = await prisma.match.findMany({
@@ -348,6 +350,32 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
             division: { include: { gameSeason: { include: { realSeason: true } } } },
         },
     });
+
+    // Ordre chronologique : `Match` n'a pas de date, on rejoue la convention du /timeline
+    // (année réelle → saison MPG → journée). Surtout PAS de groupement par ligue MPG : les IDs
+    // de ligue changent au fil des migrations séquentielles et couperaient toutes les séries.
+    const chrono = matches
+        .slice()
+        .sort(
+            (a, b) =>
+                a.division.gameSeason.realSeason.year - b.division.gameSeason.realSeason.year ||
+                a.division.gameSeason.index - b.division.gameSeason.index ||
+                a.gameWeek - b.gameWeek,
+        );
+
+    type FormMatch = {
+        result: "W" | "D" | "L";
+        score: string;
+        opponent: string | null;
+        opponentId: string | null;
+        gameWeek: number;
+        gameSeason: string;
+        realSeason: string;
+        context: string;
+    };
+    const timeline: FormMatch[] = [];
+    let bestWinStreak = 0;
+    let winRun = 0;
 
     type Opp = {
         opponentId: string;
@@ -366,15 +394,31 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
     let biggestWin: any = null;
     let biggestLoss: any = null;
 
-    for (const m of matches) {
+    for (const m of chrono) {
         const isHome = m.homeManagerId === id;
         const oppMgr = isHome ? m.awayManager : m.homeManager;
         const oppId = isHome ? m.awayManagerId : m.homeManagerId;
-        if (!oppId || !oppMgr) continue;
         const mine = isHome ? m.homeScore : m.awayScore;
         const theirs = isHome ? m.awayScore : m.homeScore;
         const won = mine > theirs;
         const lost = mine < theirs;
+
+        // Forme et séries : on compte le match même si l'adversaire n'a pas pu être résolu
+        // (manager supprimé) — seuls les agrégats par adversaire l'ignorent, juste en dessous.
+        timeline.push({
+            result: won ? "W" : lost ? "L" : "D",
+            score: `${mine}-${theirs}`,
+            opponent: oppMgr?.displayName ?? null,
+            opponentId: oppId ?? null,
+            gameWeek: m.gameWeek,
+            gameSeason: m.division.gameSeason.name,
+            realSeason: m.division.gameSeason.realSeason.name,
+            context: `${m.division.name} · ${m.division.gameSeason.name}`,
+        });
+        winRun = won ? winRun + 1 : 0;
+        if (winRun > bestWinStreak) bestWinStreak = winRun;
+
+        if (!oppId || !oppMgr) continue;
 
         const e = opp.get(oppId) ?? {
             opponentId: oppId,
@@ -418,6 +462,20 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
         }
     }
 
+    // Série de VICTOIRES en cours : retombe à 0 dès que le dernier match est un nul ou une défaite.
+    // On remonte aussi le dernier match et la dernière victoire, pour situer une série à 0.
+    let currentWinStreak = 0;
+    for (let i = timeline.length - 1; i >= 0 && timeline[i].result === "W"; i--) currentWinStreak++;
+    const lastMatch = timeline.at(-1) ?? null;
+    const streakSince = currentWinStreak > 0 ? timeline[timeline.length - currentWinStreak] : null;
+    let lastWin: FormMatch | null = null;
+    for (let i = timeline.length - 1; i >= 0; i--) {
+        if (timeline[i].result === "W") {
+            lastWin = timeline[i];
+            break;
+        }
+    }
+
     const opponents = [...opp.values()].sort((a, b) => b.played - a.played);
     const eligible = opponents.filter((o) => o.played >= 2);
     const beteNoire = [...eligible].sort((a, b) => b.l - b.w - (a.l - a.w) || b.l - a.l)[0] ?? null;
@@ -430,6 +488,12 @@ palmaresRouter.get("/h2h/:managerId", async (req, res) => {
         victimePreferee: victimePreferee && victimePreferee.w > victimePreferee.l ? victimePreferee : null,
         biggestWin,
         biggestLoss,
+        form: timeline.slice(-5), // 5 derniers matchs, du plus ancien au plus récent
+        currentWinStreak,
+        streakSince, // 1er match de la série en cours (null si série à 0)
+        lastMatch,
+        lastWin,
+        bestWinStreak,
     });
 });
 
