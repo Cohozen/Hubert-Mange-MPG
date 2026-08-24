@@ -22,7 +22,7 @@ export function PhaseSlot({
             last={data.last}
             live={data.live}
             form={data.form}
-            next={data.next}
+            upcoming={data.upcoming}
             me={me}
             meId={meId}
             meUsername={meUsername}

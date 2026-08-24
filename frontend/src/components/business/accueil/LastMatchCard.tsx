@@ -1,5 +1,5 @@
 import type { DashboardNext } from "@/components/business/accueil/types";
-import { daysUntil, ordinal } from "@/components/business/accueil/types";
+import { daysUntil, ordinal, shortDate } from "@/components/business/accueil/types";
 import { initials, playerGradient } from "@/components/business/stats/playerStyle";
 import type { FormMatch } from "@/components/business/stats/types";
 import { Empty } from "@/components/ui/Empty";
@@ -44,7 +44,7 @@ export function LastMatchCard({
     last,
     live,
     form,
-    next,
+    upcoming,
     me,
     meId,
     meUsername,
@@ -52,7 +52,7 @@ export function LastMatchCard({
     last: FormMatch | null;
     live: FormMatch | null;
     form: FormMatch[];
-    next: DashboardNext | null;
+    upcoming: DashboardNext[];
     me: string;
     meId: string;
     meUsername: string | null;
@@ -67,10 +67,11 @@ export function LastMatchCard({
     }
     const r = RESULT[match.result];
     const [mine, theirs] = match.score.split("-");
+    const [next, ...suivants] = upcoming;
     const inDays = daysUntil(next?.kickoffAt ?? null);
 
     return (
-        <div className="lhm-card relative h-full overflow-hidden rounded-[18px] border border-bord bg-carte p-[18px]">
+        <div className="lhm-card relative flex h-full flex-col justify-between overflow-hidden rounded-[18px] border border-bord bg-carte p-[18px]">
             <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-2">
                 <div className="font-display text-[11px] font-extrabold uppercase tracking-wider text-texte-2">
                     {live ? "Journée en cours" : "Dernière journée"} · J{match.gameWeek} · {match.gameSeason}
@@ -132,25 +133,51 @@ export function LastMatchCard({
             )}
 
             {next && (
-                <div className="mt-4 flex items-center justify-between gap-3 border-t border-bord pt-4">
-                    <div className="flex min-w-0 items-center gap-2.5">
-                        <Tile name={next.opponent ?? "?"} seed={next.opponentId ?? next.opponent ?? "?"} />
-                        <div className="min-w-0">
-                            <div className="text-[9px] font-bold uppercase tracking-wider text-texte-2">
-                                Prochain · J{next.gameWeek}
-                                {next.opponentRank
-                                    ? ` · ${next.opponentRank}${ordinal(next.opponentRank)} de la division`
-                                    : ""}
-                            </div>
-                            <div className="truncate font-display text-sm font-black text-white">
-                                vs {next.opponent ?? "à définir"}
+                <div className="mt-4 border-t border-bord pt-4">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                            <Tile name={next.opponent ?? "?"} seed={next.opponentId ?? next.opponent ?? "?"} />
+                            <div className="min-w-0">
+                                <div className="text-[9px] font-bold uppercase tracking-wider text-texte-2">
+                                    Prochain · J{next.gameWeek}
+                                    {next.opponentRank
+                                        ? ` · ${next.opponentRank}${ordinal(next.opponentRank)} de la division`
+                                        : ""}
+                                </div>
+                                <div className="truncate font-display text-sm font-black text-white">
+                                    vs {next.opponent ?? "à définir"}
+                                </div>
                             </div>
                         </div>
+                        {inDays != null && (
+                            <span className="shrink-0 rounded-full px-3.5 py-2 font-display text-[11px] font-black text-white grad-energy">
+                                Dans {inDays}j
+                            </span>
+                        )}
                     </div>
-                    {inDays != null && (
-                        <span className="shrink-0 rounded-full px-3.5 py-2 font-display text-[11px] font-black text-white grad-energy">
-                            Dans {inDays}j
-                        </span>
+
+                    {/* Les rendez-vous suivants : ils occupent la hauteur que la carte Palmarès impose. */}
+                    {suivants.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                            {suivants.map((rdv) => (
+                                <div
+                                    key={`${rdv.gameWeek}-${rdv.opponentId ?? rdv.opponent}`}
+                                    className="flex items-center justify-between gap-3 rounded-xl bg-nuit/60 px-3 py-2"
+                                >
+                                    <div className="flex min-w-0 items-center gap-2.5">
+                                        <span className="shrink-0 font-display text-[10px] font-black text-texte-2">
+                                            J{rdv.gameWeek}
+                                        </span>
+                                        <span className="truncate text-xs font-semibold text-texte-2">
+                                            vs <span className="text-white">{rdv.opponent ?? "à définir"}</span>
+                                        </span>
+                                    </div>
+                                    <span className="shrink-0 text-[10px] font-bold text-texte-2">
+                                        {shortDate(rdv.kickoffAt) ?? "à venir"}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
                     )}
                 </div>
             )}

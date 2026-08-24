@@ -61,19 +61,23 @@ export async function liveMatchOf(managerId: string) {
 }
 
 /** Prochain match à venir d'un manager (le plus proche), ou null. Le live n'en fait pas partie. */
-export async function nextMatchOf(managerId: string) {
+export async function nextMatchesOf(managerId: string, take = 3) {
     const upcoming = await prisma.match.findMany({
         where: { played: false, live: false, OR: [{ homeManagerId: managerId }, { awayManagerId: managerId }] },
         include: matchInclude,
     });
-    return (
-        upcoming.sort(
+    return upcoming
+        .sort(
             (a, b) =>
                 a.division.gameSeason.realSeason.year - b.division.gameSeason.realSeason.year ||
                 a.division.gameSeason.index - b.division.gameSeason.index ||
                 a.gameWeek - b.gameWeek,
-        )[0] ?? null
-    );
+        )
+        .slice(0, take);
+}
+
+export async function nextMatchOf(managerId: string) {
+    return (await nextMatchesOf(managerId, 1))[0] ?? null;
 }
 
 /** Transforme un match en ligne de forme, vue du manager. */

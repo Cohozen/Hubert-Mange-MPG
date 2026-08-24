@@ -66,6 +66,7 @@ export interface Dashboard {
     season: DashboardSeason | null;
     rank: DashboardRank | null;
     next: DashboardNext | null;
+    upcoming: DashboardNext[]; // les 3 prochains rendez-vous (le 1er = `next`)
     last: FormMatch | null;
     live: FormMatch | null; // journée en direct : score provisoire, exclu des stats
     form: FormMatch[];
@@ -89,4 +90,10 @@ export function daysUntil(iso: string | null): number | null {
     if (!iso) return null;
     const diff = new Date(iso).getTime() - Date.now();
     return diff > 0 ? Math.ceil(diff / 86_400_000) : null;
+}
+
+/** « dim. 14 sept. » — date courte d'un rendez-vous à venir (null si le match n'est pas daté). */
+export function shortDate(iso: string | null): string | null {
+    if (!iso) return null;
+    return new Date(iso).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
 }

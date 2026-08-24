@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../../db/client.js";
 import { requireAuth } from "../../http/middleware.js";
-import { liveMatchOf, nextMatchOf, playedMatchesOf, summarizeForm, toFormMatch } from "../palmares/form.js";
+import { liveMatchOf, nextMatchesOf, playedMatchesOf, summarizeForm, toFormMatch } from "../palmares/form.js";
 
 /**
  * Dashboard d'accueil : tout ce qui concerne le manager connecté « ici et maintenant ».
@@ -130,21 +130,22 @@ dashboardRouter.get("/", async (req, res) => {
     // Forme récente (matchs terminés uniquement) + match en direct + prochain rendez-vous.
     const { timeline, lastMatch } = summarizeForm(await playedMatchesOf(managerId), managerId);
     const liveMatch = phase === "enCours" ? await liveMatchOf(managerId) : null;
-    const upcoming = phase === "enCours" ? await nextMatchOf(managerId) : null;
-    const next = upcoming
-        ? (() => {
-              const isHome = upcoming.homeManagerId === managerId;
-              const opp = isHome ? upcoming.awayManager : upcoming.homeManager;
-              const oppId = isHome ? upcoming.awayManagerId : upcoming.homeManagerId;
-              return {
-                  gameWeek: upcoming.gameWeek,
-                  opponent: opp?.displayName ?? null,
-                  opponentId: oppId,
-                  opponentRank: oppId ? (rankByManager.get(oppId) ?? null) : null,
-                  kickoffAt: upcoming.kickoffAt,
-              };
-          })()
-        : null;
+    // Les trois prochains rendez-vous : le premier nourrit le hero, la liste remplit la carte de
+    // la dernière journée (qui, seule, laissait un vide à côté du palmarès en desktop).
+    const upcoming = phase === "enCours" ? await nextMatchesOf(managerId, 3) : [];
+    const nextList = upcoming.map((m) => {
+        const isHome = m.homeManagerId === managerId;
+        const opp = isHome ? m.awayManager : m.homeManager;
+        const oppId = isHome ? m.awayManagerId : m.homeManagerId;
+        return {
+            gameWeek: m.gameWeek,
+            opponent: opp?.displayName ?? null,
+            opponentId: oppId,
+            opponentRank: oppId ? (rankByManager.get(oppId) ?? null) : null,
+            kickoffAt: m.kickoffAt,
+        };
+    });
+    const next = nextList[0] ?? null;
 
     const mercato =
         phase === "enCours" && division
@@ -213,6 +214,7 @@ dashboardRouter.get("/", async (req, res) => {
             : null,
         rank,
         next,
+        upcoming: nextList,
         last: lastMatch,
         live: liveMatch ? toFormMatch(liveMatch, managerId) : null, // score provisoire, hors stats
         form: timeline.slice(-5),
