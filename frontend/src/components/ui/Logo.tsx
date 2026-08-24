@@ -85,7 +85,7 @@ export function Logo({
                         fill="#0a0e27"
                         letterSpacing="3"
                     >
-                        2023
+                        2020
                     </text>
                 </>
             )}
