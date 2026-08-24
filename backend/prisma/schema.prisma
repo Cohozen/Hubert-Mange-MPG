@@ -36,9 +36,6 @@ model Manager {
   participations Participation[]
   contributions  Contribution[]
   payouts        Payout[]
-  cupMatchesHome CupMatch[]      @relation("HomeManager")
-  cupMatchesAway CupMatch[]      @relation("AwayManager")
-  cupMatchesWon  CupMatch[]      @relation("WinnerManager")
   awards         DivisionAward[]
   tournamentsWon Tournament[]    @relation("TournamentWinner")
   homeMatches    Match[]         @relation("HomeMatch")
@@ -55,7 +52,6 @@ model RealSeason {
   createdAt          DateTime @default(now())
 
   gameSeasons GameSeason[]
-  cups        Cup[]
   prizePool   PrizePool?
   tournaments Tournament[]
 }
@@ -189,42 +185,6 @@ model Tournament {
   createdAt       DateTime    @default(now())
 
   payouts Payout[]
-}
-
-/// Coupe (style Ligue des Champions) + repêchage Coupe UEFA, rattachée à une saison réelle.
-model Cup {
-  id           String     @id @default(cuid())
-  realSeasonId String
-  realSeason   RealSeason @relation(fields: [realSeasonId], references: [id], onDelete: Cascade)
-  name         String
-
-  rounds CupRound[]
-}
-
-/// Un tour de coupe (8es, 1/4...) pour une compétition donnée (LDC ou UEFA).
-model CupRound {
-  id          String @id @default(cuid())
-  cupId       String
-  cup         Cup    @relation(fields: [cupId], references: [id], onDelete: Cascade)
-  competition String // LDC | UEFA
-  name        String // ex. "8es de finale"
-  order       Int
-
-  matches CupMatch[]
-}
-
-model CupMatch {
-  id              String   @id @default(cuid())
-  cupRoundId      String
-  cupRound        CupRound @relation(fields: [cupRoundId], references: [id], onDelete: Cascade)
-  homeManagerId   String?
-  homeManager     Manager? @relation("HomeManager", fields: [homeManagerId], references: [id])
-  awayManagerId   String?
-  awayManager     Manager? @relation("AwayManager", fields: [awayManagerId], references: [id])
-  homeScore       Int?
-  awayScore       Int?
-  winnerManagerId String?
-  winnerManager   Manager? @relation("WinnerManager", fields: [winnerManagerId], references: [id])
 }
 
 /// Cagnotte d'une SAISON RÉELLE (mise annuelle unique, identique pour tous).

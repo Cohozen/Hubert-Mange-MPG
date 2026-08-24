@@ -18,12 +18,16 @@ prisma/dev.db*
 # Données de découverte MPG (perso : peut contenir le token / données)
 backend/discovery/
 
+# Artefacts de build incrémental (regénérés à chaque build)
+*.tsbuildinfo
+
 # Logs
 *.log
 npm-debug.log*
 
 # macOS
 .DS_Store
+.thumbnail
 
 # Éditeurs
 .vscode/

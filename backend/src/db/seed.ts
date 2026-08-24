@@ -12,7 +12,6 @@ async function main() {
     await prisma.participation.deleteMany();
     await prisma.division.deleteMany();
     await prisma.gameSeason.deleteMany();
-    await prisma.cup.deleteMany();
     await prisma.realSeason.deleteMany();
     await prisma.manager.deleteMany();
 
