@@ -209,8 +209,15 @@ function DonutCard({ w, d, l }: { w: number; d: number; l: number }) {
 function FormCard({ form }: { form: FormMatch[] }) {
     return (
         <div className="lhm-card rounded-[18px] border border-bord bg-carte p-4 lg:p-5">
-            <div className="mb-3 font-display text-[10px] font-extrabold uppercase tracking-[1.5px] text-texte-2">
-                5 derniers matchs · forme
+            <div className="mb-3 flex items-baseline justify-between gap-2">
+                <span className="truncate font-display text-[10px] font-extrabold uppercase tracking-[1.5px] text-texte-2">
+                    5 derniers matchs
+                </span>
+                {form.length > 1 && (
+                    <span className="shrink-0 whitespace-nowrap font-display text-[9px] font-bold uppercase tracking-[0.5px] text-texte-2">
+                        ancien → récent
+                    </span>
+                )}
             </div>
             {form.length === 0 ? (
                 <div className="flex items-center gap-2 rounded-xl border border-dashed border-bord bg-nuit/40 px-4 py-5 text-sm text-texte-2">
@@ -218,8 +225,9 @@ function FormCard({ form }: { form: FormMatch[] }) {
                 </div>
             ) : (
                 <div className="flex gap-1.5 lg:gap-2">
-                    {form.map((m) => {
+                    {form.map((m, i) => {
                         const r = RESULT[m.result];
+                        const dernier = i === form.length - 1;
                         return (
                             <div
                                 key={`${m.context}-${m.gameWeek}`}
@@ -227,12 +235,19 @@ function FormCard({ form }: { form: FormMatch[] }) {
                                 title={`J${m.gameWeek} · ${m.score}${m.opponent ? ` vs ${m.opponent}` : ""} · ${m.context}`}
                             >
                                 <span
-                                    className="grid h-[34px] w-full place-items-center rounded-lg font-display text-[13px] font-black lg:h-[46px] lg:text-base"
+                                    className={`grid h-[34px] w-full place-items-center rounded-lg font-display text-[13px] font-black lg:h-[46px] lg:text-base ${
+                                        dernier ? "ring-2 ring-white/70" : ""
+                                    }`}
                                     style={{ background: r.bg, color: r.c }}
                                 >
                                     {r.label}
                                 </span>
                                 <span className="text-[9px] text-texte-2 lg:text-[10px]">{m.score}</span>
+                                {dernier && (
+                                    <span className="font-display text-[8px] font-black uppercase tracking-[0.5px] text-white lg:text-[9px]">
+                                        Dernier
+                                    </span>
+                                )}
                             </div>
                         );
                     })}

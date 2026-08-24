@@ -3,7 +3,6 @@ import { api } from "@/api/client";
 import { useAuth } from "@/auth/useAuth";
 import type { TimelineSeason } from "@/components/business/profile/types";
 import type { AllTimeRow, CupCount } from "@/components/business/stats/types";
-import { InfoHint } from "@/components/ui/InfoHint";
 import { InitialsAvatar } from "@/components/ui/InitialsAvatar";
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
@@ -43,9 +42,75 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
     const divLabel = divLevel ? `D${divLevel}` : "—";
     const rating = clamp(60 + trophies * 4 + Math.round(winPct / 5), 55, 99);
 
+    /** Identité : avatar + nom + pseudo. L'avatar n'accepte qu'une taille en pixels. */
+    const identity = (avatarSize: number) => (
+        <div className="flex min-w-0 flex-1 items-center gap-3 lg:gap-[13px]">
+            <InitialsAvatar
+                name={name}
+                seed={managerId}
+                size={avatarSize}
+                ring
+                className="border-[3px] border-[#2D1B69]"
+            />
+            <div className="min-w-0">
+                <h1 className="font-display text-[26px] font-black uppercase leading-[0.92] tracking-[-0.8px] text-white [overflow-wrap:anywhere] lg:mt-1 lg:text-[44px] lg:tracking-[-1.5px]">
+                    {name}
+                </h1>
+                {username && <p className="truncate text-[11px] text-[#C9B8F5] lg:text-sm">{username}</p>}
+            </div>
+        </div>
+    );
+
+    /** Côte manager + division. `compact` = version mobile, posée à droite du nom. */
+    const noteTile = (compact: boolean) =>
+        compact ? (
+            <div className="flex shrink-0 flex-col items-center rounded-xl border border-white/15 bg-nuit/[0.34] px-2.5 py-2">
+                <div className="font-display text-[26px] font-black leading-none text-jaune">{rating}</div>
+                <div className="mt-1 font-display text-[8px] font-black tracking-[1px] text-white">CÔTE</div>
+                <div className="my-1.5 h-px w-5 bg-white/25" />
+                <div className="font-display text-xs font-black leading-none text-jaune">{divLabel}</div>
+                {ldc > 0 && <div className="mt-0.5 text-[11px]">⭐</div>}
+            </div>
+        ) : (
+            <div className="flex shrink-0 flex-col items-center rounded-2xl border border-white/15 bg-nuit/[0.34] px-5 py-[18px]">
+                <div className="font-display text-[64px] font-black leading-[0.8] text-jaune">{rating}</div>
+                <div className="mt-1.5 font-display text-[13px] font-black tracking-[2px] text-white">Côte manager</div>
+                <div className="my-[11px] h-px w-11 bg-white/25" />
+                <div className="font-display text-[22px] font-black leading-none text-jaune">{divLabel}</div>
+                {ldc > 0 && <div className="mt-1.5 text-lg">⭐</div>}
+            </div>
+        );
+
+    const badgeClass =
+        "shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 font-display text-[9px] font-black tracking-[0.5px] lg:px-[15px] lg:py-[7px] lg:text-[11px]";
+    const badges = (
+        <>
+            {divLevel > 0 && (
+                <span
+                    className={badgeClass}
+                    style={{ background: "linear-gradient(135deg,#FFD23F,#FF6B35)", color: "#3D2E00" }}
+                >
+                    DIVISION {divLevel}
+                    {divLevel === 1 ? " · ÉLITE" : ""}
+                </span>
+            )}
+            {ldc > 0 && (
+                <span className={`${badgeClass} border border-menthe/50 bg-menthe/[0.16] text-menthe`}>
+                    {ldc}× LIGUE DES CRAMPONS
+                </span>
+            )}
+            {isMe && <span className={`${badgeClass} border border-white/20 bg-nuit/40 text-white`}>TOI</span>}
+            {memberSince && (
+                <span className={`${badgeClass} border border-white/20 bg-nuit/40 font-bold text-[#C9B8F5]`}>
+                    Membre depuis {memberSince}
+                </span>
+            )}
+        </>
+    );
+
     return (
         <div
-            className="relative overflow-hidden rounded-[22px] border p-5 shadow-[0_18px_46px_rgba(109,40,217,.4)] lg:rounded-3xl lg:p-8"
+            className="relative overflow-hidden rounded-[22px] border p-4 shadow-[0_18px_46px_rgba(109,40,217,.4)] lg:rounded-3xl lg:p-8"
             style={{
                 background: "linear-gradient(150deg,#2D1B69,#6D28D9 78%)",
                 borderColor: "rgba(167,139,250,.35)",
@@ -63,73 +128,23 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
                 style={{ background: "repeating-linear-gradient(118deg,#fff 0 2px, transparent 2px 24px)" }}
             />
 
-            <div className="relative flex items-center gap-4 lg:gap-7">
-                {/* Colonne note */}
-                <div className="flex shrink-0 flex-col items-center rounded-2xl border border-white/15 bg-nuit/[0.34] px-3 py-[11px] lg:px-5 lg:py-[18px]">
-                    <div className="font-display text-[38px] font-black leading-[0.8] text-jaune lg:text-[64px]">
-                        {rating}
-                    </div>
-                    <div className="mt-1 flex items-center gap-1 lg:mt-1.5">
-                        <span className="font-display text-[10px] font-black tracking-[1.5px] text-white lg:text-[13px] lg:tracking-[2px]">
-                            Côte manager
-                        </span>
-                    </div>
-                    <div className="my-[7px] h-px w-6 bg-white/25 lg:my-[11px] lg:w-11" />
-                    <div className="font-display text-sm font-black leading-none text-jaune lg:text-[22px]">
-                        {divLabel}
-                    </div>
-                    {ldc > 0 && <div className="mt-1 text-[13px] lg:mt-1.5 lg:text-lg">⭐</div>}
+            {/* Mobile : la côte passe à droite du nom, les badges filent sur une seule ligne. */}
+            <div className="relative lg:hidden">
+                <div className="flex items-center gap-3">
+                    {identity(52)}
+                    {noteTile(true)}
                 </div>
+                <div className="mt-3 flex flex-wrap gap-1.5">{badges}</div>
+            </div>
 
-                {/* Avatar + identité */}
+            {/* Desktop : côte à gauche, identité au centre, stats clés à droite. */}
+            <div className="relative hidden items-center gap-7 lg:flex">
+                {noteTile(false)}
                 <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-3 lg:gap-[13px]">
-                        <InitialsAvatar
-                            name={name}
-                            seed={managerId}
-                            size={64}
-                            ring
-                            className="border-[3px] border-[#2D1B69]"
-                        />
-                        <div className="min-w-0">
-                            <h1 className="mt-1 font-display text-[26px] font-black uppercase leading-[0.92] tracking-[-0.8px] text-white [overflow-wrap:anywhere] lg:text-[44px] lg:tracking-[-1.5px]">
-                                {name}
-                            </h1>
-                            {username && <p className="truncate text-xs text-[#C9B8F5] lg:text-sm">{username}</p>}
-                        </div>
-                    </div>
-
-                    {/* Badges */}
-                    <div className="mt-3 flex flex-wrap gap-1.5 lg:mt-3.5 lg:gap-2">
-                        {divLevel > 0 && (
-                            <span
-                                className="rounded-full px-2.5 py-1 font-display text-[9px] font-black tracking-[0.5px] lg:px-[15px] lg:py-[7px] lg:text-[11px]"
-                                style={{ background: "linear-gradient(135deg,#FFD23F,#FF6B35)", color: "#3D2E00" }}
-                            >
-                                DIVISION {divLevel}
-                                {divLevel === 1 ? " · ÉLITE" : ""}
-                            </span>
-                        )}
-                        {ldc > 0 && (
-                            <span className="rounded-full border border-menthe/50 bg-menthe/[0.16] px-2.5 py-1 font-display text-[9px] font-black text-menthe lg:px-[15px] lg:py-[7px] lg:text-[11px]">
-                                {ldc}× LIGUE DES CRAMPONS
-                            </span>
-                        )}
-                        {isMe && (
-                            <span className="rounded-full border border-white/20 bg-nuit/40 px-2.5 py-1 font-display text-[9px] font-black text-white lg:px-[15px] lg:py-[7px] lg:text-[11px]">
-                                TOI
-                            </span>
-                        )}
-                        {memberSince && (
-                            <span className="rounded-full border border-white/20 bg-nuit/40 px-2.5 py-1 font-display text-[9px] font-bold text-[#C9B8F5] lg:px-[15px] lg:py-[7px] lg:text-[11px]">
-                                Membre depuis {memberSince}
-                            </span>
-                        )}
-                    </div>
+                    {identity(64)}
+                    <div className="mt-3.5 flex flex-wrap gap-2">{badges}</div>
                 </div>
-
-                {/* Stats clés (desktop) */}
-                <div className="hidden shrink-0 gap-2 lg:flex">
+                <div className="flex shrink-0 gap-2">
                     <HeadlineStat value={row ? `${row.rank}e` : "—"} label="Rang all-time" color="text-white" />
                     <HeadlineStat value={trophies} label="Trophées" color="text-jaune" />
                     <HeadlineStat value={`${winPct}%`} label="Réussite" color="text-menthe" />
