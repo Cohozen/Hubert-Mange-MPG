@@ -243,7 +243,7 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                 // État live (journée en cours, mercato) : n'a de sens que pour une saison en cours,
                 // et c'est ce qui alimente le dashboard d'accueil. `/division/{id}` donne aussi le
                 // vrai nombre de journées, plus fiable que le calcul (nbÉquipes - 1) × 2.
-                let live: { currentGameWeek?: number; totalGameWeeks?: number } = {};
+                let live: { currentGameWeek?: number; totalGameWeeks?: number; numberUpAndDown?: number } = {};
                 let mercato: { mercatoClosed?: boolean; nextMercatoTurn?: Date | null } = {};
                 if (!isFinished) {
                     try {
@@ -251,6 +251,7 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                         live = {
                             currentGameWeek: detail?.liveState?.currentGameWeek,
                             totalGameWeeks: detail?.liveState?.totalGameWeeks,
+                            numberUpAndDown: detail?.gameSettings?.numberUpAndDownPreference,
                         };
                         mercato = {
                             mercatoClosed: detail?.mercatoState?.mercatoClosed,
@@ -263,6 +264,7 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                 const divisionState = {
                     currentGameWeek: live.currentGameWeek ?? null,
                     totalGameWeeks: live.totalGameWeeks ?? null,
+                    numberUpAndDown: live.numberUpAndDown ?? null,
                     mercatoClosed: mercato.mercatoClosed ?? null,
                     nextMercatoTurn: mercato.nextMercatoTurn ?? null,
                 };
@@ -438,10 +440,15 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                     const realGw = realGameWeeks.get(gw);
                     const kickoffAt = realGw ? (gameWeekDates?.get(realGw) ?? null) : null;
                     for (const m of dms) {
-                        // « Joué » = MPG a posé un score. `finalResult` n'apparaît qu'une fois la
-                        // journée close (absent pendant le live), et `status` vaut 1 ou 2 selon
-                        // l'âge du match : la présence des scores est le seul critère fiable.
-                        const played = m.home?.score != null && m.away?.score != null;
+                        // Trois états. MPG pose un score dès le coup d'envoi, mais `finalResult`
+                        // n'apparaît qu'une fois la journée close : sans lui, un match en direct
+                        // passerait pour terminé et son score partiel entrerait dans les stats.
+                        // Le repli sur `currentGameWeek` évite qu'une vieille journée reste
+                        // éternellement « en cours » si MPG n'a jamais posé `finalResult`.
+                        const hasScore = m.home?.score != null && m.away?.score != null;
+                        const isFinal = Boolean(m.finalResult) || gw < (live.currentGameWeek ?? gw);
+                        const isLive = hasScore && !isFinal;
+                        const played = hasScore && !isLive;
                         // Un match à venir n'expose que le teamId, pas le userId du manager.
                         const homeId =
                             (m.home?.userId ? userToManager.get(m.home.userId) : null) ??
@@ -454,9 +461,10 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                             gameWeek: gw,
                             homeManagerId: homeId ?? null,
                             awayManagerId: awayId ?? null,
-                            homeScore: played ? m.home.score : null,
-                            awayScore: played ? m.away.score : null,
+                            homeScore: hasScore ? m.home.score : null,
+                            awayScore: hasScore ? m.away.score : null,
                             played,
+                            live: isLive,
                             kickoffAt,
                         };
                         await prisma.match.upsert({

@@ -93,6 +93,9 @@ model Division {
   // Renseigné pour la saison en cours ; sert au dashboard d'accueil.
   currentGameWeek Int?
   totalGameWeeks  Int?
+  /// Nombre d'équipes qui montent (et qui descendent) en fin de saison, tel que configuré côté
+  /// MPG (gameSettings.numberUpAndDownPreference). Sert aux zones du dashboard.
+  numberUpAndDown Int?
   mercatoClosed   Boolean?
   nextMercatoTurn DateTime?
 
@@ -163,6 +166,9 @@ model Match {
   homeScore     Int? // null tant que le match n'est pas joué
   awayScore     Int?
   played        Boolean   @default(true)
+  /// Journée en direct : MPG a posé un score, mais le résultat n'est pas définitif.
+  /// Un match live n'est ni « joué » (hors stats) ni « à venir ».
+  live          Boolean   @default(false)
   kickoffAt     DateTime? // début de la journée réelle L1 (/championship-calendar/{id})
 }
 

@@ -5,6 +5,7 @@ export interface FormMatch {
     result: "W" | "D" | "L";
     score: string;
     opponent: string | null;
+    opponentUsername: string | null;
     opponentId: string | null;
     gameWeek: number;
     gameSeason: string;
@@ -51,10 +52,18 @@ export async function playedMatchesOf(managerId: string) {
     );
 }
 
-/** Prochain match à venir d'un manager (le plus proche), ou null. */
+/** Match en cours d'un manager (score partiel, journée non close), ou null. */
+export async function liveMatchOf(managerId: string) {
+    return prisma.match.findFirst({
+        where: { live: true, OR: [{ homeManagerId: managerId }, { awayManagerId: managerId }] },
+        include: matchInclude,
+    });
+}
+
+/** Prochain match à venir d'un manager (le plus proche), ou null. Le live n'en fait pas partie. */
 export async function nextMatchOf(managerId: string) {
     const upcoming = await prisma.match.findMany({
-        where: { played: false, OR: [{ homeManagerId: managerId }, { awayManagerId: managerId }] },
+        where: { played: false, live: false, OR: [{ homeManagerId: managerId }, { awayManagerId: managerId }] },
         include: matchInclude,
     });
     return (
@@ -77,6 +86,7 @@ export function toFormMatch(m: MatchWithContext, managerId: string): FormMatch {
         result: mine > theirs ? "W" : mine < theirs ? "L" : "D",
         score: `${mine}-${theirs}`,
         opponent: oppMgr?.displayName ?? null,
+        opponentUsername: oppMgr?.username ?? null,
         opponentId: (isHome ? m.awayManagerId : m.homeManagerId) ?? null,
         gameWeek: m.gameWeek,
         gameSeason: m.division.gameSeason.name,

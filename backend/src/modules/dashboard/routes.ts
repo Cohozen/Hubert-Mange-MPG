@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../../db/client.js";
 import { requireAuth } from "../../http/middleware.js";
-import { nextMatchOf, playedMatchesOf, summarizeForm } from "../palmares/form.js";
+import { liveMatchOf, nextMatchOf, playedMatchesOf, summarizeForm, toFormMatch } from "../palmares/form.js";
 
 /**
  * Dashboard d'accueil : tout ce qui concerne le manager connecté « ici et maintenant ».
@@ -15,6 +15,47 @@ dashboardRouter.use(requireAuth);
 
 /** Phase de vie de la ligue, déduite du statut des saisons et des dates du championnat réel. */
 type Phase = "enCours" | "inter" | "estivale";
+
+/** Enjeu de la place occupée dans la division. */
+type Zone = "titre" | "promotion" | "maintien" | "relegation";
+
+/**
+ * Zone occupée et écart de points avec l'objectif suivant.
+ *
+ * MPG configure le nombre de montées/descentes par ligue
+ * (`gameSettings.numberUpAndDownPreference`, 2 chez nous) ; on garde 2 en repli. Les extrêmes n'ont
+ * pas toutes les zones : pas de promotion depuis la D1, pas de relégation depuis la dernière.
+ */
+function computeZone(
+    rank: number,
+    points: number,
+    level: number,
+    totalDivisions: number,
+    rows: { finalRank: number | null; points: number | null }[],
+    upAndDown: number,
+): { zone: Zone; gap: number | null; target: string | null } {
+    const teams = rows.length;
+    const isTop = level === 1;
+    const isBottom = level >= totalDivisions;
+    const pointsAt = (r: number) => rows.find((x) => x.finalRank === r)?.points ?? null;
+    // Écart avec la place visée : positif = ce qu'il manque, négatif = l'avance sur le poursuivant.
+    const gapTo = (r: number) => {
+        const p = pointsAt(r);
+        return p == null ? null : Math.abs(p - points);
+    };
+
+    if (isTop && rank === 1) return { zone: "titre", gap: gapTo(2), target: "2e" };
+    if (!isTop && rank <= upAndDown) {
+        return { zone: "promotion", gap: gapTo(upAndDown + 1), target: `${upAndDown + 1}e` };
+    }
+    if (!isBottom && rank > teams - upAndDown) {
+        return { zone: "relegation", gap: gapTo(teams - upAndDown), target: "maintien" };
+    }
+    // Maintien : l'objectif est la montée, ou le titre quand on est déjà dans l'élite.
+    return isTop
+        ? { zone: "maintien", gap: gapTo(1), target: "titre" }
+        : { zone: "maintien", gap: gapTo(upAndDown), target: "promotion" };
+}
 
 dashboardRouter.get("/", async (req, res) => {
     const managerId = req.auth!.managerId;
@@ -55,6 +96,19 @@ dashboardRouter.get("/", async (req, res) => {
     const leaderPoints = divisionRows.reduce((max, r) => Math.max(max, r.points ?? 0), 0);
     const rankByManager = new Map(divisionRows.map((r) => [r.managerId, r.finalRank]));
 
+    const totalDivisions = gameSeason ? await prisma.division.count({ where: { gameSeasonId: gameSeason.id } }) : 0;
+    const zone =
+        current?.finalRank && division && phase === "enCours"
+            ? computeZone(
+                  current.finalRank,
+                  current.points ?? 0,
+                  division.level,
+                  totalDivisions,
+                  divisionRows,
+                  division.numberUpAndDown ?? 2,
+              )
+            : null;
+
     const totalGameWeeks = division?.totalGameWeeks ?? null;
     const playedWeeks = current?.played ?? 0;
     const rank = current
@@ -67,11 +121,15 @@ dashboardRouter.get("/", async (req, res) => {
               gap: Math.max(0, leaderPoints - (current.points ?? 0)),
               progressPct: totalGameWeeks ? Math.round((playedWeeks / totalGameWeeks) * 100) : null,
               gameWeeksLeft: totalGameWeeks ? Math.max(0, totalGameWeeks - playedWeeks) : null,
+              zone: zone?.zone ?? null,
+              zoneGap: zone?.gap ?? null,
+              zoneTarget: zone?.target ?? null,
           }
         : null;
 
-    // Forme récente (tous matchs joués confondus) + prochain rendez-vous.
+    // Forme récente (matchs terminés uniquement) + match en direct + prochain rendez-vous.
     const { timeline, lastMatch } = summarizeForm(await playedMatchesOf(managerId), managerId);
+    const liveMatch = phase === "enCours" ? await liveMatchOf(managerId) : null;
     const upcoming = phase === "enCours" ? await nextMatchOf(managerId) : null;
     const next = upcoming
         ? (() => {
@@ -156,6 +214,7 @@ dashboardRouter.get("/", async (req, res) => {
         rank,
         next,
         last: lastMatch,
+        live: liveMatch ? toFormMatch(liveMatch, managerId) : null, // score provisoire, hors stats
         form: timeline.slice(-5),
         mercato,
         cagnotte,
