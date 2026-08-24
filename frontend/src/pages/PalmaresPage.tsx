@@ -33,7 +33,7 @@ export default function PalmaresPage() {
             {/* En-tête : titre (mobile) + sous-titre + onglets */}
             <header className="space-y-3.5">
                 <div>
-                    <h1 className="font-display text-[34px] font-black uppercase leading-[0.95] tracking-[-1.2px] text-white lg:hidden">
+                    <h1 className="font-display text-[34px] font-black uppercase leading-[0.95] tracking-[-1.2px] text-white lg:text-[38px]">
                         Palmarès
                     </h1>
                     <p className="mt-1.5 text-xs text-texte-2 lg:text-sm">

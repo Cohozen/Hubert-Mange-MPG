@@ -1,5 +1,7 @@
-import { NavLink } from "react-router-dom";
-import { isLeagueAdmin, useAuth } from "@/auth/useAuth";
+import { LogOut } from "lucide-react";
+import { Link, NavLink } from "react-router-dom";
+import { isLeagueAdmin, type Me } from "@/auth/useAuth";
+import { InitialsAvatar } from "@/components/ui/InitialsAvatar";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
 import { MAIN_NAV, type NavItem, SECONDARY_NAV } from "./nav";
@@ -22,9 +24,8 @@ function SideItem({ item }: { item: NavItem }) {
     );
 }
 
-/** Sidebar de navigation (desktop). */
-export function Sidebar({ className }: { className?: string }) {
-    const { data: me } = useAuth();
+/** Sidebar (desktop) : navigation, réglages, puis le compte connecté tout en bas. */
+export function Sidebar({ me, onLogout, className }: { me: Me; onLogout: () => void; className?: string }) {
     const secondary = SECONDARY_NAV.filter((it) => !it.adminOnly || isLeagueAdmin(me));
     return (
         <aside
@@ -52,6 +53,29 @@ export function Sidebar({ className }: { className?: string }) {
                 {secondary.map((it) => (
                     <SideItem key={it.to} item={it} />
                 ))}
+            </div>
+
+            {/* Compte : ce bloc remplace la barre du haut, retirée en desktop. */}
+            <div className="mt-3 flex items-center gap-2 border-t border-bord pt-3">
+                <Link
+                    to="/profil"
+                    className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl px-2 py-2 transition hover:bg-carte-2"
+                >
+                    <InitialsAvatar name={me.displayName} seed={me.id} size={32} />
+                    <span className="min-w-0">
+                        <span className="block truncate text-[13px] font-semibold text-texte">{me.displayName}</span>
+                        {me.username && <span className="block truncate text-[11px] text-texte-2">{me.username}</span>}
+                    </span>
+                </Link>
+                <button
+                    type="button"
+                    onClick={onLogout}
+                    aria-label="Déconnexion"
+                    title="Déconnexion"
+                    className="grid size-9 shrink-0 place-items-center rounded-xl text-texte-2 transition hover:bg-carte-2 hover:text-rouge"
+                >
+                    <LogOut size={18} />
+                </button>
             </div>
         </aside>
     );

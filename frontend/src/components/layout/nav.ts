@@ -23,15 +23,3 @@ export const SECONDARY_NAV: NavItem[] = [
     { to: "/parametres", label: "Paramètres", icon: Settings },
     { to: "/administration", label: "Administration", icon: ShieldCheck, adminOnly: true },
 ];
-
-/** Titre de page à partir du pathname courant (topbar desktop). */
-export function pageTitle(pathname: string): string {
-    if (pathname === "/") return "Accueil";
-    if (pathname.startsWith("/palmares")) return "Palmarès";
-    if (pathname.startsWith("/stats")) return "Rétro";
-    if (pathname.startsWith("/cagnotte")) return "Cagnotte";
-    if (pathname.startsWith("/profil")) return "Profil";
-    if (pathname.startsWith("/parametres")) return "Paramètres";
-    if (pathname.startsWith("/administration")) return "Administration";
-    return "Ligue Hubert Mange";
-}
