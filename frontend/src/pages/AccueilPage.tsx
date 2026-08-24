@@ -61,7 +61,7 @@ export default function AccueilPage() {
 
             {/* Ligne du bas : phase de saison + palmarès */}
             <div className="grid items-start gap-4 lg:grid-cols-[1.3fr_1fr]">
-                <PhaseSlot data={data} me={me.displayName} meId={me.id} />
+                <PhaseSlot data={data} me={me.displayName} meId={me.id} meUsername={me.username} />
                 <PalmaresSummaryCard palmares={data.palmares} />
             </div>
         </div>

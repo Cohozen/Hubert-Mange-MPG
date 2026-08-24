@@ -23,7 +23,13 @@ export interface DashboardRank {
     gap: number;
     progressPct: number | null;
     gameWeeksLeft: number | null;
+    zone: Zone | null;
+    zoneGap: number | null; // points d'écart avec l'objectif
+    zoneTarget: string | null; // « promotion », « maintien », « titre », « 3e »…
 }
+
+/** Enjeu de la place occupée dans la division. */
+export type Zone = "titre" | "promotion" | "maintien" | "relegation";
 export interface DashboardNext {
     gameWeek: number;
     opponent: string | null;
@@ -61,6 +67,7 @@ export interface Dashboard {
     rank: DashboardRank | null;
     next: DashboardNext | null;
     last: FormMatch | null;
+    live: FormMatch | null; // journée en direct : score provisoire, exclu des stats
     form: FormMatch[];
     mercato: DashboardMercato | null;
     cagnotte: DashboardCagnotte | null;

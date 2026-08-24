@@ -23,6 +23,7 @@ export interface FormMatch {
     result: "W" | "D" | "L";
     score: string;
     opponent: string | null;
+    opponentUsername: string | null;
     opponentId: string | null;
     gameWeek: number;
     gameSeason: string;
