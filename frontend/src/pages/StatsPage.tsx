@@ -7,6 +7,8 @@ import { RankingRestList } from "@/components/business/stats/RankingRestList";
 import { StatsInfoDialog } from "@/components/business/stats/StatsInfoDialog";
 import type { AllTimeRow, CupCount, FunStats, RankingEntry, RankRow } from "@/components/business/stats/types";
 import { Empty } from "@/components/ui/Empty";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Loader } from "@/components/ui/Loader";
 import { PillTabs } from "@/components/ui/PillTabs";
 import { useTabParam } from "@/lib/useTabParam";
 
@@ -188,7 +190,19 @@ export default function StatsPage() {
                 ]}
             />
 
-            {tab === "classement" ? (
+            {allTime.isError || fun.isError || cups.isError || allTime.isPaused || fun.isPaused || cups.isPaused ? (
+                <ErrorState
+                    onRetry={() => {
+                        allTime.refetch();
+                        fun.refetch();
+                        cups.refetch();
+                    }}
+                >
+                    Impossible de charger la Rétro.
+                </ErrorState>
+            ) : allTime.isPending || fun.isPending || cups.isPending ? (
+                <Loader />
+            ) : tab === "classement" ? (
                 entries.length ? (
                     <div className="space-y-6">
                         {/* Titre + méthode */}

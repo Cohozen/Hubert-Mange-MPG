@@ -3,6 +3,8 @@ import { api } from "@/api/client";
 import type { CupRow, DivisionWinner } from "@/components/business/palmares/types";
 import { divisionStyle } from "@/components/business/stats/playerStyle";
 import { Empty } from "@/components/ui/Empty";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Loader } from "@/components/ui/Loader";
 
 interface Trophy {
     icon: string;
@@ -59,7 +61,19 @@ export function ProfileTrophiesTab({ managerId }: { managerId: string }) {
         queryKey: ["tournaments"],
         queryFn: () => api<{ list: CupRow[] }>("/api/palmares/tournaments"),
     });
-    if (winners.isLoading || cups.isLoading) return null;
+    if (winners.isError || cups.isError || winners.isPaused || cups.isPaused) {
+        return (
+            <ErrorState
+                onRetry={() => {
+                    winners.refetch();
+                    cups.refetch();
+                }}
+            >
+                Impossible de charger la salle des trophées.
+            </ErrorState>
+        );
+    }
+    if (winners.isPending || cups.isPending) return <Loader />;
 
     const titles = (winners.data?.divisionWinners ?? []).filter((w) => w.managerId === managerId);
     const cupWins = (cups.data?.list ?? []).filter((c) => c.winnerManagerId === managerId);

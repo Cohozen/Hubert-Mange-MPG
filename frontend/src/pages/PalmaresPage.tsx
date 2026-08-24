@@ -5,6 +5,8 @@ import { PalmaresRankingCard } from "@/components/business/palmares/PalmaresRank
 import { SeasonChampionsView } from "@/components/business/palmares/SeasonChampionsView";
 import type { CupCount, CupRow, DivisionWinner } from "@/components/business/palmares/types";
 import { Empty } from "@/components/ui/Empty";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Loader } from "@/components/ui/Loader";
 import { PillTabs } from "@/components/ui/PillTabs";
 import { useTabParam } from "@/lib/useTabParam";
 
@@ -48,7 +50,18 @@ export default function PalmaresPage() {
                 />
             </header>
 
-            {tab === "coupes" ? (
+            {winners.isError || cups.isError || winners.isPaused || cups.isPaused ? (
+                <ErrorState
+                    onRetry={() => {
+                        winners.refetch();
+                        cups.refetch();
+                    }}
+                >
+                    Impossible de charger le palmarès.
+                </ErrorState>
+            ) : winners.isPending || cups.isPending ? (
+                <Loader />
+            ) : tab === "coupes" ? (
                 <div className="space-y-4 lg:space-y-6">
                     {ranking.length > 0 && <PalmaresRankingCard rows={ranking} />}
                     <div className="grid gap-3.5 lg:gap-5 lg:grid-cols-3">

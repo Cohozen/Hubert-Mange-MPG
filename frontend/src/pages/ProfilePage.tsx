@@ -6,6 +6,7 @@ import { ProfileHeader } from "@/components/business/profile/ProfileHeader";
 import { ProfileStatsTab } from "@/components/business/profile/ProfileStatsTab";
 import { ProfileSummaryTab } from "@/components/business/profile/ProfileSummaryTab";
 import { ProfileTrophiesTab } from "@/components/business/profile/ProfileTrophiesTab";
+import { Loader } from "@/components/ui/Loader";
 import { useTabParam } from "@/lib/useTabParam";
 
 type TabKey = "resume" | "trophees" | "stats" | "confrontations";
@@ -35,13 +36,7 @@ export default function ProfilePage() {
         activeRef.current?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }, [tab]);
 
-    if (!targetId) {
-        return (
-            <div className="grid min-h-[40vh] place-items-center">
-                <div className="size-10 animate-spin rounded-full border-4 border-bord border-t-rose" />
-            </div>
-        );
-    }
+    if (!targetId) return <Loader />;
 
     return (
         <div className="space-y-6">

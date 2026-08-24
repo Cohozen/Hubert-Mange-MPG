@@ -6,6 +6,8 @@ import type { TimelineSeason } from "@/components/business/profile/types";
 import { initials, playerGradient } from "@/components/business/stats/playerStyle";
 import type { FormMatch, H2H, OppRow } from "@/components/business/stats/types";
 import { Empty } from "@/components/ui/Empty";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Loader } from "@/components/ui/Loader";
 
 /** Couleurs et libellés d'un résultat vu du manager (V / N / D). */
 const RESULT = {
@@ -241,7 +243,12 @@ function FormCard({ form }: { form: FormMatch[] }) {
 }
 
 export function ProfileSummaryTab({ managerId }: { managerId: string }) {
-    const { data: h } = useQuery({
+    const {
+        data: h,
+        isError,
+        isPaused,
+        refetch,
+    } = useQuery({
         queryKey: ["h2h", managerId],
         queryFn: () => api<H2H>(`/api/palmares/h2h/${managerId}`),
     });
@@ -250,7 +257,10 @@ export function ProfileSummaryTab({ managerId }: { managerId: string }) {
         queryFn: () => api<{ seasons: TimelineSeason[] }>(`/api/palmares/timeline/${managerId}`),
     });
 
-    if (!h) return null;
+    if (isError || isPaused) {
+        return <ErrorState onRetry={() => refetch()}>Impossible de charger ce profil.</ErrorState>;
+    }
+    if (!h) return <Loader />;
     if (h.overall.played === 0) {
         return (
             <div className="space-y-3 lg:space-y-[18px]">

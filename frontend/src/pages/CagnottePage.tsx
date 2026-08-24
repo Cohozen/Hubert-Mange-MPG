@@ -4,6 +4,8 @@ import { canEditCagnotte, useAuth } from "@/auth/useAuth";
 import { SeasonView } from "@/components/business/cagnotte/SeasonView";
 import type { SeasonRow } from "@/components/business/cagnotte/types";
 import { Empty } from "@/components/ui/Empty";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Loader } from "@/components/ui/Loader";
 import { PillTabs } from "@/components/ui/PillTabs";
 import { useTabParam } from "@/lib/useTabParam";
 
@@ -23,7 +25,10 @@ export default function CagnottePage() {
     const [selName, setSelName] = useTabParam<string>("saison", names[0] ?? "", names);
     const current = tabs.find((s) => s.name === selName) ?? tabs[0];
 
-    if (seasons.isLoading) return null;
+    if (seasons.isError || seasons.isPaused) {
+        return <ErrorState onRetry={() => seasons.refetch()}>Impossible de charger la cagnotte.</ErrorState>;
+    }
+    if (seasons.isPending) return <Loader />;
     if (!tabs.length) {
         return <Empty>Aucune cagnotte disponible.</Empty>;
     }

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { isLeagueAdmin, useAuth, useLogout } from "@/auth/useAuth";
 import { AppShell } from "@/components/layout/AppShell";
+import { Loader } from "@/components/ui/Loader";
 import AccueilPage from "@/pages/AccueilPage";
 import AdministrationPage from "@/pages/AdministrationPage";
 import CagnottePage from "@/pages/CagnottePage";
@@ -18,21 +19,13 @@ function useDarkTheme() {
     }, []);
 }
 
-function FullScreenLoader() {
-    return (
-        <div className="grid min-h-screen place-items-center bg-nuit">
-            <div className="size-10 animate-spin rounded-full border-4 border-bord border-t-rose" />
-        </div>
-    );
-}
-
 export default function App() {
     useDarkTheme();
     const { data: me, isLoading } = useAuth();
     const logout = useLogout();
 
     if (isLoading) {
-        return <FullScreenLoader />;
+        return <Loader fullScreen />;
     }
 
     if (!me) {

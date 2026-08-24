@@ -4,6 +4,8 @@ import { CreatePool } from "@/components/business/cagnotte/CreatePool";
 import { PoolView } from "@/components/business/cagnotte/PoolView";
 import type { PoolDetail, SeasonRow } from "@/components/business/cagnotte/types";
 import { Empty } from "@/components/ui/Empty";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Loader } from "@/components/ui/Loader";
 
 export function SeasonView({ season, editor }: { season: SeasonRow; editor: boolean }) {
     const qc = useQueryClient();
@@ -25,6 +27,9 @@ export function SeasonView({ season, editor }: { season: SeasonRow; editor: bool
         return <CreatePool season={season} onCreated={refresh} />;
     }
 
-    if (!detail.data) return null;
+    if (detail.isError || detail.isPaused) {
+        return <ErrorState onRetry={() => detail.refetch()}>Impossible de charger cette cagnotte.</ErrorState>;
+    }
+    if (!detail.data) return <Loader />;
     return <PoolView pool={detail.data} editor={editor} onChange={refresh} />;
 }

@@ -5,6 +5,20 @@
 //   sous-domaine API (front et API sont same-site, le cookie de session passe).
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
+/**
+ * Erreur d'API porteuse du code HTTP. Le `status` sert au traitement global du 401 (session
+ * expirée) configuré dans `main.tsx` ; le message, lui, reste celui du backend.
+ */
+export class ApiError extends Error {
+    readonly status: number;
+
+    constructor(status: number, message: string) {
+        super(message);
+        this.name = "ApiError";
+        this.status = status;
+    }
+}
+
 export async function api<T = any>(path: string, options: RequestInit = {}): Promise<T> {
     const res = await fetch(`${API_BASE}${path}`, {
         credentials: "include",
@@ -13,7 +27,7 @@ export async function api<T = any>(path: string, options: RequestInit = {}): Pro
     });
     if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? `Erreur ${res.status}`);
+        throw new ApiError(res.status, body.error ?? `Erreur ${res.status}`);
     }
     return res.status === 204 ? (undefined as T) : res.json();
 }

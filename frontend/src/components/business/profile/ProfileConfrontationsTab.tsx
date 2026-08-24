@@ -4,6 +4,8 @@ import { api } from "@/api/client";
 import { initials, playerGradient } from "@/components/business/stats/playerStyle";
 import type { H2H, OppRow } from "@/components/business/stats/types";
 import { Empty } from "@/components/ui/Empty";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Loader } from "@/components/ui/Loader";
 
 const BADGE = {
     dom: { label: "Domination", emoji: "", c: "#00E5A0", bg: "rgba(0,229,160,.12)", bd: "rgba(0,229,160,.4)" },
@@ -33,12 +35,20 @@ const fmt2 = (n: number) => n.toFixed(2).replace(".", ",");
 const COLS = "grid-cols-[1.6fr_60px_54px_54px_54px_80px_80px_150px]";
 
 export function ProfileConfrontationsTab({ managerId }: { managerId: string }) {
-    const { data: h } = useQuery({
+    const {
+        data: h,
+        isError,
+        isPaused,
+        refetch,
+    } = useQuery({
         queryKey: ["h2h", managerId],
         queryFn: () => api<H2H>(`/api/palmares/h2h/${managerId}`),
     });
 
-    if (!h) return null;
+    if (isError || isPaused) {
+        return <ErrorState onRetry={() => refetch()}>Impossible de charger les confrontations.</ErrorState>;
+    }
+    if (!h) return <Loader />;
     if (h.opponents.length === 0) return <Empty>Aucune confrontation enregistrée.</Empty>;
 
     const o = h.overall;

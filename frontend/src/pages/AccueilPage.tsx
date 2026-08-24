@@ -8,6 +8,8 @@ import { PhaseSlot } from "@/components/business/accueil/PhaseSlot";
 import { SeasonHeroCard } from "@/components/business/accueil/SeasonHeroCard";
 import type { Dashboard } from "@/components/business/accueil/types";
 import { Empty } from "@/components/ui/Empty";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Loader } from "@/components/ui/Loader";
 
 /** Contexte affiché sous la salutation, selon la phase de vie de la ligue. */
 function contextLabel(d: Dashboard): string {
@@ -23,13 +25,16 @@ function contextLabel(d: Dashboard): string {
 /** Dashboard « Accueil » : la saison en cours du manager connecté. */
 export default function AccueilPage() {
     const { data: me } = useAuth();
-    const { data, isLoading } = useQuery({
+    const { data, isPending, isPaused, isError, refetch } = useQuery({
         queryKey: ["dashboard"],
         queryFn: () => api<Dashboard>("/api/dashboard"),
     });
 
     const first = me?.displayName?.split(" ")[0] ?? "";
-    if (isLoading || !data || !me) return null;
+    if (isError || isPaused) {
+        return <ErrorState onRetry={() => refetch()}>Impossible de charger ton tableau de bord.</ErrorState>;
+    }
+    if (isPending || !data || !me) return <Loader />;
     if (!data.season) return <Empty>Aucune saison synchronisée pour le moment.</Empty>;
 
     return (

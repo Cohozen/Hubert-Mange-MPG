@@ -4,6 +4,8 @@ import { CareerChart } from "@/components/business/profile/CareerChart";
 import type { TimelineSeason } from "@/components/business/profile/types";
 import type { H2H } from "@/components/business/stats/types";
 import { Empty } from "@/components/ui/Empty";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Loader } from "@/components/ui/Loader";
 
 const sum = (xs: (number | null)[]): number => xs.reduce<number>((a, b) => a + (b ?? 0), 0);
 const fmt1 = (n: number) => n.toFixed(2).replace(".", ",");
@@ -89,7 +91,7 @@ function SeasonCard({
 }
 
 export function ProfileStatsTab({ managerId }: { managerId: string }) {
-    const { data } = useQuery({
+    const { data, isError, isPaused, refetch } = useQuery({
         queryKey: ["timeline", managerId],
         queryFn: () => api<{ seasons: TimelineSeason[] }>(`/api/palmares/timeline/${managerId}`),
     });
@@ -99,7 +101,10 @@ export function ProfileStatsTab({ managerId }: { managerId: string }) {
         queryFn: () => api<H2H>(`/api/palmares/h2h/${managerId}`),
     });
 
-    if (!data || !h) return null;
+    if (isError || isPaused) {
+        return <ErrorState onRetry={() => refetch()}>Impossible de charger ces statistiques.</ErrorState>;
+    }
+    if (!data || !h) return <Loader />;
     const { seasons } = data;
     if (seasons.length === 0) return <Empty>Pas encore de saison jouée.</Empty>;
 
