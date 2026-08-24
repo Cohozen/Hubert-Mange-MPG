@@ -4,6 +4,7 @@ import { api } from "@/api/client";
 import { useAuth } from "@/auth/useAuth";
 import { SETTINGS_BARS, SettingsCard } from "@/components/business/settings/SettingsCard";
 import { Button } from "@/components/ui/button";
+import { InitialsAvatar } from "@/components/ui/InitialsAvatar";
 
 interface Profile {
     displayName: string;
@@ -30,16 +31,6 @@ function Label({ children, optional }: { children: React.ReactNode; optional?: b
             )}
         </div>
     );
-}
-
-function initials(name?: string | null) {
-    if (!name) return "—";
-    return name
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((w) => w[0]?.toUpperCase() ?? "")
-        .join("");
 }
 
 export function ProfileForm() {
@@ -103,18 +94,14 @@ export function ProfileForm() {
             <SettingsCard bar={SETTINGS_BARS.profil} title="Mon profil">
                 {/* Avatar */}
                 <div className="mb-[18px] flex items-center gap-4">
-                    <div className="relative size-[68px] shrink-0 lg:size-[84px]">
-                        <div
-                            className="absolute -inset-[2px] rounded-full lg:-inset-[3px]"
-                            style={{ background: "linear-gradient(135deg,#FFD23F,#FF2D78,#6D28D9)" }}
-                        />
-                        <div
-                            className="absolute inset-0 grid place-items-center rounded-full border-[3px] border-carte font-display text-[25px] font-black text-white lg:border-4 lg:text-[31px]"
-                            style={{ background: "linear-gradient(135deg,#6D28D9,#FF2D78,#FF6B35)" }}
-                        >
-                            {initials(name)}
-                        </div>
-                    </div>
+                    <InitialsAvatar
+                        name={name}
+                        seed={me?.id ?? name}
+                        size={68}
+                        ring
+                        ringWidth={2}
+                        className="border-[3px] border-carte"
+                    />
                     <div className="min-w-0 flex-1">
                         <span className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-xl border border-bord bg-nuit px-3.5 py-2.5 font-display text-[11px] font-black uppercase tracking-[0.5px] text-texte-2 opacity-70">
                             Changer la photo

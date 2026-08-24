@@ -4,16 +4,7 @@ import { useAuth } from "@/auth/useAuth";
 import type { TimelineSeason } from "@/components/business/profile/types";
 import type { AllTimeRow, CupCount } from "@/components/business/stats/types";
 import { InfoHint } from "@/components/ui/InfoHint";
-
-function initials(name?: string | null) {
-    if (!name) return "—";
-    return name
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((w) => w[0]?.toUpperCase() ?? "")
-        .join("");
-}
+import { InitialsAvatar } from "@/components/ui/InitialsAvatar";
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
@@ -100,18 +91,13 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
                 {/* Avatar + identité */}
                 <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3 lg:gap-[13px]">
-                        <div className="relative size-16 shrink-0 lg:size-[108px]">
-                            <div
-                                className="absolute -inset-[3px] rounded-full lg:-inset-1"
-                                style={{ background: "linear-gradient(135deg,#FFD23F,#FF2D78,#6D28D9)" }}
-                            />
-                            <div
-                                className="absolute inset-0 grid place-items-center rounded-full border-[3px] border-[#2D1B69] font-display text-2xl font-black text-white lg:border-[5px] lg:text-[40px]"
-                                style={{ background: "linear-gradient(135deg,#6D28D9,#FF2D78,#FF6B35)" }}
-                            >
-                                {initials(name)}
-                            </div>
-                        </div>
+                        <InitialsAvatar
+                            name={name}
+                            seed={managerId}
+                            size={64}
+                            ring
+                            className="border-[3px] border-[#2D1B69]"
+                        />
                         <div className="min-w-0">
                             <div className="text-[9px] font-bold uppercase tracking-[2px] text-[#C9B8F5] lg:text-[11px] lg:tracking-[2.5px]">
                                 Fiche manager · LHM

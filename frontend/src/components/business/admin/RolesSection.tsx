@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import { SettingsCard } from "@/components/business/settings/SettingsCard";
+import { InitialsAvatar } from "@/components/ui/InitialsAvatar";
 import { cn } from "@/lib/utils";
 
 interface ManagerRow {
@@ -15,23 +16,6 @@ const ASSIGNABLE = [
     { code: "ADMIN", label: "Admin" },
     { code: "TREASURER", label: "Banquier" },
 ];
-
-function initials(name: string) {
-    return name
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((w) => w[0]?.toUpperCase() ?? "")
-        .join("");
-}
-
-function Avatar({ name }: { name: string }) {
-    return (
-        <div className="grid size-[38px] shrink-0 place-items-center rounded-full font-display text-xs font-black text-white grad-banner">
-            {initials(name)}
-        </div>
-    );
-}
 
 export function RolesSection() {
     const qc = useQueryClient();
@@ -74,7 +58,7 @@ export function RolesSection() {
                         className="lhm-row flex flex-col gap-2.5 rounded-[14px] border border-bord bg-nuit p-3 transition sm:flex-row sm:items-center sm:gap-3"
                     >
                         <div className="flex min-w-0 items-center gap-3">
-                            <Avatar name={m.displayName} />
+                            <InitialsAvatar name={m.displayName} seed={m.id} size={38} />
                             <div className="min-w-0 flex-1">
                                 <div className="truncate font-display text-[13px] font-black tracking-[0.2px] text-white">
                                     {m.displayName}
@@ -123,7 +107,7 @@ export function RolesSection() {
                                 key={m.id}
                                 className="flex items-center gap-3 rounded-[14px] border border-rouge/30 bg-rouge/[0.05] p-3"
                             >
-                                <Avatar name={m.displayName} />
+                                <InitialsAvatar name={m.displayName} seed={m.id} size={38} />
                                 <div className="min-w-0 flex-1">
                                     <div className="truncate font-display text-[13px] font-black tracking-[0.2px] text-white">
                                         {m.displayName}

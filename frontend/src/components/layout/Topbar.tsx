@@ -42,7 +42,7 @@ export function Topbar({
                     to="/profil"
                     className="flex items-center gap-2.5 rounded-full px-2 py-1 transition hover:bg-carte-2"
                 >
-                    <InitialsAvatar name={me.displayName} size={32} />
+                    <InitialsAvatar name={me.displayName} seed={me.id} size={32} />
                     <span className="text-sm font-medium text-texte-2">{me.displayName}</span>
                 </Link>
                 <Button variant="ghost" size="icon" onClick={onLogout} aria-label="Déconnexion">

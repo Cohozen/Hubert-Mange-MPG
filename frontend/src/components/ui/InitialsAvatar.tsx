@@ -1,26 +1,55 @@
-import { initials } from "@/components/business/stats/playerStyle";
+import { initials, playerGradient } from "@/components/business/stats/playerStyle";
 import { cn } from "@/lib/utils";
 
 /**
- * Pastille d'identité à initiales, dégradé de marque — le rendu de la page profil.
- * Utilisé partout où l'on représente le manager connecté (topbar, hero du profil) :
- * la ligue n'affiche pas les photos MPG (convention « initiales colorées partout »).
+ * Identité d'un manager : initiales sur un dégradé **déterministe** dérivé de son id — un joueur
+ * garde la même couleur d'une page à l'autre (convention « initiales colorées partout », pas de
+ * photo MPG). `ring` ajoute l'anneau de marque du hero de profil.
  */
-export function InitialsAvatar({ name, size = 32, className }: { name: string; size?: number; className?: string }) {
-    return (
+export function InitialsAvatar({
+    name,
+    seed,
+    size = 32,
+    ring = false,
+    ringWidth = 3,
+    className,
+}: {
+    name: string;
+    seed: string;
+    size?: number;
+    ring?: boolean;
+    ringWidth?: number;
+    className?: string;
+}) {
+    const g = playerGradient(seed);
+    const tile = (
         <span
-            className={cn(
-                "grid shrink-0 place-items-center rounded-full font-display font-black text-white",
-                className,
-            )}
-            style={{
-                width: size,
-                height: size,
-                fontSize: Math.round(size * 0.4),
-                background: "linear-gradient(135deg,#6D28D9,#FF2D78,#FF6B35)",
-            }}
+            className={cn("grid size-full place-items-center rounded-full font-display font-black", className)}
+            style={{ background: g.grad, color: g.txt, fontSize: Math.round(size * 0.38) }}
         >
             {initials(name)}
+        </span>
+    );
+
+    if (!ring) {
+        return (
+            <span className="block shrink-0" style={{ width: size, height: size }}>
+                {tile}
+            </span>
+        );
+    }
+    return (
+        <span className="relative block shrink-0" style={{ width: size, height: size }}>
+            <span
+                className="absolute rounded-full"
+                style={{
+                    inset: -ringWidth,
+                    background: "linear-gradient(135deg,#FFD23F,#FF2D78,#6D28D9)",
+                }}
+            />
+            <span className="absolute inset-0 rounded-full" style={{ padding: 0 }}>
+                {tile}
+            </span>
         </span>
     );
 }

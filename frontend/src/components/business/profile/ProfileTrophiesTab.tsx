@@ -112,7 +112,9 @@ export function ProfileTrophiesTab({ managerId }: { managerId: string }) {
                     <span className="font-display text-[22px] font-black leading-none text-jaune lg:text-xl">
                         {trophies.length}
                     </span>
-                    <span className="text-[9px] font-bold uppercase tracking-[1px] text-texte-2">Titres</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[1px] text-texte-2">
+                        {trophies.length > 1 ? "Titres" : "Titre"}
+                    </span>
                 </div>
             </div>
 
