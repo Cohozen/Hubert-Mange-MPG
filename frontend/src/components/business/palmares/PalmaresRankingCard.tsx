@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type { CupCount } from "@/components/business/palmares/types";
+import { initials, playerGradient } from "@/components/business/stats/playerStyle";
 
 /** Médaille de rang (or / argent / bronze) pour le top 3. */
 const rankStyles = [
@@ -7,15 +8,6 @@ const rankStyles = [
     { bg: "linear-gradient(135deg,#E2E8F8,#A9B2D8)", color: "#1B2350" },
     { bg: "linear-gradient(135deg,#E59866,#B4631F)", color: "#ffffff" },
 ];
-
-function initials(name: string) {
-    return name
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((w) => w[0]?.toUpperCase() ?? "")
-        .join("");
-}
 
 const GRID = "grid-cols-[26px_1fr_28px_28px_28px_32px] lg:grid-cols-[64px_1fr_88px_88px_88px_88px]";
 
@@ -84,6 +76,7 @@ export function PalmaresRankingCard({ rows }: { rows: CupCount[] }) {
             {/* Lignes */}
             {rows.map((r, i) => {
                 const rs = rankStyles[i];
+                const g = playerGradient(r.managerId);
                 return (
                     <div
                         key={r.managerId}
@@ -100,7 +93,10 @@ export function PalmaresRankingCard({ rows }: { rows: CupCount[] }) {
                             {i + 1}
                         </div>
                         <div className="flex min-w-0 items-center gap-2 lg:gap-[13px]">
-                            <div className="grid size-[26px] shrink-0 place-items-center rounded-lg border border-bord bg-carte-2 font-display text-[9px] font-black text-[#9aa3d4] lg:size-[42px] lg:rounded-xl lg:text-[15px]">
+                            <div
+                                className="grid size-[26px] shrink-0 place-items-center rounded-lg font-display text-[9px] font-black lg:size-[42px] lg:rounded-xl lg:text-[15px]"
+                                style={{ background: g.grad, color: g.txt }}
+                            >
                                 {initials(r.manager)}
                             </div>
                             <Link

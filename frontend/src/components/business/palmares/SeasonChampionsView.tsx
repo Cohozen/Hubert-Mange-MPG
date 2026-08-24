@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { DivisionWinner } from "@/components/business/palmares/types";
-import { divisionStyle } from "@/components/business/stats/playerStyle";
+import { divisionStyle, initials, playerGradient } from "@/components/business/stats/playerStyle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /** Couleur du texte sur la pastille + libellé (les couleurs viennent de `divisionStyle`). */
@@ -18,16 +18,6 @@ const divStyle = (level: number) => {
     const { c, grad } = divisionStyle(level);
     return { color: c, grad, ...(DIV_LABEL[level] ?? NEUTRAL_LABEL) };
 };
-
-function initials(name?: string | null) {
-    if (!name) return "—";
-    return name
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((w) => w[0]?.toUpperCase() ?? "")
-        .join("");
-}
 
 const triggerClass = "h-[42px] rounded-xl border-bord bg-carte font-display text-xs font-extrabold lg:h-[46px]";
 
@@ -96,6 +86,7 @@ export function SeasonChampionsView({ winners }: { winners: DivisionWinner[] }) 
                     <div className="flex flex-col gap-2 lg:hidden">
                         {rows.map((w, i) => {
                             const d = divStyle(w.level);
+                            const g = playerGradient(w.managerId ?? w.winner ?? "?");
                             return (
                                 <div
                                     key={`${w.realSeason}-${w.division}-${i}`}
@@ -104,9 +95,9 @@ export function SeasonChampionsView({ winners }: { winners: DivisionWinner[] }) 
                                     <span className="absolute inset-y-0 left-0 w-1" style={{ background: d.color }} />
                                     <div
                                         className="grid size-[38px] shrink-0 place-items-center rounded-[11px] font-display text-sm font-black"
-                                        style={{ background: d.grad, color: d.txt }}
+                                        style={{ background: g.grad, color: g.txt }}
                                     >
-                                        {initials(w.winner)}
+                                        {initials(w.winner ?? "—")}
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-baseline gap-1.5">
@@ -156,12 +147,15 @@ export function SeasonChampionsView({ winners }: { winners: DivisionWinner[] }) 
                         </div>
                         {rows.map((w, i) => {
                             const d = divStyle(w.level);
+                            const g = playerGradient(w.managerId ?? w.winner ?? "?");
                             return (
                                 <div
                                     key={`${w.realSeason}-${w.division}-${i}`}
                                     className="grid grid-cols-[150px_250px_1fr_120px] items-center gap-4 border-b border-carte-2 px-6 py-3.5 transition hover:bg-carte-2/40"
                                 >
-                                    <div className="font-display text-[17px] font-black text-white">{w.realSeason} - S{w.season.split(" ")[3] ?? "?"}</div>
+                                    <div className="font-display text-[17px] font-black text-white">
+                                        {w.realSeason} - S{w.season.split(" ")[3] ?? "?"}
+                                    </div>
                                     <div className="flex items-center gap-[11px]">
                                         <span
                                             className="inline-flex h-[30px] min-w-9 items-center justify-center rounded-[9px] px-[11px] font-display text-[13px] font-black"
@@ -174,9 +168,9 @@ export function SeasonChampionsView({ winners }: { winners: DivisionWinner[] }) 
                                     <div className="flex items-center gap-[13px]">
                                         <div
                                             className="grid size-[42px] shrink-0 place-items-center rounded-xl font-display text-[15px] font-black"
-                                            style={{ background: d.grad, color: d.txt }}
+                                            style={{ background: g.grad, color: g.txt }}
                                         >
-                                            {initials(w.winner)}
+                                            {initials(w.winner ?? "—")}
                                         </div>
                                         <div className="flex items-baseline gap-1.5">
                                             {w.managerId ? (
