@@ -34,7 +34,8 @@ export function SyncSection() {
         setLoading(true);
         try {
             await api("/api/sync", { method: "POST" });
-            await qc.invalidateQueries({ queryKey: ["sync-last"] });
+            // Le sync réécrit palmarès, stats, cagnotte et dashboard : tout le cache est périmé.
+            await qc.invalidateQueries();
         } catch (err: any) {
             setError(err.message);
         } finally {

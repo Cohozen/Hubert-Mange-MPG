@@ -16,7 +16,19 @@ import "@fontsource/archivo/800.css";
 import "@fontsource/archivo/900.css";
 import "./styles.css";
 
-const queryClient = new QueryClient();
+/**
+ * Les données de la ligue ne changent qu'au sync MPG (cron hebdomadaire ou déclenchement admin) :
+ * refetcher à chaque remontage de composant ne sert à rien. Le profil, dont les onglets remontent
+ * le contenu, rejouait ainsi /h2h et /timeline à chaque clic.
+ *
+ * Corollaire : après un sync, tout est périmé d'un coup — c'est SyncSection qui invalide alors le
+ * cache entier. Les mutations ciblées (cagnotte, rôles, ligues) invalident déjà leurs clés.
+ */
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: { staleTime: 5 * 60_000, refetchOnWindowFocus: false },
+    },
+});
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
