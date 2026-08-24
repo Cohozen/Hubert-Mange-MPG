@@ -183,6 +183,8 @@ export default function LoginPage() {
                             <FieldLabel>Email MPG</FieldLabel>
                             <Input
                                 type="email"
+                                name="email"
+                                autoComplete="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="ton@email.com"
@@ -195,6 +197,8 @@ export default function LoginPage() {
                             <FieldLabel>Mot de passe MPG</FieldLabel>
                             <Input
                                 type="password"
+                                name="password"
+                                autoComplete="current-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"

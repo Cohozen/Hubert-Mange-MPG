@@ -1,0 +1,16 @@
+{
+    "name": "Ligue Hubert Mange",
+    "short_name": "LHM",
+    "description": "Palmarès, classements et cagnotte de la ligue Mon Petit Gazon.",
+    "lang": "fr",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0a0e27",
+    "theme_color": "#0a0e27",
+    "icons": [
+        { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    ]
+}

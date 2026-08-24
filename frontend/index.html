@@ -2,9 +2,38 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/logo/lhm-logo-broadcast-icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Hubert Mange MPG</title>
+    <meta
+      name="description"
+      content="Palmarès, classements, cagnotte et profils de la ligue Hubert Mange (Mon Petit Gazon)."
+    />
+    <meta name="theme-color" content="#0a0e27" />
+
+    <!-- Icônes : SVG pour les navigateurs, PNG pour iOS (qui ignore les favicons SVG). -->
+    <link rel="icon" type="image/svg+xml" href="/logo/lhm-logo-broadcast-icon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- « Ajouter à l'écran d'accueil » sur iOS : plein écran et barre d'état sombre. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="LHM" />
+
+    <!-- Aperçu du lien partagé dans le groupe (l'image doit être en URL absolue). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Ligue Hubert Mange" />
+    <meta property="og:title" content="Ligue Hubert Mange" />
+    <meta
+      property="og:description"
+      content="Palmarès, classements, cagnotte et profils de la ligue. Toute l'histoire, saison après saison."
+    />
+    <meta property="og:url" content="https://www.ligue-hubert-mange.fr/" />
+    <meta property="og:image" content="https://www.ligue-hubert-mange.fr/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <div id="root"></div>
