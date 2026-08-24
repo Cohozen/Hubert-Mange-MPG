@@ -10,10 +10,10 @@ synchronisation des données depuis l'API MPG.
   (graphiques, ex. la frise de carrière du profil).
   - **Un seul composant par fichier, un seul fichier par composant.** Pas de sous-composant
     défini dans une page.
-  - Composants **métier** → `src/components/business/<domaine>/` (ex. `cagnotte/`, `stats/`,
-    `palmares/`, `admin/`, `profile/`, `settings/`, `login/`) ; UI **générique réutilisable** (Avatar,
-    ManagerLabel, Field, Empty…) → `src/components/ui/`. Les types partagés d'un domaine vont dans
-    son `types.ts`.
+  - Composants **métier** → `src/components/business/<domaine>/` (ex. `accueil/`, `cagnotte/`,
+    `stats/`, `palmares/`, `admin/`, `profile/`, `settings/`, `login/`) ; UI **générique réutilisable**
+    (`InitialsAvatar`, `Field`, `Empty`…) → `src/components/ui/`. Les types partagés d'un domaine vont
+    dans son `types.ts`.
   - Les `src/pages/*.tsx` ne font que **data-fetching + composition** (elles assemblent les
     composants métier, ne les définissent pas).
   - Imports via l'**alias `@/`** (`@/api/client`, `@/components/...`), configuré dans
@@ -22,18 +22,28 @@ synchronisation des données depuis l'API MPG.
     **minuscules** (`button.tsx`, `card.tsx`, `table.tsx`, `input.tsx`, `select.tsx`, `tabs.tsx`,
     `dialog.tsx`, `sheet.tsx`…), ajoutées via `npx shadcn@latest add <nom>`. Helper `cn()` dans
     `src/lib/utils.ts`, config `components.json` (style « new-york »). Les composants **maison**
-    génériques (`Avatar`, `Field`, `Empty`, `ManagerLabel`, `Logo`, `SectionTitle`, `PillTabs`,
+    génériques (`InitialsAvatar`, `Field`, `Empty`, `Logo`, `SectionTitle`, `PillTabs`,
     `ConfirmDialog`, `ToggleSwitch`, `InfoHint`) restent en **PascalCase** dans `ui/` — ⚠️ FS macOS insensible à
     la casse : ne PAS générer le primitive shadcn `avatar` (collision avec `Avatar.tsx`).
+    ⚠️ `Avatar.tsx` et `ManagerLabel.tsx` ne sont **plus importés nulle part** (code mort en sursis) :
+    `Avatar` est le dernier à afficher la photo MPG et une seule initiale, à contre-courant de la
+    convention — ne pas les réutiliser, prendre `InitialsAvatar`.
   - **Composants génériques V2 réutilisés partout** : `PillTabs` (onglets pilules contrôlés, prop
     `width` = `auto|full|mobile-full|scroll` ; scroll horizontal safe — Palmarès/Rétro/Cagnotte),
     `ConfirmDialog` (**modale portale maison**, PAS le shadcn `dialog` — le `Dialog` radix contrôlé
     plantait sur un souci de ref ; remplace `window.confirm` pour les suppressions admin),
     `ToggleSwitch` (interrupteur on/off), `InfoHint` (petit ⓘ qui ouvre un popover au clic/tap —
     tap-friendly, fermeture au clic extérieur/Échap ; ex. explication de la note manager « MNG » sur
-    le profil). Côté métier : `SettingsCard` (`settings/`, carte à barre de
-    dégradé + en-tête, réutilisée par settings ET admin) et `stats/playerStyle.ts`
-    (`playerGradient(seed)` déterministe + `initials` + chips titres/coupes).
+    le profil), `InitialsAvatar` (identité d'un manager : initiales + dégradé **déterministe** dérivé
+    de son `managerId`, prop `ring` pour l'anneau du hero de profil). Côté métier : `SettingsCard`
+    (`settings/`, carte à barre de dégradé + en-tête, réutilisée par settings ET admin) et
+    `stats/playerStyle.ts` — `playerGradient(seed)` déterministe, `initials`, chips titres/coupes et
+    **`divisionStyle(level)`, source unique de la palette D1→D6** (accent, fond, bordure, dégradé),
+    consommée par la Rétro, le Palmarès et la salle des trophées.
+  - **Onglets dans l'URL** : `lib/useTabParam.ts` (hook `useSearchParams`) porte l'onglet actif en
+    query string — `?tab=` sur Profil/Palmarès/Rétro, `?saison=2025-2026` sur la Cagnotte (le nom de
+    saison, pas l'id). Le bouton retour du navigateur reparcourt les onglets et une vue est
+    partageable ; la valeur par défaut n'est jamais écrite dans l'URL.
   - **Design system « Broadcast » (V2)** défini dans `src/styles.css` — maquettes de référence dans
     `docs/mockups/`. Palette de marque en `@theme` (`--color-violet/rose/orange/menthe/jaune/
     violet-clair/rouge` + surfaces `nuit/carte/carte-2/bord` + `texte/texte-2`), rayons, polices
@@ -50,15 +60,14 @@ synchronisation des données depuis l'API MPG.
     tokens changent.
   - **Bannière de la page Stats** : asset statique `public/stats-banner.jpg` (servi à
     `/stats-banner.jpg`). À remplacer manuellement en fin de saison si le podium change.
-  - **Refonte « Broadcast V2 » selon les maquettes : faite pour TOUTES les pages sauf l'Accueil/
-    Dashboard** (`docs/mockups/design/LHM *.dc.html`, frame mobile 430 + desktop 1320, valeurs
-    px/hex en dur = source de vérité). Login, Palmarès, Rétro, Cagnotte, Profil (hero + 4 onglets),
-    Paramètres et Admin sont reconstruits. Le **Dashboard/Accueil reste à refaire** (données
-    factices dans `business/accueil/mockData.ts`). Conventions transverses tranchées avec Coco (cf.
-    mémoire) : **initiales colorées partout, pas de photos d'avatar** ; **pseudo (`username`)
-    affiché à côté du nom partout** (d'où l'ajout de `username` au `ranking` de
-    `/api/palmares/tournaments`) ; éléments sans backend (thème clair, notifications, forme des 5
-    derniers matchs, série de victoires en cours) affichés en **placeholder « bientôt » désactivé**.
+  - **Refonte « Broadcast V2 » : faite sur TOUTES les pages** (`docs/mockups/design/LHM *.dc.html`,
+    frame mobile 430 + desktop 1320, valeurs px/hex en dur = source de vérité), Accueil comprise —
+    elle consomme `GET /api/dashboard`, il n'y a plus de données factices. Conventions transverses
+    tranchées avec Coco (cf. mémoire) : **initiales colorées partout, pas de photos d'avatar** (un
+    joueur = une couleur, via `playerGradient(managerId)`) ; **pseudo (`username`) affiché à côté du
+    nom partout** (d'où l'ajout de `username` au `ranking` de `/api/palmares/tournaments` et
+    d'`opponentUsername` à `FormMatch`). Ce qui n'a pas de backend n'est pas affiché en placeholder :
+    on le retire (card Préférences thème/notifications supprimée).
 
 ## Déploiement
 
@@ -137,19 +146,32 @@ synchronisation des données depuis l'API MPG.
 - **Pages & navigation** : coquille `AppShell` (`src/components/layout/`) — sidebar fixe en desktop
   (`sticky top-0 h-screen`, ne s'étire plus avec le contenu), bottom nav en mobile (`< lg`). Le header
   de page (`Topbar` desktop / `MobileHeader` mobile) et le bloc logo de la sidebar font tous **`h-[72px]`**
-  (bordures alignées). **Pages « détail »** (profil d'un autre = `/profil/:managerId`, et `/parametres`) :
-  `AppShell` calcule `isDetail` (via `useMatch`) → **pas de bottom-nav** + **bouton retour** (`navigate(-1)`)
-  dans le header (mobile ET desktop). Navigation mobile animée (keyframe `lhmPageIn`, wrapper contenu
-  `key={pathname}`, désactivée en `lg`). Routes : `/` = **Accueil** (dashboard, `AccueilPage` ; données
-  **factices** dans `business/accueil/mockData.ts`, `TODO backend`), `/palmares` = **Palmarès**,
-  `/stats` = **Rétro** (libellé « Rétro », route inchangée), `/cagnotte`, `/profil`, `/parametres`.
-  La page **Paramètres** (`/parametres` ; `/admin` redirige) regroupe le
-  formulaire perso (visible par **tous**) + un encart **admin** (sync/ligues/tournois) et un encart
-  **superadmin** (rôles), gatés par rôle. Le **profil public** d'un joueur est sur `/profil/:managerId`
-  (`/profil` = soi), à onglets (Résumé / Salle des trophées / Stats / Confrontations). Pour lier vers
-  un profil depuis un classement, passer `managerId` à `ManagerLabel` (rend l'identité cliquable).
-  Stats H2H + frise de carrière (graphique Recharts, données via `/api/palmares/timeline/:managerId`)
-  vivent dans le profil, pas sur la page Stats (qui ne garde que les stats globales).
+  (bordures alignées). **Pages « détail »** (profil d'un autre = `/profil/:managerId`, `/parametres`
+  et `/administration`) : `AppShell` calcule `isDetail` (via `useMatch`) → **pas de bottom-nav** +
+  **bouton retour** (`navigate(-1)`) dans le header (mobile ET desktop). Navigation mobile animée
+  (keyframe `lhmPageIn`, wrapper contenu `key={pathname}`, désactivée en `lg`). Routes : `/` =
+  **Accueil** (dashboard branché sur `/api/dashboard`), `/palmares` = **Palmarès**, `/stats` =
+  **Rétro** (libellé « Rétro », route inchangée), `/cagnotte`, `/profil`, `/parametres`,
+  `/administration` (`/admin` y redirige).
+  **Paramètres** (`/parametres`) = espace **personnel** uniquement (profil, paiement, déconnexion).
+  Toute l'administration vit sur **`/administration`** : synchro, ligues et tournois suivis (ADMIN),
+  attribution des rôles (SUPERADMIN). La route est gardée dans `App.tsx`
+  (`isLeagueAdmin(me) ? <AdministrationPage/> : <Navigate to="/"/>`), l'entrée de menu est filtrée
+  par le flag `adminOnly` de `SECONDARY_NAV` (`layout/nav.ts`) — sidebar en desktop, icône bouclier
+  à gauche de l'engrenage en mobile. Le **profil public** d'un joueur est sur `/profil/:managerId`
+  (`/profil` = soi), à onglets (Résumé / Salle des trophées / Stats / Confrontations), l'onglet actif
+  étant porté par `?tab=`. Stats H2H + frise de carrière (graphique Recharts, données via
+  `/api/palmares/timeline/:managerId`) vivent dans le profil, pas sur la page Stats.
+  ⚠️ **Débordement mobile invisible** : `AppShell` a `overflow-x-clip`, donc un contenu trop large
+  est **coupé** au lieu de créer un scroll — ça ne se voit pas à l'œil. Les colonnes de grille
+  doivent porter `min-w-0` (sans ça, un texte long impose sa largeur au conteneur), et tout écran
+  se teste à **375 px** (`resize_window` preset mobile), pas seulement en desktop.
+- **Cache TanStack Query** : `QueryClient` configuré dans `main.tsx` avec `staleTime` de 5 min et
+  `refetchOnWindowFocus: false` — les données de la ligue ne bougent qu'au sync, et le profil
+  (dont les onglets remontent le contenu) rejouait sinon `/h2h` et `/timeline` à chaque clic.
+  **Corollaire indispensable** : un sync réussi périme TOUT (palmarès, stats, cagnotte, dashboard),
+  donc `SyncSection` fait un `qc.invalidateQueries()` **global**, pas seulement sur `["sync-last"]`.
+  Les mutations ciblées (cagnotte, rôles, ligues, tournois) invalident leurs propres clés.
 - **Désactiver ≠ supprimer une ligue/tournoi** : stats/palmarès agrègent **toutes** les données
   synchronisées (pas de filtre `active`). Décocher une ligue = `active:false` → *gèle* le sync, les
   données **restent** au classement. La **supprimer** (`DELETE`, superadmin) efface ses `GameSeason`
@@ -182,6 +204,41 @@ synchronisation des données depuis l'API MPG.
   inchangée : **coupe année N ↔ `RealSeason` N-1**. Pour corriger des données déjà en prod
   (reclasser/recalculer) : **relancer un sync** (upsert idempotent sur `mpgTournamentId`), pas de
   script dédié.
+- **Trois états d'un match** (`Match.played` / `Match.live`) : MPG pose un score **dès le coup
+  d'envoi**, mais `finalResult` n'apparaît qu'une fois la journée close et `status` vaut 1 ou 2 selon
+  l'âge du match. D'où la règle du sync : `hasScore && !finalResult && gw >= currentGameWeek` = **en
+  direct** (`live`), sinon score présent = **joué**, sinon **à venir**. Le repli sur `currentGameWeek`
+  évite qu'une vieille journée reste éternellement « en cours ». Conséquences : les matchs à venir
+  **sont en base** (scores `null`), donc **toute lecture de résultats doit filtrer `played: true`** —
+  c'est le rôle de `playedMatchesOf()` (`modules/palmares/form.ts`, partagé par `/h2h` et le
+  dashboard) ; un match `live` est **hors statistiques** (forme, séries, bilans) et n'est pas non plus
+  le « prochain rendez-vous » (`nextMatchOf` filtre `live: false`), il est renvoyé à part par le
+  dashboard et affiché avec un badge « en cours » + score provisoire.
+- **Dater un match** : `/division/{id}/game-week/{n}/matches` ne porte **aucune date**. Le seul
+  chemin est `/division/{id}/calendar` (`gameWeek` → `realGameWeek`) puis
+  `/championship-calendar/{championshipId}` (dates des journées L1, mis en cache par championnat dans
+  le run de sync). ⚠️ Cet endpoint ne renvoie **que la saison en cours** : on ne date donc que les
+  saisons actives (`kickoffAt` reste `null` sur l'historique, et c'est très bien).
+- **`GET /api/dashboard`** (`modules/dashboard/routes.ts`) = **le seul endroit de l'API qui parle de
+  la saison EN COURS** : phase (`enCours|inter|estivale`), rang et variation, progression, zone,
+  prochain rendez-vous daté, dernier match, match en direct, forme, mercato, cagnotte, palmarès
+  perso — en une requête plutôt que cinq.
+- **Zone de classement (promotion / maintien / relégation / titre)** : ne pas la deviner, MPG la
+  configure — `gameSettings.numberUpAndDownPreference` (2 chez nous) sur `/division/{id}`, persisté
+  dans `Division.numberUpAndDown` (repli 2). Règle : D1 → rang 1 = titre, `u` derniers = relégation ;
+  dernière division → `u` premiers = promotion, jamais de relégation ; entre les deux → les deux.
+  Vérifié sur l'historique : 281/287 transitions (97,9 %), les écarts étant du turn-over d'effectif.
+- **Périmètre « saison en cours »** — `Participation.finalRank` contient le rang **instantané** (écrit
+  à chaque sync depuis les standings live), pas le rang final. Règle tranchée avec Coco :
+  - **filtré** (`FINISHED_SEASON` dans `modules/palmares/routes.ts`) là où un **titre est célébré** :
+    `/winners` (Palmarès + salle des trophées) et `/all-time` (tableau des médailles) ;
+  - **non filtré** partout ailleurs : le **Hubert Book** (`/fun-stats` : podiums, Jean-Claude Duss,
+    séries de titres, saisons D1) et les cumuls (buts, points, Rotaldo) racontent la ligue en direct ;
+  - côté **profil**, `/timeline` expose `status` et le front s'en sert pour deux exceptions
+    seulement : le compteur « Titres de saison » + la médaille 🥇 de la frise attendent la fin de
+    saison, et meilleure/pire saison ne compare que des saisons closes (sinon celle qui démarre à
+    0 point devient « la pire »). La card « Dernière saison » du profil montre la dernière saison
+    **terminée** — la saison en cours, c'est le dashboard.
 - **Classement all-time (`/api/palmares/all-time`)** : ordonné **façon JO** sur les titres de
   **division** d'abord (départage sur D1, puis D2…), **puis** par **nombre total de coupes** (les
   coupes départagent désormais *après* les championnats), enfin moins de saisons jouées puis le nom.
@@ -194,7 +251,11 @@ synchronisation des données depuis l'API MPG.
   l'**ID de ligue MPG change dans le temps** (migrations *séquentielles*, pas des ligues parallèles) —
   grouper/reset par ligue casserait toute série traversant une migration. Même tri que le timeline
   du profil (`/timeline`). Une série n'est interrompue que par une saison hors-critère (rang ≠ 1
-  pour les titres, division ≠ D1 pour `d1Streak`).
+  pour les titres, division ≠ D1 pour `d1Streak`). La **saison en cours y compte** (cf. périmètre
+  ci-dessus) : le Hubert Book est un livre de records vivant.
+- **`/api/palmares/movements`** (montées / descentes / yo-yo) **n'est plus consommée par le front** :
+  le bloc a été retiré de la Rétro (retrait temporaire assumé), la route est conservée pour pouvoir
+  le rebrancher.
 - **Formatage : Biome** (config racine `biome.json`, version épinglée). Lancer `npm run format`
   (écrit) ou `npm run format:check` (vérifie) **depuis la racine** — couvre front + back. Les deux
   scripts pointent sur **`biome check`** (pas `biome format`) : il formate **et** trie les imports.
