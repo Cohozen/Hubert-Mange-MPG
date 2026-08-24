@@ -71,12 +71,7 @@ export function LastMatchCard({
 
     return (
         <div className="lhm-card relative h-full overflow-hidden rounded-[18px] border border-bord bg-carte p-[18px]">
-            <div
-                className="absolute inset-y-0 left-0 w-1.5"
-                style={{ background: "linear-gradient(180deg,#ff2d78,#ff6b35)" }}
-            />
-
-            <div className="mb-4 flex items-center justify-between gap-2">
+            <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-2">
                 <div className="font-display text-[11px] font-extrabold uppercase tracking-wider text-texte-2">
                     {live ? "Journée en cours" : "Dernière journée"} · J{match.gameWeek} · {match.gameSeason}
                 </div>

@@ -139,7 +139,7 @@ export function SeasonChampionsView({ winners }: { winners: DivisionWinner[] }) 
                                         </div>
                                     </div>
                                     <span className="shrink-0 font-display text-[13px] font-black text-texte-2">
-                                        {w.realSeason}
+                                        {w.realSeason} - S{w.season.split(" ")[3] ?? "?"}
                                     </span>
                                 </div>
                             );
@@ -161,7 +161,7 @@ export function SeasonChampionsView({ winners }: { winners: DivisionWinner[] }) 
                                     key={`${w.realSeason}-${w.division}-${i}`}
                                     className="grid grid-cols-[150px_250px_1fr_120px] items-center gap-4 border-b border-carte-2 px-6 py-3.5 transition hover:bg-carte-2/40"
                                 >
-                                    <div className="font-display text-[17px] font-black text-white">{w.realSeason}</div>
+                                    <div className="font-display text-[17px] font-black text-white">{w.realSeason} - S{w.season.split(" ")[3] ?? "?"}</div>
                                     <div className="flex items-center gap-[11px]">
                                         <span
                                             className="inline-flex h-[30px] min-w-9 items-center justify-center rounded-[9px] px-[11px] font-display text-[13px] font-black"

@@ -14,7 +14,7 @@ const COMP: Record<
         accent: "#00E5A0",
         tile: "linear-gradient(135deg,#00E5A0,#34D399)",
         tileTxt: "#06251A",
-        subtitle: "LDC · la C1 de la ligue",
+        subtitle: "LDC · C1",
     },
     UEFA: {
         icon: "🎖️",
@@ -22,7 +22,7 @@ const COMP: Record<
         accent: "#FFD23F",
         tile: "linear-gradient(135deg,#FFD23F,#FF6B35)",
         tileTxt: "#3D2E00",
-        subtitle: "Europa · la C3",
+        subtitle: "Europa · C3",
     },
     CONFERENCE: {
         icon: "🍐",
@@ -30,7 +30,7 @@ const COMP: Record<
         accent: "#A78BFA",
         tile: "linear-gradient(135deg,#6D28D9,#A78BFA)",
         tileTxt: "#ffffff",
-        subtitle: "Conférence · la C4",
+        subtitle: "Conférence · C4",
     },
 };
 

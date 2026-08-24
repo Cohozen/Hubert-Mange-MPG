@@ -71,15 +71,8 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
                     </div>
                     <div className="mt-1 flex items-center gap-1 lg:mt-1.5">
                         <span className="font-display text-[10px] font-black tracking-[1.5px] text-white lg:text-[13px] lg:tracking-[2px]">
-                            MNG
+                            Côte manager
                         </span>
-                        <InfoHint label="Comment est calculée la note manager ?">
-                            <span className="font-display text-[10px] font-black uppercase tracking-wide text-white">
-                                Note manager
-                            </span>
-                            <br />
-                            Base 60, +4 par trophée et +1 par tranche de 5&nbsp;% de victoires. Bornée entre 55 et 99.
-                        </InfoHint>
                     </div>
                     <div className="my-[7px] h-px w-6 bg-white/25 lg:my-[11px] lg:w-11" />
                     <div className="font-display text-sm font-black leading-none text-jaune lg:text-[22px]">
@@ -99,9 +92,6 @@ export function ProfileHeader({ managerId }: { managerId: string }) {
                             className="border-[3px] border-[#2D1B69]"
                         />
                         <div className="min-w-0">
-                            <div className="text-[9px] font-bold uppercase tracking-[2px] text-[#C9B8F5] lg:text-[11px] lg:tracking-[2.5px]">
-                                Fiche manager · LHM
-                            </div>
                             <h1 className="mt-1 font-display text-[26px] font-black uppercase leading-[0.92] tracking-[-0.8px] text-white [overflow-wrap:anywhere] lg:text-[44px] lg:tracking-[-1.5px]">
                                 {name}
                             </h1>

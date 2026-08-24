@@ -16,7 +16,7 @@ function contextLabel(d: Dashboard): string {
     if (!d.season) return "En attente de la première saison";
     const { realSeason, gameSeason, currentGameWeek } = d.season;
     if (d.phase === "enCours") {
-        return `Saison ${realSeason} · ${gameSeason}${currentGameWeek ? ` · Journée ${currentGameWeek}` : ""}`;
+        return `${realSeason} · ${gameSeason}${currentGameWeek ? ` · Journée ${currentGameWeek}` : ""}`;
     }
     if (d.phase === "inter") return `${gameSeason} terminée · la suivante arrive`;
     return `Trêve estivale · ${realSeason} en préparation`;
@@ -31,6 +31,7 @@ export default function AccueilPage() {
     });
 
     const first = me?.displayName?.split(" ")[0] ?? "";
+
     if (isError || isPaused) {
         return <ErrorState onRetry={() => refetch()}>Impossible de charger ton tableau de bord.</ErrorState>;
     }
