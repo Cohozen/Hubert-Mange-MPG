@@ -4,12 +4,16 @@ import { requireAuth } from "../../http/middleware.js";
 import { playedMatchesOf, summarizeForm } from "./form.js";
 
 /**
- * Une saison de jeu n'entre au palmarès qu'une fois TERMINÉE.
+ * Une saison de jeu n'entre au PALMARÈS qu'une fois TERMINÉE.
  *
  * `Participation.finalRank` est écrit à chaque sync depuis les standings live : c'est le rang
  * instantané, pas le rang final. Sans ce filtre, le leader provisoire d'une saison qui vient de
- * commencer apparaît comme champion (palmarès, salle des trophées, tableau des médailles).
- * Les cumuls (buts, points, Rotaldo) restent volontairement en direct.
+ * commencer apparaîtrait comme champion.
+ *
+ * Périmètre volontairement étroit : seuls `/winners` (palmarès et salle des trophées) et
+ * `/all-time` (tableau des médailles) l'appliquent, parce qu'ils célèbrent des titres acquis.
+ * Le Hubert Book (`/fun-stats`), lui, raconte la ligue en direct — podiums, séries et saisons D1
+ * comptent la saison en cours, comme les cumuls (buts, points, Rotaldo).
  */
 const FINISHED_SEASON = { gameSeason: { status: "finished" } } as const;
 
@@ -259,13 +263,13 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
     });
     const podiumAgg = await prisma.participation.groupBy({
         by: ["managerId"],
-        where: { finalRank: { lte: 3 }, division: FINISHED_SEASON },
+        where: { finalRank: { lte: 3 } },
         _count: { _all: true },
     });
     // Jean-Claude Duss : le plus de fois 2e (« du mal à conclure »).
     const secondAgg = await prisma.participation.groupBy({
         by: ["managerId"],
-        where: { finalRank: 2, division: FINISHED_SEASON },
+        where: { finalRank: 2 },
         _count: { _all: true },
     });
     const awards = await prisma.divisionAward.findMany({
@@ -286,10 +290,7 @@ palmaresRouter.get("/fun-stats", async (_req, res) => {
     // Plus longue série de titres consécutifs (rang 1 sur saisons jeu consécutives).
     const mgrsForStreak = await prisma.manager.findMany({
         include: {
-            participations: {
-                where: { division: FINISHED_SEASON },
-                include: { division: { include: { gameSeason: { include: { realSeason: true } } } } },
-            },
+            participations: { include: { division: { include: { gameSeason: { include: { realSeason: true } } } } } },
         },
     });
     const streak = new Map<string, number>();
