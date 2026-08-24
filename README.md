@@ -59,6 +59,8 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
   **« Rétro »**.
 - ✅ **Installable et partageable** : manifest PWA + icônes (ajout à l'écran d'accueil), carte
   Open Graph pour l'aperçu du lien envoyé dans le groupe.
+- ✅ **Coquille desktop sans barre du haut** : la sidebar porte la navigation et, en bas, le compte
+  connecté (profil + déconnexion) ; les pages détail affichent leur bouton retour dans le contenu.
 - ✅ Connecteur MPG (flow OAuth), auth applicative "Sign in with MPG", sessions JWT.
 - ✅ Modèle de données complet (Manager / RealSeason / GameSeason / Division / Participation /
   Match / Tournament / DivisionAward / PrizePool / Contribution / Payout / TrackedLeague·Tournament).

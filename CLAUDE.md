@@ -36,7 +36,9 @@ synchronisation des données depuis l'API MPG.
     `ToggleSwitch` (interrupteur on/off), `InfoHint` (petit ⓘ qui ouvre un popover au clic/tap —
     tap-friendly, fermeture au clic extérieur/Échap ; ex. explication de la note manager « MNG » sur
     le profil), `InitialsAvatar` (identité d'un manager : initiales + dégradé **déterministe** dérivé
-    de son `managerId`, prop `ring` pour l'anneau du hero de profil). Côté métier : `SettingsCard`
+    de son `managerId`, prop `ring` pour l'anneau du hero de profil). ⚠️ La couleur **de division**
+    ne s'applique jamais à un joueur : elle est réservée aux pastilles D1…D6 et aux barres d'accent
+    (les classements du Palmarès faisaient exception, corrigé). Côté métier : `SettingsCard`
     (`settings/`, carte à barre de dégradé + en-tête, réutilisée par settings ET admin) et
     `stats/playerStyle.ts` — `playerGradient(seed)` déterministe, `initials`, chips titres/coupes et
     **`divisionStyle(level)`, source unique de la palette D1→D6** (accent, fond, bordure, dégradé),
@@ -162,11 +164,16 @@ synchronisation des données depuis l'API MPG.
   cagnotte. **SUPERADMIN seul** : backfill de structure, attribution des rôles, fusion de managers,
   et la **suppression** d'une ligue/tournoi suivi.
 - **Pages & navigation** : coquille `AppShell` (`src/components/layout/`) — sidebar fixe en desktop
-  (`sticky top-0 h-screen`, ne s'étire plus avec le contenu), bottom nav en mobile (`< lg`). Le header
-  de page (`Topbar` desktop / `MobileHeader` mobile) et le bloc logo de la sidebar font tous **`h-[72px]`**
-  (bordures alignées). **Pages « détail »** (profil d'un autre = `/profil/:managerId`, `/parametres`
+  (`sticky top-0 h-screen`, ne s'étire plus avec le contenu), bottom nav en mobile (`< lg`).
+  ⚠️ **Plus de barre en haut en desktop** (`Topbar` supprimée, ainsi que `pageTitle()`) : la sidebar
+  porte la navigation ET, tout en bas, une section **compte** (avatar + nom + pseudo → `/profil`,
+  puis la déconnexion). Corollaires à connaître : le **titre de page** de Palmarès et Cagnotte, que
+  la topbar affichait, doit rester **visible en desktop** (pas de `lg:hidden` dessus) ; et le
+  **bouton retour** des pages détail est rendu **par `AppShell` en tête du contenu** en desktop, par
+  `MobileHeader` en mobile. Le `MobileHeader` et le bloc logo de la sidebar gardent leur **`h-[72px]`**.
+  **Pages « détail »** (profil d'un autre = `/profil/:managerId`, `/parametres`
   et `/administration`) : `AppShell` calcule `isDetail` (via `useMatch`) → **pas de bottom-nav** +
-  **bouton retour** (`navigate(-1)`) dans le header (mobile ET desktop). Navigation mobile animée
+  **bouton retour** (`navigate(-1)`). Navigation mobile animée
   (keyframe `lhmPageIn`, wrapper contenu `key={pathname}`, désactivée en `lg`). Routes : `/` =
   **Accueil** (dashboard branché sur `/api/dashboard`), `/palmares` = **Palmarès**, `/stats` =
   **Rétro** (libellé « Rétro », route inchangée), `/cagnotte`, `/profil`, `/parametres`,
@@ -248,8 +255,10 @@ synchronisation des données depuis l'API MPG.
   saisons actives (`kickoffAt` reste `null` sur l'historique, et c'est très bien).
 - **`GET /api/dashboard`** (`modules/dashboard/routes.ts`) = **le seul endroit de l'API qui parle de
   la saison EN COURS** : phase (`enCours|inter|estivale`), rang et variation, progression, zone,
-  prochain rendez-vous daté, dernier match, match en direct, forme, mercato, cagnotte, palmarès
-  perso — en une requête plutôt que cinq.
+  **les trois prochains rendez-vous datés** (`upcoming`, dont `next` est le premier — la carte de la
+  dernière journée liste les suivants pour combler la hauteur imposée par la carte Palmarès à côté),
+  dernier match, match en direct, forme, mercato, cagnotte, palmarès perso — en une requête plutôt
+  que cinq.
 - **Zone de classement (promotion / maintien / relégation / titre)** : ne pas la deviner, MPG la
   configure — `gameSettings.numberUpAndDownPreference` (2 chez nous) sur `/division/{id}`, persisté
   dans `Division.numberUpAndDown` (repli 2). Règle : D1 → rang 1 = titre, `u` derniers = relégation ;
