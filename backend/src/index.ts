@@ -16,6 +16,10 @@ import { connectorForManager, executeSync } from "./sync/service.js";
 
 const app = express();
 
+// Railway place un proxy devant l'app : sans ça, `req.ip` vaut celle du proxy pour tout le
+// monde et le limiteur de tentatives du login devient un compteur global.
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(cookieParser());
 

@@ -16,7 +16,11 @@ export const adminRouter = Router();
 adminRouter.use(requireAuth);
 
 // ---- Managers ----
-adminRouter.get("/managers", async (_req, res) => {
+
+// Liste complète des membres AVEC leur e-mail et leur userId MPG : réservée au superadmin, seul
+// consommateur (RolesSection). Le `requireAuth` du routeur ne suffit pas — ce serait le carnet
+// d'adresses de la ligue ouvert à n'importe quel compte connecté.
+adminRouter.get("/managers", requireSuperadmin, async (_req, res) => {
     const managers = await prisma.manager.findMany({
         orderBy: { displayName: "asc" },
         select: {
@@ -283,7 +287,7 @@ adminRouter.delete("/tournaments/:id", requireSuperadmin, async (req, res) => {
 });
 
 // ---- Saisons réelles + saisons jeu ----
-adminRouter.get("/structure", async (_req, res) => {
+adminRouter.get("/structure", requireSuperadmin, async (_req, res) => {
     const realSeasons = await prisma.realSeason.findMany({
         orderBy: { year: "desc" },
         include: {

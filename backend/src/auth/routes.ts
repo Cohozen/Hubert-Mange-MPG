@@ -4,10 +4,22 @@ import { config } from "../config.js";
 import { MpgAuthError, MpgConnector } from "../connector/index.js";
 import { prisma } from "../db/client.js";
 import { requireAuth } from "../http/middleware.js";
+import { failureRateLimit } from "../http/rateLimit.js";
 import { encrypt, isEncryptionConfigured } from "../lib/crypto.js";
 import { clearSession, issueSession } from "./session.js";
 
 export const authRouter = Router();
+
+/**
+ * Chaque tentative de login déclenche un vrai aller-retour Auth0 sur connect.ligue1.fr (Cloudflare
+ * devant) : un bruteforce ferait blacklister l'IP du serveur, ce qui couperait le login ET le sync
+ * pour toute la ligue. Seuls les ÉCHECS sont comptés (cf. rateLimit.ts).
+ */
+const loginLimit = failureRateLimit({
+    windowMs: 15 * 60_000,
+    max: 10,
+    message: "Trop de tentatives de connexion. Réessaie dans quelques minutes.",
+});
 
 const loginSchema = z.object({
     email: z.string().email(),
@@ -18,7 +30,7 @@ const loginSchema = z.object({
  * "Se connecter avec MPG" : on vérifie les identifiants via le connecteur, on ne stocke
  * JAMAIS le mot de passe. On relie/crée le Manager puis on émet une session applicative.
  */
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/login", loginLimit.middleware, async (req, res) => {
     const parsed = loginSchema.safeParse(req.body);
     if (!parsed.success) {
         res.status(400).json({ error: "Email et mot de passe requis" });
@@ -53,6 +65,7 @@ authRouter.post("/login", async (req, res) => {
         // une refonte côté MPG se traduit par un 401 trompeur et un diagnostic très coûteux.
         const message = err?.message ?? String(err);
         console.error("Login MPG échoué:", message);
+        loginLimit.registerFailure(req);
         if (err instanceof MpgAuthError && err.kind === "flow") {
             res.status(502).json({ error: "Connexion à MPG indisponible", detail: message });
             return;
