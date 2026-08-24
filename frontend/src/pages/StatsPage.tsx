@@ -21,7 +21,8 @@ export default function StatsPage() {
 
     const allTime = useQuery({
         queryKey: ["all-time"],
-        queryFn: () => api<{ ranking: AllTimeRow[]; maxLevel: number }>("/api/palmares/all-time"),
+        queryFn: () =>
+            api<{ ranking: AllTimeRow[]; maxLevel: number; firstYear: number | null }>("/api/palmares/all-time"),
     });
     const fun = useQuery({ queryKey: ["fun-stats"], queryFn: () => api<FunStats>("/api/palmares/fun-stats") });
     const cups = useQuery({
@@ -166,7 +167,8 @@ export default function StatsPage() {
                             Rétro
                         </h1>
                         <p className="mt-2 max-w-[280px] text-xs leading-[1.4] text-white/90 lg:max-w-none lg:text-sm">
-                            Classement all-time, records et chambrage officiel de la ligue · depuis 2023.
+                            Classement all-time, records et chambrage officiel de la ligue
+                            {allTime.data?.firstYear ? ` · depuis ${allTime.data.firstYear}` : ""}.
                         </p>
                     </div>
                     <StatsInfoDialog>
@@ -220,7 +222,7 @@ export default function StatsPage() {
                                 </button>
                             </StatsInfoDialog>
                             <span className="hidden text-[13px] text-texte-2 lg:inline">
-                                Trié par titres D1 → D6, puis par coupes (C1 · C3 · C4).
+                                Trié par titres D1 → D{allTime.data?.maxLevel ?? 1}, puis par coupes (C1 · C3 · C4).
                             </span>
                         </div>
 

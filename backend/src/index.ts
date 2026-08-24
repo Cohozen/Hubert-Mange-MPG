@@ -11,7 +11,7 @@ import { dashboardRouter } from "./modules/dashboard/routes.js";
 import { palmaresRouter } from "./modules/palmares/routes.js";
 import { profileRouter } from "./modules/profile/routes.js";
 import { publicRouter } from "./modules/public/routes.js";
-import { startScheduler } from "./sync/scheduler.js";
+import { describeSchedule, startScheduler } from "./sync/scheduler.js";
 import { connectorForManager, executeSync } from "./sync/service.js";
 
 const app = express();
@@ -71,6 +71,11 @@ app.post("/api/sync", requireLeagueAdmin, async (req, res) => {
 app.get("/api/sync/last", requireLeagueAdmin, async (_req, res) => {
     const run = await prisma.syncRun.findFirst({ orderBy: { startedAt: "desc" } });
     res.json(run ? { ...run, summary: run.summary ? JSON.parse(run.summary) : null } : null);
+});
+
+// Configuration de l'auto-sync (admin) : l'UI doit dire l'état RÉEL du cron.
+app.get("/api/sync/config", requireLeagueAdmin, (_req, res) => {
+    res.json(describeSchedule());
 });
 
 // Historique des syncs (admin).

@@ -25,6 +25,15 @@ export const palmaresRouter = Router();
 
 palmaresRouter.use(requireAuth);
 
+/**
+ * Première année au palmarès. Le front affichait « depuis 2023 » en dur : une donnée figée dans
+ * le code finit toujours par mentir (cf. convention « les chiffres viennent de la base »).
+ */
+async function leagueFirstYear(): Promise<number | null> {
+    const first = await prisma.realSeason.findFirst({ orderBy: { year: "asc" }, select: { year: true } });
+    return first?.year ?? null;
+}
+
 // Vainqueurs par saison jeu (1er de chaque division) + vainqueurs de coupe.
 palmaresRouter.get("/winners", async (_req, res) => {
     const divisions = await prisma.division.findMany({
@@ -65,7 +74,7 @@ palmaresRouter.get("/winners", async (_req, res) => {
             };
         });
 
-    res.json({ divisionWinners });
+    res.json({ divisionWinners, firstYear: await leagueFirstYear() });
 });
 
 // Classement all-time « façon Jeux Olympiques » : on compte les titres (1re place) par niveau de
@@ -141,7 +150,7 @@ palmaresRouter.get("/all-time", async (_req, res) => {
         if (sameRank(ranking[i], ranking[i - 1])) ranking[i].rank = ranking[i - 1].rank;
     }
 
-    res.json({ ranking, maxLevel });
+    res.json({ ranking, maxLevel, firstYear: await leagueFirstYear() });
 });
 
 // Classements "fun" : montées et descentes entre saisons jeu consécutives (même ligue).

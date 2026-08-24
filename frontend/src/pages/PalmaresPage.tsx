@@ -16,7 +16,7 @@ const TABS: Tab[] = ["coupes", "saisons"];
 export default function PalmaresPage() {
     const winners = useQuery({
         queryKey: ["winners"],
-        queryFn: () => api<{ divisionWinners: DivisionWinner[] }>("/api/palmares/winners"),
+        queryFn: () => api<{ divisionWinners: DivisionWinner[]; firstYear: number | null }>("/api/palmares/winners"),
     });
     const cups = useQuery({
         queryKey: ["tournaments"],
@@ -37,7 +37,8 @@ export default function PalmaresPage() {
                         Palmarès
                     </h1>
                     <p className="mt-1.5 text-xs text-texte-2 lg:text-sm">
-                        Le mur des trophées de la ligue depuis 2023.
+                        Le mur des trophées de la ligue
+                        {winners.data?.firstYear ? ` depuis ${winners.data.firstYear}` : ""}.
                     </p>
                 </div>
                 <PillTabs
