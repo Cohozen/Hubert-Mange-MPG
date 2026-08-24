@@ -23,11 +23,12 @@ synchronisation des données depuis l'API MPG.
     `dialog.tsx`, `sheet.tsx`…), ajoutées via `npx shadcn@latest add <nom>`. Helper `cn()` dans
     `src/lib/utils.ts`, config `components.json` (style « new-york »). Les composants **maison**
     génériques (`InitialsAvatar`, `Field`, `Empty`, `Logo`, `SectionTitle`, `PillTabs`,
-    `ConfirmDialog`, `ToggleSwitch`, `InfoHint`) restent en **PascalCase** dans `ui/` — ⚠️ FS macOS insensible à
-    la casse : ne PAS générer le primitive shadcn `avatar` (collision avec `Avatar.tsx`).
-    ⚠️ `Avatar.tsx` et `ManagerLabel.tsx` ne sont **plus importés nulle part** (code mort en sursis) :
-    `Avatar` est le dernier à afficher la photo MPG et une seule initiale, à contre-courant de la
-    convention — ne pas les réutiliser, prendre `InitialsAvatar`.
+    `ConfirmDialog`, `ToggleSwitch`, `InfoHint`, `Loader`, `ErrorState`, `ErrorBoundary`) restent en
+    **PascalCase** dans `ui/`. Les primitives réellement utilisées se limitent à `button`, `input`,
+    `select`, `dialog` : les autres ont été supprimées (elles se régénèrent avec
+    `npx shadcn@latest add <nom>`). **Exceptions gardées bien qu'inutilisées** : `badge.tsx`,
+    `Field.tsx` et `SectionTitle.tsx` portent des variantes Broadcast maison que shadcn ne
+    régénère pas.
   - **Composants génériques V2 réutilisés partout** : `PillTabs` (onglets pilules contrôlés, prop
     `width` = `auto|full|mobile-full|scroll` ; scroll horizontal safe — Palmarès/Rétro/Cagnotte),
     `ConfirmDialog` (**modale portale maison**, PAS le shadcn `dialog` — le `Dialog` radix contrôlé
@@ -58,8 +59,11 @@ synchronisation des données depuis l'API MPG.
     + tailles `pill`) et `Badge` (`champ/ldc/europa/conf/admin/tres/member`). **Recharts** lit les
     `var(--color-*)` (ex. `--color-menthe`, `--color-bord`, `--color-texte-2`) → adapter là si les
     tokens changent.
-  - **Bannière de la page Stats** : asset statique `public/stats-banner.jpg` (servi à
-    `/stats-banner.jpg`). À remplacer manuellement en fin de saison si le podium change.
+  - **Assets `public/`** : icônes PWA (`icon-192/512.png`, `apple-touch-icon.png`) et carte de
+    partage `og-image.png` — **régénérées depuis le design system**, pas retouchées à la main :
+    page HTML de rendu (dégradés + logo + vraie Archivo servie par Vite) capturée en PNG via le
+    Chromium de Playwright, puis redimensionnée. `stats-banner.jpg` est **conservé en réserve mais
+    plus affiché** (la bannière de la Rétro est un dégradé CSS depuis la V2).
   - **Refonte « Broadcast V2 » : faite sur TOUTES les pages** (`docs/mockups/design/LHM *.dc.html`,
     frame mobile 430 + desktop 1320, valeurs px/hex en dur = source de vérité), Accueil comprise —
     elle consomme `GET /api/dashboard`, il n'y a plus de données factices. Conventions transverses
@@ -139,6 +143,20 @@ synchronisation des données depuis l'API MPG.
   dernière saison jeu de la saison réelle la plus récente.
 - **`ENCRYPTION_KEY` (AES-256-GCM)** chiffre les IBAN ET les tokens MPG (access + refresh).
   Obligatoire en prod, à ne jamais perdre ni committer.
+- **Secrets obligatoires en prod, détectés via `DATABASE_URL`** : dès qu'elle ne commence pas par
+  `file:` (donc Postgres), `config.ts` **refuse le démarrage** sans `SESSION_SECRET` (≠ repli de
+  dev) ni `ENCRYPTION_KEY`. ⚠️ Ne jamais se fier à `NODE_ENV` pour ça : `DEPLOY.md` interdit de le
+  poser sur Railway, `config.isProd` y est donc faux.
+- **`POST /auth/login` est limité** (`http/rateLimit.ts`) : 10 **échecs** par IP et par quart
+  d'heure, les connexions réussies ne comptant pas (plusieurs membres peuvent partager une IP
+  d'opérateur mobile). Chaque tentative tape un vrai flow Auth0 chez Ligue1 : sans garde-fou, un
+  bruteforce ferait blacklister l'IP du serveur et couperait login **et** sync. Nécessite
+  `app.set("trust proxy", 1)` (proxy Railway) pour que `req.ip` ne soit pas le même pour tous.
+- **Routes admin de lecture = superadmin** : `GET /api/admin/managers` (e-mails et userId MPG de
+  tous les membres) et `/structure` ne sont PAS couvertes par le simple `requireAuth` du routeur.
+- **`GET /api/sync/config`** (ADMIN) expose l'état RÉEL de l'auto-sync (`describeSchedule()` dans
+  `sync/scheduler.ts` : `AUTO_SYNC` **et** présence des identifiants MPG, + prochaine exécution) —
+  l'admin affichait « Active » en dur.
 - **Rôles** : `SUPERADMIN` vient de `SUPERADMIN_MPG_USER_IDS` (config, recalculé par requête) ;
   `ADMIN`/`TREASURER` sont stockés sur `Manager`. **ADMIN** gère ligues/tournois suivis + sync +
   cagnotte. **SUPERADMIN seul** : backfill de structure, attribution des rôles, fusion de managers,
@@ -166,6 +184,15 @@ synchronisation des données depuis l'API MPG.
   est **coupé** au lieu de créer un scroll — ça ne se voit pas à l'œil. Les colonnes de grille
   doivent porter `min-w-0` (sans ça, un texte long impose sa largeur au conteneur), et tout écran
   se teste à **375 px** (`resize_window` preset mobile), pas seulement en desktop.
+- **Chargement, erreur, session expirée** : jamais de `return null` ni de `?? []` silencieux —
+  `ui/Loader` pendant l'attente, `ui/ErrorState` (avec `onRetry`) en cas d'échec, sinon l'appli
+  annonce « Pas encore de données » alors que l'API est tombée. ⚠️ Brancher l'état d'échec sur
+  `isError` **ET `isPaused`** : réseau coupé, TanStack Query met la requête en pause et son statut
+  reste `pending`. Le `QueryClient` est en `networkMode: "always"` et `retry: 0` (un réessai
+  automatique reste suspendu tant que l'onglet n'est pas au premier plan — fréquent sur mobile —
+  et rendait le bouton « Réessayer » inopérant). Un **401** vide la clé `["me"]` du cache
+  (`QueryCache.onError` dans `main.tsx`) → retour automatique au login ; un crash de rendu est
+  rattrapé par `ErrorBoundary`.
 - **Cache TanStack Query** : `QueryClient` configuré dans `main.tsx` avec `staleTime` de 5 min et
   `refetchOnWindowFocus: false` — les données de la ligue ne bougent qu'au sync, et le profil
   (dont les onglets remontent le contenu) rejouait sinon `/h2h` et `/timeline` à chaque clic.

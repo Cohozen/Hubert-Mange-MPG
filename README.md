@@ -46,15 +46,19 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
   (connection string Supabase, cf. `DEPLOY.md`). ⚠️ Les champs chiffrés (IBAN, token MPG) ne
   se déchiffrent que si ta `ENCRYPTION_KEY` locale est identique à celle de prod.
 - `npx tsx src/db/seed.ts` — données de démonstration.
-- `npx tsx src/db/verify.ts` — vérif end-to-end des endpoints (forge une session admin).
+- `npx tsx src/db/verify.ts` — contrôle des 16 endpoints de lecture (forge une session
+  superadmin, backend démarré). Sort en échec si l'un d'eux tombe : à lancer avant un push.
 
 ## État actuel
 
 - ✅ **Refonte UI V2 « Broadcast »** (design system dark-first : shadcn/ui + Tailwind v4, polices
   Archivo/Inter, palette violet/rose/orange/menthe, dégradés & halos ; maquettes dans
-  `docs/mockups/`). Coquille responsive **sidebar desktop / bottom nav mobile** + nouveau
-  **dashboard Accueil** (`/`, données factices à brancher côté backend) ; Palmarès sur `/palmares`,
-  page Stats relabellée **« Rétro »**.
+  `docs/mockups/`). Coquille responsive **sidebar desktop / bottom nav mobile** ; **Accueil** (`/`)
+  branchée sur `GET /api/dashboard` (rang et zone, prochain match daté, forme, mercato, cagnotte,
+  palmarès perso) — plus aucune donnée factice ; Palmarès sur `/palmares`, page Stats relabellée
+  **« Rétro »**.
+- ✅ **Installable et partageable** : manifest PWA + icônes (ajout à l'écran d'accueil), carte
+  Open Graph pour l'aperçu du lien envoyé dans le groupe.
 - ✅ Connecteur MPG (flow OAuth), auth applicative "Sign in with MPG", sessions JWT.
 - ✅ Modèle de données complet (Manager / RealSeason / GameSeason / Division / Participation /
   Match / Tournament / DivisionAward / PrizePool / Contribution / Payout / TrackedLeague·Tournament).
@@ -102,23 +106,8 @@ npm run dev                   # http://localhost:5173 (proxy /api et /auth vers 
   mobile-first (sidebar desktop / bottom nav mobile, classements en cartes sur petit écran).
   Bannière promotionnelle en tête de la page « Rétro ».
 
-## Idées de features (v2/v3)
+## Suite
 
-Pistes pour rendre l'appli plus fun et plus « club » :
-
-- 🏅 **Distinctions individuelles dans le profil** : compléter l'onglet Stats/Trophées avec les
-  Rotaldo d'Or possédés, bouc émissaire subis et révélations (`DivisionAward`), titres/podiums.
-- 👕 **Maillot floqué à étoiles** : une étoile par titre de D1 (façon étoiles de champion sur le
-  maillot), couleurs/abréviation d'équipe du manager — décliné en avatar/embleme partout.
-- 🔥 **Rivalités** : page de confrontation entre deux joueurs au choix (réutilise les matchs H2H ;
-  l'onglet Confrontations du profil liste déjà tous les adversaires).
-- 🥇 **« Ballon d'Or » annuel** : un classement de la saison combinant titres + coupe + Rotaldo.
-- 📈 **Résultats par journée** : déjà captés (matchs en base), à exposer en mini-classements animés.
-- 🤖 **Résumé IA après chaque journée** : un agent IA génère un compte-rendu de la journée
-  (résultats marquants, mouvements au classement, exploits/flops) à partir des données synchronisées.
-- 🏅 **Badges / hauts faits** : série de titres, yo-yo, invincibilité, comeback… débloqués automatiquement.
-- 📣 **Récap partageable** (image/story) du palmarès ou de la fin de saison pour le groupe.
-- 🔔 **Notifications** du lundi matin (résultats publiés, « tu as gagné la cagnotte »).
-- 🚨 **Notifications quand un record est battu** : alerte automatique lorsqu'un record est dépassé
-  (plus longue série de titres/D1, plus large victoire, nouveau record de points…).
-- 📺 **Mode présentation / soirée de remise des prix** (plein écran) pour la fin de saison.
+Les pistes pour la V2 (résumé de journée par un agent, notifications, badges, rivalités, thème
+clair, tests…) vivent dans **[docs/ROADMAP-V2.md](docs/ROADMAP-V2.md)**, avec ce sur quoi chacune
+peut déjà s'appuyer.
