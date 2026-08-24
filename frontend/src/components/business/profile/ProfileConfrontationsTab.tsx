@@ -102,20 +102,25 @@ export function ProfileConfrontationsTab({ managerId }: { managerId: string }) {
                         {initials(op.manager)}
                     </div>
                 );
-                const nameLink = (
-                    <div className="flex min-w-0 items-baseline gap-1.5">
+                /** `stacked` : nom au-dessus du pseudo (mobile) ; sinon les deux sur une ligne. */
+                const nameLink = (stacked: boolean) => (
+                    <div className={stacked ? "min-w-0" : "flex min-w-0 items-baseline gap-1.5"}>
                         <Link
                             to={`/profil/${op.opponentId}`}
-                            className="truncate font-display text-sm font-extrabold text-white hover:underline lg:text-base"
+                            className="block truncate font-display text-sm font-extrabold text-white hover:underline lg:text-base"
                         >
                             {op.manager}
                         </Link>
-                        {op.username && <span className="shrink-0 text-[11px] text-texte-2">{op.username}</span>}
+                        {op.username && (
+                            <span className={`text-[11px] text-texte-2 ${stacked ? "block truncate" : "shrink-0"}`}>
+                                {op.username}
+                            </span>
+                        )}
                     </div>
                 );
                 const badge = (
                     <span
-                        className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-extrabold lg:text-[11px]"
+                        className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-[3px] text-[9px] font-extrabold lg:px-2.5 lg:py-1 lg:text-[11px]"
                         style={{ color: b.c, background: b.bg, borderColor: b.bd }}
                     >
                         {b.emoji} {b.label}
@@ -127,28 +132,30 @@ export function ProfileConfrontationsTab({ managerId }: { managerId: string }) {
                         {/* Mobile : carte */}
                         <div className="lhm-trow flex items-center gap-3 border-b border-carte-2 px-4 py-3 lg:hidden">
                             {tile}
-                            <div className="min-w-0 flex-1">
-                                {nameLink}
-                                <div className="mt-1.5">{badge}</div>
-                            </div>
-                            <div className="flex shrink-0 gap-1">
-                                {[
-                                    { v: op.w, l: "V", c: "#00E5A0" },
-                                    { v: op.d, l: "N", c: "#8B92C4" },
-                                    { v: op.l, l: "D", c: "#FF6B8A" },
-                                ].map((x) => (
-                                    <div key={x.l} className="w-6 text-center">
-                                        <div
-                                            className="font-display text-sm font-black leading-none"
-                                            style={{ color: x.c }}
-                                        >
-                                            {x.v}
+                            <div className="min-w-0 flex-1">{nameLink(true)}</div>
+                            {/* Colonne V/N/D, le bilan juste en dessous. */}
+                            <div className="flex shrink-0 flex-col items-center gap-1.5">
+                                <div className="flex items-center gap-1">
+                                    {[
+                                        { v: op.w, l: "V", c: "#00E5A0" },
+                                        { v: op.d, l: "N", c: "#8B92C4" },
+                                        { v: op.l, l: "D", c: "#FF6B8A" },
+                                    ].map((x) => (
+                                        <div key={x.l} className="w-6 text-center">
+                                            <div
+                                                className="font-display text-sm font-black leading-none"
+                                                style={{ color: x.c }}
+                                            >
+                                                {x.v}
+                                            </div>
+                                            <div className="mt-0.5 text-[7px] font-bold text-texte-2">{x.l}</div>
                                         </div>
-                                        <div className="mt-0.5 text-[7px] font-bold text-texte-2">{x.l}</div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
+                                {badge}
                             </div>
-                            <div className="w-[46px] shrink-0 text-right">
+                            {/* La moyenne de points garde sa propre colonne. */}
+                            <div className="w-[42px] shrink-0 text-right">
                                 <div className="font-display text-[15px] font-black leading-none text-white">{moy}</div>
                                 <div className="mt-0.5 text-[7px] font-bold uppercase text-texte-2">Moy</div>
                             </div>
@@ -160,7 +167,7 @@ export function ProfileConfrontationsTab({ managerId }: { managerId: string }) {
                         >
                             <div className="flex min-w-0 items-center gap-3">
                                 {tile}
-                                {nameLink}
+                                {nameLink(false)}
                             </div>
                             <div className="text-center font-display text-[15px] font-extrabold text-[#C7CEEF]">
                                 {op.played}
