@@ -74,8 +74,8 @@ app.get("/api/sync/last", requireLeagueAdmin, async (_req, res) => {
 });
 
 // Configuration de l'auto-sync (admin) : l'UI doit dire l'état RÉEL du cron.
-app.get("/api/sync/config", requireLeagueAdmin, (_req, res) => {
-    res.json(describeSchedule());
+app.get("/api/sync/config", requireLeagueAdmin, async (_req, res) => {
+    res.json(await describeSchedule());
 });
 
 // Historique des syncs (admin).
