@@ -168,8 +168,10 @@ synchronisation des données depuis l'API MPG.
   jours de ticks depuis les vraies dates en base (le repo n'a pas de framework de test).
   `SYNC_MODE=cron` rejoue l'ancien comportement (`SYNC_CRON` hebdomadaire) sans redéployer.
 - **Deux périmètres de sync** (`SyncRun.scope`) : `full` re-parcourt **toutes** les saisons MPG
-  (~500 requêtes, ~30 s, coût croissant chaque année), `current` la **seule saison en cours** (~85
-  requêtes). Seule différence de parcours : la borne basse de la boucle des saisons dans `runSync`.
+  (mesuré ~130 s au 01/09/2026, et le coût croît chaque année), `current` la **seule saison en
+  cours** (~45 s, ×3 plus rapide). Seule différence de parcours : la borne basse de la boucle des
+  saisons dans `runSync`. Déclenchable partout : bouton « Saison en cours » de `/administration`,
+  `POST /api/sync {scope:"current"}`, et `npm run sync -- --scope current`.
 - **Un sync qui ne lit RIEN échoue** (`runSync` lève si des ligues/tournois étaient à traiter et que
   ni `gameSeasons` ni `tournaments` n'ont bougé). Chaque appel MPG est avalé en note, donc sans ce
   garde-fou une panne MPG produisait un « succès » vide — qui faisait avancer le `lastSuccess` du

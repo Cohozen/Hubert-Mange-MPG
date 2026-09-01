@@ -3,9 +3,13 @@ import { useState } from "react";
 import { api } from "@/api/client";
 import { SETTINGS_BARS, SettingsCard } from "@/components/business/settings/SettingsCard";
 
+type SyncScope = "full" | "current";
+
 interface SyncRun {
     trigger: string;
     status: string;
+    /** `null` sur les runs antérieurs au planner — ils étaient complets par construction. */
+    scope: SyncScope | null;
     startedAt: string;
     finishedAt: string | null;
     error: string | null;
@@ -38,9 +42,16 @@ function formatNextRun(iso: string): string {
     });
 }
 
+/** Libellé du périmètre d'un run, pour la ligne « dernière synchro ». */
+function scopeLabel(scope: SyncScope | null): string {
+    return scope === "current" ? "saison en cours" : "complète";
+}
+
 export function SyncSection() {
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
+    // Quel périmètre tourne — `null` si aucun. Sert aussi à ne mettre le spinner que sur le
+    // bouton cliqué, tout en désactivant les deux (le backend refuse deux syncs simultanés).
+    const [running, setRunning] = useState<SyncScope | null>(null);
     const qc = useQueryClient();
 
     const last = useQuery<SyncRun | null>({
@@ -53,17 +64,17 @@ export function SyncSection() {
         queryFn: () => api<SyncConfig>("/api/sync/config"),
     });
 
-    async function runSync() {
+    async function runSync(scope: SyncScope) {
         setError(null);
-        setLoading(true);
+        setRunning(scope);
         try {
-            await api("/api/sync", { method: "POST" });
+            await api("/api/sync", { method: "POST", body: JSON.stringify({ scope }) });
             // Le sync réécrit palmarès, stats, cagnotte et dashboard : tout le cache est périmé.
             await qc.invalidateQueries();
         } catch (err: any) {
             setError(err.message);
         } finally {
-            setLoading(false);
+            setRunning(null);
         }
     }
 
@@ -83,11 +94,11 @@ export function SyncSection() {
         >
             <button
                 type="button"
-                onClick={runSync}
-                disabled={loading}
+                onClick={() => runSync("full")}
+                disabled={running !== null}
                 className="lhm-btn flex w-full items-center justify-center gap-2.5 rounded-[14px] py-[15px] font-display text-sm font-black uppercase tracking-[1.5px] text-white shadow-[0_8px_22px_rgba(255,45,120,.32)] grad-banner transition hover:brightness-110 disabled:opacity-60"
             >
-                {loading ? (
+                {running === "full" ? (
                     <>
                         <span className="size-4 animate-spin rounded-full border-2 border-white/35 border-t-white" />
                         Synchronisation…
@@ -96,6 +107,26 @@ export function SyncSection() {
                     <>
                         <span className="size-3 rounded-full border-2 border-white" />
                         Synchroniser MPG
+                    </>
+                )}
+            </button>
+            {/* Périmètre réduit à la saison en cours : ~3× plus rapide, suffisant pour rafraîchir
+                une journée sans re-parcourir tout l'historique. */}
+            <button
+                type="button"
+                onClick={() => runSync("current")}
+                disabled={running !== null}
+                className="lhm-btn mt-2.5 flex w-full items-center justify-center gap-2.5 rounded-[14px] border border-bord bg-nuit py-[13px] font-display text-xs font-black uppercase tracking-[1.2px] text-texte transition hover:border-violet-clair/45 hover:text-white disabled:opacity-60"
+            >
+                {running === "current" ? (
+                    <>
+                        <span className="size-3.5 animate-spin rounded-full border-2 border-white/25 border-t-violet-clair" />
+                        Synchronisation…
+                    </>
+                ) : (
+                    <>
+                        <span className="text-sm leading-none">⚡</span>
+                        Saison en cours
                     </>
                 )}
             </button>
@@ -132,7 +163,7 @@ export function SyncSection() {
                             {ok ? "Dernière synchro réussie" : "Échec de la dernière synchro"}
                         </div>
                         <div className="mt-0.5 text-[11px] text-texte-2">
-                            {new Date(run.startedAt).toLocaleString("fr-FR")} · {run.trigger}
+                            {new Date(run.startedAt).toLocaleString("fr-FR")} · {run.trigger} · {scopeLabel(run.scope)}
                             {run.summary && ` · ${run.summary.leagues} ligues · ${run.summary.managers} managers`}
                         </div>
                         {run.error && <div className="mt-0.5 text-[11px] text-rouge">{run.error}</div>}

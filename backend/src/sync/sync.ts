@@ -169,7 +169,7 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string; sco
         const championshipId = String(league.gameSettings?.championshipId ?? "");
 
         // Un run léger ne parcourt que la saison MPG en cours : c'est le seul poste de coût qui
-        // grandit d'année en année (~500 requêtes séquentielles en `full` contre ~85 ici).
+        // grandit d'année en année : ~130 s pour un `full` contre ~45 s ici (mesuré 01/09/2026).
         const firstSeason = scope === "current" ? currentSeason : 1;
         for (let season = firstSeason; season <= currentSeason; season++) {
             // Vainqueurs : donne l'année Ligue 1 réelle (championshipSeason) + structure finale.

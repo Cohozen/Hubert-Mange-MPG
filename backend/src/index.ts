@@ -52,6 +52,9 @@ app.use("/api/profile", profileRouter);
 // Déclenchement manuel du sync (admin) — via le token MPG de l'admin connecté.
 app.post("/api/sync", requireLeagueAdmin, async (req, res) => {
     const leagueId = typeof req.body?.leagueId === "string" ? req.body.leagueId : undefined;
+    // `current` ne re-parcourt que la saison MPG en cours : quelques secondes au lieu de trente,
+    // ce qui suffit dès qu'on veut juste rafraîchir une journée. Défaut `full`, inchangé.
+    const scope = req.body?.scope === "current" ? ("current" as const) : ("full" as const);
     let mpg;
     try {
         mpg = await connectorForManager(req.auth!.managerId);
@@ -60,7 +63,7 @@ app.post("/api/sync", requireLeagueAdmin, async (req, res) => {
         return;
     }
     try {
-        const run = await executeSync("manual", { leagueId, mpg });
+        const run = await executeSync("manual", { leagueId, mpg, scope });
         res.json({ ...run, summary: run.summary ? JSON.parse(run.summary) : null });
     } catch (err: any) {
         res.status(502).json({ error: "Sync MPG échoué", detail: err?.message });
