@@ -13,6 +13,7 @@
         "start:prod": "npm run db:to-postgres && prisma generate && prisma db push --accept-data-loss && node dist/index.js",
         "sync": "tsx src/sync/run.ts",
         "connector:test": "tsx src/connector/test.ts",
+        "sync:plan": "tsx src/sync/plan.ts",
         "discover": "tsx src/connector/discover.ts",
         "db:migrate": "prisma migrate dev",
         "db:push": "prisma db push",

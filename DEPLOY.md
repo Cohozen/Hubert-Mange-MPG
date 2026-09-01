@@ -37,7 +37,10 @@ Branche de prod : `main`.
    | `SUPERADMIN_MPG_USER_IDS` | `user_3482203` | oui |
    | `MPG_ADMIN_EMAIL` / `MPG_ADMIN_PASSWORD` | identifiants MPG | pour l'auto-sync |
    | `AUTO_SYNC` | `true` en saison, `false` à l'intersaison | non (défaut `true`) |
-   | `SYNC_CRON` / `SYNC_TZ` | défaut : lundi 08:30 Europe/Paris | non |
+   | `SYNC_TZ` | défaut : `Europe/Paris` | non |
+   | `SYNC_MODE` | `matchday` (défaut, piloté par le calendrier) ou `cron` (repli) | non |
+   | `SYNC_SLOTS` | surcharge des créneaux, ex. `"fri 22:45, sat 19:15"` | non |
+   | `SYNC_CRON` | **ignoré en mode `matchday`** — à retirer de Railway | non |
 
    Dès que `DATABASE_URL` pointe sur Postgres, l'appli se considère en prod : **sans
    `SESSION_SECRET` ni `ENCRYPTION_KEY`, elle s'arrête au démarrage avec un message explicite**
@@ -99,3 +102,8 @@ Branche de prod : `main`.
   string qu'à l'étape 1). ⚠️ Les champs chiffrés (IBAN, tokens MPG) ne se déchiffrent que si la
   `ENCRYPTION_KEY` locale est identique à celle de prod.
 - Le cron d'auto-sync exige un **process Node persistant** (Railway), pas du serverless.
+- En mode `matchday` (défaut), l'auto-sync ne suit plus une expression cron unique : un tick
+  toutes les 15 min interroge le planner, qui ne déclenche que sur un créneau Ligue 1 franchi
+  **et** une journée effectivement en cours. Les logs `[auto-sync]` disent le créneau et le
+  périmètre (`full` le lundi matin, `current` le reste du temps) ; un run échoué est retenté au
+  tick suivant pendant 2 h. `GET /api/sync/config` expose l'état réel.

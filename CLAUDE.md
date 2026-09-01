@@ -156,9 +156,29 @@ synchronisation des données depuis l'API MPG.
   `app.set("trust proxy", 1)` (proxy Railway) pour que `req.ip` ne soit pas le même pour tous.
 - **Routes admin de lecture = superadmin** : `GET /api/admin/managers` (e-mails et userId MPG de
   tous les membres) et `/structure` ne sont PAS couvertes par le simple `requireAuth` du routeur.
+- **Déclenchement de l'auto-sync : piloté par le calendrier, pas par un cron unique**
+  (`sync/planner.ts`). Un tick (`SYNC_TICK_CRON`, 15 min) croise deux choses : une **grille de
+  créneaux** calée sur les horaires L1 (ven 22:45 · sam 19:15 et 22:45 · dim 17:00, 19:15 et 22:45 ·
+  mar–jeu 20:30 et 23:15, surchargeable par `SYNC_SLOTS`) et une **garde « journée en cours »**
+  = « il existe un `Match` avec `kickoffAt` passé (< 4 j) et `played: false` ». C'est la garde qui
+  rend le planning auto-adaptatif : silencieux en trêve et à l'intersaison, actif dès qu'une journée
+  tourne, **y compris décalée en semaine** — un cron fixe raterait l'un ou taperait dans le vide.
+  Deux créneaux sans garde : **lundi 08:30 = run `full`**, autres jours 08:30 = battement de cœur.
+  Décision isolée dans `decide()` (pure) → rejouable par **`npm run sync:plan`**, qui simule 14
+  jours de ticks depuis les vraies dates en base (le repo n'a pas de framework de test).
+  `SYNC_MODE=cron` rejoue l'ancien comportement (`SYNC_CRON` hebdomadaire) sans redéployer.
+- **Deux périmètres de sync** (`SyncRun.scope`) : `full` re-parcourt **toutes** les saisons MPG
+  (~500 requêtes, ~30 s, coût croissant chaque année), `current` la **seule saison en cours** (~85
+  requêtes). Seule différence de parcours : la borne basse de la boucle des saisons dans `runSync`.
+- **Un sync qui ne lit RIEN échoue** (`runSync` lève si des ligues/tournois étaient à traiter et que
+  ni `gameSeasons` ni `tournaments` n'ont bougé). Chaque appel MPG est avalé en note, donc sans ce
+  garde-fou une panne MPG produisait un « succès » vide — qui faisait avancer le `lastSuccess` du
+  planner et **supprimait tout retry**. Un run échoué est retenté au tick suivant pendant 2 h
+  (`CATCH_UP_MS`), puis le battement de cœur de 08:30 reprend la main.
 - **`GET /api/sync/config`** (ADMIN) expose l'état RÉEL de l'auto-sync (`describeSchedule()` dans
-  `sync/scheduler.ts` : `AUTO_SYNC` **et** présence des identifiants MPG, + prochaine exécution) —
-  l'admin affichait « Active » en dur.
+  `sync/scheduler.ts` : `AUTO_SYNC` **et** présence des identifiants MPG, prochaine exécution, mode,
+  fenêtre de journée ouverte ou non, derniers succès) — l'admin affichait « Active » en dur.
+  ⚠️ La fonction est **async** (elle lit la base) : la route doit l'`await`.
 - **Rôles** : `SUPERADMIN` vient de `SUPERADMIN_MPG_USER_IDS` (config, recalculé par requête) ;
   `ADMIN`/`TREASURER` sont stockés sur `Manager`. **ADMIN** gère ligues/tournois suivis + sync +
   cagnotte. **SUPERADMIN seul** : backfill de structure, attribution des rôles, fusion de managers,
@@ -253,6 +273,14 @@ synchronisation des données depuis l'API MPG.
   `/championship-calendar/{championshipId}` (dates des journées L1, mis en cache par championnat dans
   le run de sync). ⚠️ Cet endpoint ne renvoie **que la saison en cours** : on ne date donc que les
   saisons actives (`kickoffAt` reste `null` sur l'historique, et c'est très bien).
+  **Granularité = la journée, jamais le match** : `gameWeeks[].startDate` est le coup d'envoi du
+  **premier** match de la journée L1, et tous les matchs d'une journée partagent donc le même
+  `kickoffAt`. Se caler sur chaque match L1 réel exigerait une API foot tierce — inutile de
+  rechercher ça côté MPG. (Deux endpoints jamais sondés pourraient contenir plus fin :
+  `/championship-calendar/{id}/next-game-weeks` et `/championship-calendars/nearest-game-weeks`.)
+  ⚠️ **`kickoffAt` ne doit jamais régresser vers `null`** : l'upsert `Match` ne l'écrit en `update`
+  que s'il est connu. Les appels calendrier sont sautés dès qu'une saison est finie, donc l'écrire
+  tel quel effaçait toutes les dates au premier re-sync — et le planner du sync s'en sert d'ancre.
 - **`GET /api/dashboard`** (`modules/dashboard/routes.ts`) = **le seul endroit de l'API qui parle de
   la saison EN COURS** : phase (`enCours|inter|estivale`), rang et variation, progression, zone,
   **les trois prochains rendez-vous datés** (`upcoming`, dont `next` est le premier — la carte de la
@@ -313,6 +341,8 @@ Backend (`cd backend`) :
 - `npm run clone:prod` — copie la prod (Postgres) → base SQLite locale (lit `PROD_DATABASE_URL`)
 - `npm run sync` — sync CLI (utilise `.env`) · `npm run connector:test` / `npm run discover` —
   outils de debug du connecteur MPG
+- `npm run sync:plan` — diagnostic du planificateur : décision à l'instant présent + simulation des
+  ticks à venir (`-- --at <ISO>` pour un instant précis, `-- --days N` pour l'horizon)
 
 Frontend (`cd frontend`) :
 - `npm run dev` · `npm run build` · `npm run preview`
