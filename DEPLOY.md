@@ -36,7 +36,7 @@ Branche de prod : `main`.
    | `COOKIE_SECURE` | `true` | oui (HTTPS) |
    | `SUPERADMIN_MPG_USER_IDS` | `user_3482203` | oui |
    | `MPG_ADMIN_EMAIL` / `MPG_ADMIN_PASSWORD` | identifiants MPG | pour l'auto-sync |
-   | `AUTO_SYNC` | `true` en saison, `false` à l'intersaison | non (défaut `true`) |
+   | `AUTO_SYNC` | `true` — **peut rester posé toute l'année** (voir Notes) | non (défaut `true`) |
    | `SYNC_TZ` | défaut : `Europe/Paris` | non |
    | `SYNC_MODE` | `matchday` (défaut, piloté par le calendrier) ou `cron` (repli) | non |
    | `SYNC_SLOTS` | surcharge des créneaux, ex. `"fri 22:45, sat 19:15"` | non |
@@ -77,8 +77,9 @@ Branche de prod : `main`.
    si l'un tombe).
 2. `git push` → Railway et Vercel se déploient.
 3. **Railway** : `SESSION_SECRET` et `ENCRYPTION_KEY` présents, `FRONTEND_ORIGIN`,
-   `COOKIE_SECURE=true`, et `AUTO_SYNC=true` si la saison a repris. Vérifier les logs de démarrage
-   (schéma poussé, auto-sync planifié).
+   `COOKIE_SECURE=true`, `AUTO_SYNC=true`. Vérifier les logs de démarrage : schéma poussé, puis
+   `Auto-sync planifié en mode matchday` suivi de la grille de créneaux et du prochain. Un
+   avertissement `SYNC_CRON est défini mais ignoré` signale une variable à retirer.
 4. **Vercel** : `VITE_API_BASE_URL` en scope Production **et redéploiement** après tout changement.
 5. ⚠️ **Administration prod AVANT d'envoyer le lien** : ajouter la ligue de la saison en cours dans
    « Ligues suivies », les tournois, reposer les `competitionOverride` (donnée en base, donc **par
@@ -86,7 +87,8 @@ Branche de prod : `main`.
    Le login **refuse tout compte qui n'appartient pas à une ligue suivie active** : lien envoyé
    avant le sync = 403 sec pour tout le monde au premier essai.
 6. Contrôles finaux : `/api/health`, connexion avec ton compte, Accueil / Palmarès / Cagnotte,
-   la pastille Auto-sync dans Administration, et l'aperçu du lien collé dans une conversation.
+   la pastille Auto-sync dans Administration (et son « Prochaine synchro », qui doit tomber sur un
+   créneau de la grille), et l'aperçu du lien collé dans une conversation.
 7. Envoyer le lien au groupe.
 
 ---
@@ -107,3 +109,10 @@ Branche de prod : `main`.
   **et** une journée effectivement en cours. Les logs `[auto-sync]` disent le créneau et le
   périmètre (`full` le lundi matin, `current` le reste du temps) ; un run échoué est retenté au
   tick suivant pendant 2 h. `GET /api/sync/config` expose l'état réel.
+- **`AUTO_SYNC` n'a plus à être basculé au fil de la saison.** Hors journée — trêve, intersaison —
+  la garde du planner ferme les créneaux du soir d'elle-même ; il ne reste que le run léger de
+  08:30, qui redémarre tout seul quand la nouvelle saison apparaît chez MPG. Le laisser sur `true`
+  évite d'oublier de le rallumer en août.
+- Le déploiement de cette évolution **n'exige aucune action manuelle en base** : `start:prod`
+  lance `prisma db push`, qui ajoute la colonne `SyncRun.scope` (nullable — les runs existants
+  restent lisibles et sont traités comme complets).

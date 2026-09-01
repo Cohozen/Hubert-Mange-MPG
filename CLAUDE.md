@@ -341,8 +341,8 @@ Backend (`cd backend`) :
 - `npm run dev` — API en watch · `npm run build` — tsc · `npm start` — dist
 - `npm run db:push` — applique le schéma · `npm run db:studio` — Prisma Studio
 - `npm run clone:prod` — copie la prod (Postgres) → base SQLite locale (lit `PROD_DATABASE_URL`)
-- `npm run sync` — sync CLI (utilise `.env`) · `npm run connector:test` / `npm run discover` —
-  outils de debug du connecteur MPG
+- `npm run sync` — sync CLI complet (utilise `.env`) · `-- --scope current` pour la seule saison
+  en cours · `npm run connector:test` / `npm run discover` — outils de debug du connecteur MPG
 - `npm run sync:plan` — diagnostic du planificateur : décision à l'instant présent + simulation des
   ticks à venir (`-- --at <ISO>` pour un instant précis, `-- --days N` pour l'horizon)
 
