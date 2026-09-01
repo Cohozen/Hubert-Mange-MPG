@@ -27,9 +27,27 @@ export const config = {
     isPostgres,
     // Cookie de session en Secure (HTTPS). Mettre COOKIE_SECURE=true en prod.
     cookieSecure: process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
-    // Auto-sync : activé par défaut. Lundi 08:30 Europe/Paris (résultats publiés vers 8h).
+    // Auto-sync : activé par défaut.
     autoSync: process.env.AUTO_SYNC !== "false",
+    /**
+     * `matchday` (défaut) : le planner croise une grille de créneaux Ligue 1 avec l'état réel des
+     * journées en base (cf. sync/planner.ts). `cron` : repli sur l'ancien comportement, une seule
+     * expression `SYNC_CRON`. Le connecteur MPG étant fragile, on garde ce retour arrière
+     * accessible sans redéployer du code.
+     */
+    syncMode: process.env.SYNC_MODE === "cron" ? ("cron" as const) : ("matchday" as const),
+    /** Cadence d'évaluation du planner (mode `matchday`) — un tick à vide ne coûte qu'un SELECT. */
+    syncTickCron: process.env.SYNC_TICK_CRON ?? "*/15 * * * *",
+    /**
+     * Surcharge des créneaux « journée en cours ». Format : "fri 22:45, sat 19:15, …" (jours en
+     * anglais abrégés, heure locale `SYNC_TZ`). Vide ⇒ grille par défaut de `sync/planner.ts`.
+     * La LFP réajuste ses créneaux toutes les quelques saisons : on ne veut pas redéployer pour ça.
+     */
+    syncSlots: process.env.SYNC_SLOTS ?? "",
+    /** Utilisé UNIQUEMENT en `SYNC_MODE=cron`. Lundi 08:30 Europe/Paris. */
     syncCron: process.env.SYNC_CRON ?? "30 8 * * 1",
+    /** Renseignée ou non — sert à avertir au démarrage qu'elle est ignorée en mode `matchday`. */
+    syncCronSet: Boolean(process.env.SYNC_CRON),
     syncTz: process.env.SYNC_TZ ?? "Europe/Paris",
     // userId MPG des superadmins (séparés par des virgules). Ex: "user_3482203".
     superadminMpgUserIds: (process.env.SUPERADMIN_MPG_USER_IDS ?? "")
