@@ -1,5 +1,6 @@
 import { MpgConnector } from "../connector/index.js";
 import { prisma } from "../db/client.js";
+import type { SyncScope } from "./planner.js";
 
 /**
  * Sync admin : authentifie l'admin auprès de MPG et remplit la base à partir des endpoints
@@ -14,6 +15,8 @@ import { prisma } from "../db/client.js";
  */
 export interface SyncResult {
     authenticated: boolean;
+    /** Périmètre parcouru : tout l'historique (`full`) ou la seule saison MPG en cours. */
+    scope: SyncScope;
     leagues: number;
     gameSeasons: number;
     divisions: number;
@@ -112,7 +115,8 @@ async function championshipGameWeekDates(mpg: MpgConnector, championshipId: stri
     return dates;
 }
 
-export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): Promise<SyncResult> {
+export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string; scope?: SyncScope }): Promise<SyncResult> {
+    const scope: SyncScope = opts?.scope ?? "full";
     const notes: string[] = [];
     // Un seul appel au calendrier par championnat pour tout le run.
     const calendarCache = new Map<string, Map<number, Date>>();
@@ -164,7 +168,10 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
         const totalDivisions: number = Object.keys(league.divisions ?? {}).length || 1;
         const championshipId = String(league.gameSettings?.championshipId ?? "");
 
-        for (let season = 1; season <= currentSeason; season++) {
+        // Un run léger ne parcourt que la saison MPG en cours : c'est le seul poste de coût qui
+        // grandit d'année en année (~500 requêtes séquentielles en `full` contre ~85 ici).
+        const firstSeason = scope === "current" ? currentSeason : 1;
+        for (let season = firstSeason; season <= currentSeason; season++) {
             // Vainqueurs : donne l'année Ligue 1 réelle (championshipSeason) + structure finale.
             let championshipSeason: number | undefined;
             try {
@@ -465,12 +472,15 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
                             awayScore: hasScore ? m.away.score : null,
                             played,
                             live: isLive,
-                            kickoffAt,
                         };
                         await prisma.match.upsert({
                             where: { mpgMatchId: m.id },
-                            update: data,
-                            create: { mpgMatchId: m.id, ...data },
+                            // ⚠️ `kickoffAt` n'est mis à jour que s'il est connu : les deux appels
+                            // calendrier sont sautés sur une saison finie (et peuvent échouer sur
+                            // une saison active), donc l'écrire tel quel effacerait les dates déjà
+                            // en base au premier re-sync — or le planner du sync s'en sert d'ancre.
+                            update: { ...data, ...(kickoffAt ? { kickoffAt } : {}) },
+                            create: { mpgMatchId: m.id, ...data, kickoffAt },
                         });
                         counters.matches++;
                     }
@@ -484,8 +494,10 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
     }
 
     // Tournois (coupes) SUIVIS uniquement (sauf en resync d'une ligue précise).
+    let trackedTournaments = 0;
     if (!opts?.leagueId) {
         const tracked = await prisma.trackedTournament.findMany({ where: { active: true } });
+        trackedTournaments = tracked.length;
         for (const tt of tracked) {
             try {
                 const t = await mpg.apiGet<any>(`/tournament/${tt.mpgTournamentId}`);
@@ -517,8 +529,19 @@ export async function runSync(mpg: MpgConnector, opts?: { leagueId?: string }): 
         }
     }
 
+    // Chaque appel MPG est enveloppé d'un try/catch qui pousse une note plutôt que de planter : un
+    // sync reste utile même si une ligue est inaccessible. Mais quand il y avait du travail et que
+    // RIEN n'a pu être lu (MPG indisponible, token révoqué, API changée), un « succès » vide est un
+    // mensonge — et surtout il ferait avancer le `lastSuccess` du planner, qui n'a alors plus aucune
+    // raison de retenter. On échoue explicitement.
+    const hadWork = leagueTiles.length > 0 || trackedTournaments > 0;
+    if (hadWork && counters.gameSeasons === 0 && counters.tournaments === 0) {
+        throw new Error(`Aucune donnée MPG n'a pu être lue. ${notes.join(" ")}`.trim());
+    }
+
     return {
         authenticated: true,
+        scope,
         leagues: leagueTiles.length,
         gameSeasons: counters.gameSeasons,
         divisions: counters.divisions,

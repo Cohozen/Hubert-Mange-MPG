@@ -2,6 +2,7 @@ import { config } from "../config.js";
 import { MpgConnector } from "../connector/index.js";
 import { prisma } from "../db/client.js";
 import { decrypt, encrypt, isEncryptionConfigured } from "../lib/crypto.js";
+import type { SyncScope } from "./planner.js";
 import { runSync } from "./sync.js";
 
 /**
@@ -10,6 +11,9 @@ import { runSync } from "./sync.js";
  * - enregistre chaque exécution dans SyncRun (observabilité).
  */
 let running = false;
+
+/** Message du verrou : le planner le reconnaît pour ne pas logguer une erreur sur un skip normal. */
+export const SYNC_BUSY_MSG = "Un sync est déjà en cours";
 
 const TOKEN_EXPIRED_MSG = "Token MPG expiré ou absent — reconnecte-toi pour relancer la synchronisation.";
 
@@ -79,23 +83,44 @@ async function persistTokens(managerId: string, mpg: MpgConnector): Promise<void
     }
 }
 
-export async function executeSync(trigger: "manual" | "auto", opts?: { leagueId?: string; mpg?: MpgConnector }) {
+export async function executeSync(
+    trigger: "manual" | "auto",
+    opts?: { leagueId?: string; mpg?: MpgConnector; scope?: SyncScope },
+) {
     if (running) {
-        throw new Error("Un sync est déjà en cours");
+        throw new Error(SYNC_BUSY_MSG);
     }
-    // Connecteur : fourni par l'appelant (sync manuel = token du membre connecté), sinon on
-    // retombe sur les identifiants admin .env (cron auto-sync, non-attendu).
-    let mpg = opts?.mpg;
-    if (!mpg) {
-        if (!config.mpgAdminEmail || !config.mpgAdminPassword) {
-            throw new Error("Identifiants admin MPG non configurés (.env)");
-        }
-        mpg = await MpgConnector.login(config.mpgAdminEmail, config.mpgAdminPassword);
-    }
+    // ⚠️ Le verrou se pose AVANT le login MPG : sinon deux runs concurrents (tick du planner et
+    // sync manuel) déclenchent deux flows Auth0 chez Ligue1 — protégé par Cloudflare — avant que
+    // l'un des deux ne soit rejeté.
     running = true;
-    const run = await prisma.syncRun.create({ data: { trigger, status: "running" } });
+    const scope: SyncScope = opts?.scope ?? "full";
     try {
-        const result = await runSync(mpg, { leagueId: opts?.leagueId });
+        // Connecteur : fourni par l'appelant (sync manuel = token du membre connecté), sinon on
+        // retombe sur les identifiants admin .env (cron auto-sync, non-attendu).
+        let mpg = opts?.mpg;
+        if (!mpg) {
+            if (!config.mpgAdminEmail || !config.mpgAdminPassword) {
+                throw new Error("Identifiants admin MPG non configurés (.env)");
+            }
+            mpg = await MpgConnector.login(config.mpgAdminEmail, config.mpgAdminPassword);
+        }
+        return await recordRun(trigger, scope, mpg, opts?.leagueId);
+    } finally {
+        running = false;
+    }
+}
+
+/** Trace l'exécution dans `SyncRun` (observabilité) et relaie l'erreur éventuelle. */
+async function recordRun(
+    trigger: "manual" | "auto",
+    scope: SyncScope,
+    mpg: MpgConnector,
+    leagueId: string | undefined,
+) {
+    const run = await prisma.syncRun.create({ data: { trigger, scope, status: "running" } });
+    try {
+        const result = await runSync(mpg, { leagueId, scope });
         return await prisma.syncRun.update({
             where: { id: run.id },
             data: { status: "success", finishedAt: new Date(), summary: JSON.stringify(result) },
@@ -106,7 +131,5 @@ export async function executeSync(trigger: "manual" | "auto", opts?: { leagueId?
             data: { status: "error", finishedAt: new Date(), error: err?.message ?? String(err) },
         });
         throw err;
-    } finally {
-        running = false;
     }
 }

@@ -150,15 +150,15 @@ model DivisionAward {
 /// Contient aussi les matchs À VENIR (`played = false`, scores nuls) : ils alimentent le
 /// « prochain rendez-vous » du dashboard. Toute lecture de résultats doit filtrer `played`.
 model Match {
-  id            String   @id @default(cuid())
-  mpgMatchId    String   @unique
+  id            String    @id @default(cuid())
+  mpgMatchId    String    @unique
   divisionId    String
-  division      Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  division      Division  @relation(fields: [divisionId], references: [id], onDelete: Cascade)
   gameWeek      Int
   homeManagerId String?
-  homeManager   Manager? @relation("HomeMatch", fields: [homeManagerId], references: [id], onDelete: SetNull)
+  homeManager   Manager?  @relation("HomeMatch", fields: [homeManagerId], references: [id], onDelete: SetNull)
   awayManagerId String?
-  awayManager   Manager? @relation("AwayMatch", fields: [awayManagerId], references: [id], onDelete: SetNull)
+  awayManager   Manager?  @relation("AwayMatch", fields: [awayManagerId], references: [id], onDelete: SetNull)
   homeScore     Int? // null tant que le match n'est pas joué
   awayScore     Int?
   played        Boolean   @default(true)
@@ -243,6 +243,9 @@ model SyncRun {
   id         String    @id @default(cuid())
   trigger    String // manual | auto
   status     String // running | success | error
+  /// Périmètre parcouru : full (tout l'historique) | current (saison MPG en cours seulement).
+  /// `null` sur les runs antérieurs au planner — traités comme `full` à la lecture.
+  scope      String?
   startedAt  DateTime  @default(now())
   finishedAt DateTime?
   summary    String? // JSON du SyncResult
